@@ -16,6 +16,18 @@ FloatArray = npt.NDArray[np.float64]
 IntArray = npt.NDArray[np.int64]
 
 
+@dataclass(frozen=True)
+class Feature:
+    """Scientific identity of a predictor, separate from its matrix column name."""
+
+    feature_id: str
+    kind: str = "gene_expression"
+    cell_type: str | None = None
+    gene_id: str | None = None
+    program: str | None = None
+    unit: str = "expression"
+
+
 @dataclass
 class Dataset:
     expression: pd.DataFrame
@@ -24,6 +36,9 @@ class Dataset:
     input_hashes: dict[str, str] = field(default_factory=dict)
     upstream_qc: dict[str, Any] = field(default_factory=dict)
     symbols: dict[str, str] = field(default_factory=dict)
+    features: dict[str, Feature] = field(default_factory=dict)
+    cell_resamples: tuple[pd.DataFrame, ...] = ()
+    counts_by_cell_type: dict[str, pd.DataFrame] = field(default_factory=dict)
 
     def subset(self, rows: IntArray) -> Dataset:
         return Dataset(
@@ -33,6 +48,9 @@ class Dataset:
             self.input_hashes,
             self.upstream_qc,
             self.symbols,
+            self.features,
+            tuple(frame.iloc[rows] for frame in self.cell_resamples),
+            {name: frame.iloc[rows] for name, frame in self.counts_by_cell_type.items()},
         )
 
 

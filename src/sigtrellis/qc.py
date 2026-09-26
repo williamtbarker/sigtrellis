@@ -52,7 +52,9 @@ def validate_dataset(data: Dataset, config: Config) -> dict[str, Any]:
     if any(not str(v).strip() or str(v).lower() == "nan" for v in [*x.index, *x.columns]):
         raise ValueError("Empty/invalid sample or gene identifier")
     required = {config.outcome, config.sample_id, *config.covariates}
-    required.update(v for v in (config.group, config.batch, config.permutation_strata) if v)
+    required.update(
+        v for v in (config.group, config.batch, config.permutation_strata, config.time) if v
+    )
     missing = required - set(m.columns)
     if missing:
         raise ValueError(f"Missing metadata columns: {sorted(missing)}")
@@ -68,7 +70,7 @@ def validate_dataset(data: Dataset, config: Config) -> dict[str, Any]:
     if set(x.columns) & reserved:
         raise ValueError("Metadata/identifier/outcome column appears in expression feature matrix")
     values = x.to_numpy(dtype=np.float64)
-    if not np.isfinite(values).all():
+    if np.isinf(values).any() or (np.isnan(values).any() and config.imputation == "reject"):
         raise ValueError("Expression must be finite; missing values are rejected")
     if values.nbytes > config.max_dense_mb * 1024**2:
         raise ValueError("Sample-level matrix exceeds max_dense_mb")
@@ -85,8 +87,13 @@ def validate_dataset(data: Dataset, config: Config) -> dict[str, Any]:
     if n_groups < 4:
         raise ValueError("Fewer than four biological groups cannot support nested validation")
     hashes: dict[str, str] = {}
-    for row, group in zip(values, groups, strict=True):
-        key = array_hash(row)
+    source_hashes = data.upstream_qc.get("sample_cell_hashes", {})
+    for sample, row, group in zip(x.index, values, groups, strict=True):
+        # Low-dimensional summaries can legitimately tie; use original cell
+        # fingerprints when available instead of treating a tied proportion as a duplicate.
+        if config.input_scale == "features" and not source_hashes:
+            continue
+        key = source_hashes.get(str(sample), array_hash(row))
         if key in hashes and hashes[key] != group:
             raise ValueError("Identical expression samples occur in distinct biological groups")
         hashes[key] = group
@@ -99,6 +106,18 @@ def validate_dataset(data: Dataset, config: Config) -> dict[str, Any]:
         messages.append(
             "UPSTREAM_PREPROCESSING: provenance cannot establish external leakage safety"
         )
+    if config.input_scale == "features":
+        messages.append(
+            "FEATURE_ESTIMAND: predictor kinds/units are recorded; abundance and heterogeneity are not gene fold changes"
+        )
+        if np.isnan(values).any():
+            messages.append(
+                "TRAINING_ONLY_IMPUTATION: unavailable features are filled from each training fold; missingness can reflect cell recovery"
+            )
+    if config.time:
+        time = pd.to_numeric(m[config.time], errors="raise").to_numpy(dtype=float)
+        if not np.isfinite(time).all():
+            raise ValueError("Temporal metadata must be finite numeric time in declared units")
     if not config.group:
         messages.append(
             "GROUP_ASSUMPTION: each declared sample is assumed biologically independent"

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
@@ -28,6 +29,10 @@ def frozen_predict(state: dict[str, Any], data: Dataset) -> FloatArray:
         state["normalization"],
         np.asarray(state["reference"], dtype=float) if state["reference"] is not None else None,
         genes,
+        state.get("imputation", "reject"),
+        np.asarray(state["fill_values"], dtype=float)
+        if state.get("fill_values") is not None
+        else None,
     )
     normalized = norm.transform(x)
     gene_x = normalized[:, state["selected_indices"]]
@@ -68,18 +73,47 @@ def frozen_predict(state: dict[str, Any], data: Dataset) -> FloatArray:
 
 
 def external_validate(
-    run: Path, expression: Path, metadata: Path, output: Path, orientation: str = "auto"
+    run: Path,
+    expression: Path | None,
+    metadata: Path | None,
+    output: Path,
+    orientation: str = "auto",
+    *,
+    single_cell: Path | None = None,
+    model_kind: str = "full",
 ) -> dict[str, Any]:
     if output.exists() and any(output.iterdir()):
         raise ValueError("External output directory must be empty")
     manifest = json.loads((run / "run_manifest.json").read_text())
     if manifest["status"] != "complete":
         raise ValueError("Training run did not complete")
+    if model_kind not in {"full", "panel"}:
+        raise ValueError("model_kind must be full or panel")
+    state_name = "model_state.json" if model_kind == "full" else "panel_state.json"
     verified = verify_run_artifacts(
-        run, manifest, ("configuration.json", "model_state.json", "sample_metadata.csv")
+        run, manifest, ("configuration.json", state_name, "sample_metadata.csv")
     )
     config = load_config(run / "configuration.json")
-    data = load_bulk(expression, metadata, config, orientation)
+    if single_cell is not None:
+        if expression is not None or metadata is not None:
+            raise ValueError("Supply a single-cell input or an expression/metadata pair")
+        if config.single_cell_mode == "distribution":
+            from sigtrellis.cell_features import distribution_features
+
+            data = distribution_features(single_cell, replace(config, cell_resamples=0))
+        else:
+            from sigtrellis.singlecell import pseudobulk
+
+            datasets = pseudobulk(
+                single_cell, replace(config, cell_type_value=manifest["cell_type"])
+            )
+            if len(datasets) != 1:
+                raise ValueError("Frozen external evaluation requires the single fitted cell type")
+            data = datasets[0]
+    else:
+        if expression is None or metadata is None:
+            raise ValueError("Supply both expression and metadata")
+        data = load_bulk(expression, metadata, config, orientation)
     validate_dataset(data, config)
     train_metadata = pd.read_csv(
         run / "sample_metadata.csv",
@@ -92,12 +126,18 @@ def external_validate(
         train_metadata[config.group or config.sample_id].astype(str)
     ):
         raise ValueError("External biological groups overlap training")
-    state = json.loads((run / "model_state.json").read_text())
+    state = json.loads((run / state_name).read_text())
     if set(state["genes"]) != set(data.expression.columns):
         raise ValueError("External expression must contain the exact training gene universe")
     training_hashes = set(manifest["sample_expression_hashes"].values())
-    for row in data.expression.loc[:, state["genes"]].to_numpy(dtype=float):
-        if array_hash(row) in training_hashes:
+    hashes_to_check = [
+        array_hash(row) for row in data.expression.loc[:, state["genes"]].to_numpy(dtype=float)
+    ]
+    if config.input_scale == "features":
+        training_hashes = set(manifest.get("sample_cell_hashes", {}).values())
+        hashes_to_check = list(data.upstream_qc.get("sample_cell_hashes", {}).values())
+    for profile_hash in hashes_to_check:
+        if profile_hash in training_hashes:
             raise ValueError(
                 "External cohort contains an exact training expression profile, even under a different ID"
             )
@@ -123,10 +163,16 @@ def external_validate(
         "metrics": metrics,
         "input_hashes": data.input_hashes,
         "training_expression_hash": manifest["expression_hash"],
-        "training_model_sha256": verified["model_state.json"],
+        "training_model_sha256": verified[state_name],
         "verified_training_artifacts": verified,
         "classes": manifest["classes"],
-        "scope": "Frozen final full-data model; does not validate a separately refitted consensus panel",
+        "scope": "Frozen final compact panel"
+        if model_kind == "panel"
+        else "Frozen final full-data model; does not validate a separately refitted consensus panel",
+        "model_kind": model_kind,
+        "cell_profile_duplicate_check": bool(hashes_to_check)
+        if config.input_scale == "features"
+        else None,
         "training_transform_refit": False,
     }
     write_json(output / "external_metrics.json", record)

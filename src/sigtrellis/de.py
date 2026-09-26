@@ -6,13 +6,14 @@ import warnings
 
 import numpy as np
 import pandas as pd
+from scipy.stats import false_discovery_control
 
 from sigtrellis.config import Config
 from sigtrellis.domain import Dataset, FloatArray
 
 
 def differential_expression(data: Dataset, y: FloatArray, config: Config) -> pd.DataFrame:
-    """Binary NB-GLM Wald contrast, with explicit nuisance design and optional pairs.
+    """NB-GLM Wald contrasts with nuisance terms and optional fixed pairing.
 
     Identifiers are never interpolated into formulas. Rank-deficient or saturated
     designs fail rather than silently dropping confounders or pairing terms.
@@ -22,8 +23,8 @@ def differential_expression(data: Dataset, y: FloatArray, config: Config) -> pd.
         from pydeseq2.ds import DeseqStats
     except ImportError as exc:
         raise ValueError("Install sigtrellis[de] for PyDESeq2") from exc
-    if config.outcome_type != "binary" or config.input_scale != "counts":
-        raise ValueError("DE requires binary phenotype and integer counts")
+    if config.input_scale != "counts":
+        raise ValueError("DE requires integer counts")
     if config.group and data.metadata[config.group].duplicated().any() and not config.de_pair_group:
         raise ValueError(
             "DE with repeated biological groups requires de_pair_group; collapse technical replicates first"
@@ -50,7 +51,20 @@ def differential_expression(data: Dataset, y: FloatArray, config: Config) -> pd.
             )
         elif v.nunique() > 1:
             columns.append(pd.DataFrame({f"n{i}": (v - v.mean()) / v.std()}, index=v.index))
-    columns.append(pd.DataFrame({"condition": y}, index=data.metadata.index))
+    if config.outcome_type == "multiclass":
+        condition_columns = [f"condition_{i}" for i in sorted(np.unique(y).astype(int))[1:]]
+        columns.append(
+            pd.DataFrame(
+                {
+                    f"condition_{i}": (y == i).astype(float)
+                    for i in sorted(np.unique(y).astype(int))[1:]
+                },
+                index=data.metadata.index,
+            )
+        )
+    else:
+        condition_columns = ["condition"]
+        columns.append(pd.DataFrame({"condition": y}, index=data.metadata.index))
     design = pd.concat(columns, axis=1).astype(float)
     if np.linalg.matrix_rank(design.to_numpy()) < design.shape[1]:
         raise ValueError(
@@ -76,13 +90,34 @@ def differential_expression(data: Dataset, y: FloatArray, config: Config) -> pd.
             low_memory=True,
         )
         dds.deseq2()
-        contrast = np.zeros(design.shape[1], dtype=float)
-        contrast[-1] = 1.0
-        stats = DeseqStats(
-            dds, contrast=contrast, n_cpus=1, quiet=True, independent_filter=True, cooks_filter=True
+        results: list[pd.DataFrame] = []
+        from sigtrellis.qc import encode_outcome
+
+        _, labels = encode_outcome(data, config)
+        contrasts = (
+            ["response_per_training_sd"]
+            if not labels
+            else [f"{v}_vs_{labels[0]}" for v in labels[1:]]
         )
-        stats.summary()
-    result: pd.DataFrame = stats.results_df.copy()
+        for name, label in zip(condition_columns, contrasts, strict=True):
+            contrast = np.zeros(design.shape[1], dtype=float)
+            contrast[list(design.columns).index(name)] = 1.0
+            stats = DeseqStats(
+                dds,
+                contrast=contrast,
+                n_cpus=1,
+                quiet=True,
+                independent_filter=config.outcome_type != "multiclass",
+                cooks_filter=True,
+            )
+            stats.summary()
+            frame = stats.results_df.copy()
+            frame["contrast"] = label
+            frame["de_effect_unit"] = (
+                "log2_expression_change_per_outcome_unit" if not labels else "log2_fold_change"
+            )
+            results.append(frame)
+    result = pd.concat(results)
     result.index.name = "gene_id"
     result = result.rename(
         columns={
@@ -91,7 +126,22 @@ def differential_expression(data: Dataset, y: FloatArray, config: Config) -> pd.
             "pvalue": "de_pvalue",
         }
     )
+    if config.outcome_type == "multiclass":
+        # Correct the full gene-by-reference-contrast family, rather than
+        # choosing a favorable uncorrected contrast for each gene.
+        valid = result.de_pvalue.notna().to_numpy()
+        result["de_adjusted_pvalue"] = np.nan
+        result.loc[valid, "de_adjusted_pvalue"] = false_discovery_control(
+            result.loc[valid, "de_pvalue"].to_numpy()
+        )
     result.attrs["warnings"] = sorted({str(w.message) for w in captured})
     result.attrs["design_columns"] = list(design.columns)
-    result.attrs["interpretation"] = "Unshrunk count-model LFC; BH-adjusted Wald p-values"
+    result.attrs["interpretation"] = (
+        "Unshrunk count-model effects; Wald tests; multiclass BH across genes and reference contrasts"
+    )
+    result.attrs["outcome_unit"] = (
+        "original numeric outcome unit"
+        if config.outcome_type == "continuous"
+        else "reference-class contrast"
+    )
     return result

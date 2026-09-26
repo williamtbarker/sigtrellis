@@ -13,7 +13,7 @@ from scipy.spatial.distance import squareform
 
 from sigtrellis.config import Config
 from sigtrellis.domain import Dataset, FloatArray
-from sigtrellis.preprocessing import Normalizer
+from sigtrellis.preprocessing import descriptive_normalized
 
 
 @dataclass
@@ -45,7 +45,7 @@ def correlation_diagnostics(
     )
     genes = ranked.loc[ranked.selection_frequency > 0, "gene_id"].drop_duplicates().tolist()
     genes = genes[: config.correlation_max_features]
-    normalized = Normalizer(config.normalization).fit(data.expression).transform(data.expression)
+    normalized = descriptive_normalized(data, config)
     all_genes = list(data.expression.columns)
     indices = [all_genes.index(g) for g in genes]
     variable = [i for i in indices if normalized[:, i].std() > 1e-12]

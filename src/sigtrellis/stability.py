@@ -73,7 +73,12 @@ def summarize_coefficients(
 
 
 def stability_select(
-    data: Dataset, y: FloatArray, config: Config, contrasts: list[str], audit: Audit
+    data: Dataset,
+    y: FloatArray,
+    config: Config,
+    contrasts: list[str],
+    audit: Audit,
+    context_prefix: str = "stability",
 ) -> StabilityResult:
     rng = np.random.default_rng(config.seed + 101)
     values: list[FloatArray] = []
@@ -85,7 +90,10 @@ def stability_select(
         normalization = normalizations[index % len(normalizations)]
         local = replace(config, normalization=normalization)
         subset = data.subset(rows)
-        context = f"stability:{index}/{normalization}"
+        perturbation = index % (len(data.cell_resamples) + 1)
+        if perturbation:
+            subset = replace(subset, expression=subset.cell_resamples[perturbation - 1])
+        context = f"{context_prefix}:{index}/{normalization}"
         params, table = tune(subset, y[rows], local, audit, context)
         model = fit_model(subset, y[rows], local, params, audit, context + "/refit")
         values.append(model.coefficients())
@@ -97,6 +105,7 @@ def stability_select(
                 "normalization": normalization,
                 "strength": params.strength,
                 "l1_ratio": params.l1_ratio,
+                "cell_perturbation": perturbation,
             }
         )
     coefficients = np.asarray(values, dtype=float)
@@ -112,6 +121,16 @@ def stability_select(
             config.coefficient_tolerance,
         )
         table[f"frequency_{norm}"] = evidence["selection_frequency"]
+    if data.cell_resamples:
+        for value in sorted({r["cell_perturbation"] for r in resamples}):
+            mask = np.array([r["cell_perturbation"] == value for r in resamples])
+            evidence = summarize_coefficients(
+                coefficients[mask],
+                list(data.expression.columns),
+                contrasts,
+                config.coefficient_tolerance,
+            )
+            table[f"frequency_cells_{value}"] = evidence["selection_frequency"]
     any_selected = np.asarray((abs(coefficients) > config.coefficient_tolerance).any(axis=1))
     jaccard = jaccard_scores(any_selected)
     finite = jaccard[np.isfinite(jaccard)]
@@ -119,6 +138,7 @@ def stability_select(
         "resamples": len(values),
         "subsample_fraction": config.stability_fraction,
         "normalizations": normalizations,
+        "cell_perturbations": len(data.cell_resamples),
         "n_selected_per_fit": any_selected.sum(axis=1),
         "median_pairwise_jaccard": float(np.median(finite)) if len(finite) else None,
         "empty_empty_comparisons": int((~np.isfinite(jaccard)).sum()),

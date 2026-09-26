@@ -23,7 +23,7 @@ from sigtrellis.qc import encode_outcome, validate_dataset
         {"permutations": -1},
         {"candidate_method": "global_de"},
         {"cv_strategy": "leave_batch_out"},
-        {"supporting_de": True, "outcome_type": "continuous"},
+        {"supporting_de": True, "input_scale": "features", "normalization": "none"},
         {"de_pair_group": True, "group": None},
         {"min_count": 0},
         {"stability_normalizations": ("none",)},

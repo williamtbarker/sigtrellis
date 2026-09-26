@@ -2,9 +2,13 @@
 
 **Stable candidate transcriptomic signatures, with the biological replicate kept inside the validation boundary.**
 
-SigTrellis is a local Python CLI and library for bulk RNA-seq and donor-aware single-cell pseudobulk analysis. It combines fold-local preprocessing and optional differential-expression screening, nested grouped elastic-net modeling, retuned group subsampling, correlated-feature diagnostics, negative controls, and an auditable scientific report.
+SigTrellis is a local Python CLI and library for discovering candidate phenotype-associated genes and transcriptomic features from bulk or single-cell RNA-seq. It accepts user-defined organisms, cell lines, gene identifiers and outcomes. It combines training-only preprocessing and optional differential-expression screening, nested grouped elastic-net modeling, compact-panel validation, stability analysis, negative controls, and an auditable report.
 
-**Research software, version 0.1.1.** A selected gene is a candidate association—not a validated biomarker, mechanism, causal effect, diagnostic test, or qualified clinical measurement. The final consensus panel has not inherited the nested CV performance of the training procedure. Read [LIMITATIONS.md](LIMITATIONS.md) before interpreting results.
+**Version 0.2.0, for research.** A selected feature is a candidate association. Statistical selection does not establish biological validation, mechanism, causality, clinical utility or biomarker qualification. Both the full modeling procedure and an optional compact-panel discovery procedure can be evaluated by nested CV; their final fixed models need untouched external evaluation. Read [LIMITATIONS.md](LIMITATIONS.md).
+
+**Elastic net in plain language:** give the model gene measurements and the phenotype you want to predict. It learns a weight for each gene, while charging a penalty for complexity. One part of that penalty pushes weak weights to zero; the other restrains large weights and helps handle genes that carry overlapping information. The remaining genes form a candidate signature. SigTrellis tests whether that signature predicts unseen biological samples and whether the same genes or correlated groups recur when the data change.
+
+For a new cell line, start with [the practical cell-line guide](docs/CELL_LINE_GUIDE.md). You need independent cultures or experiments and a measurable phenotype with variation. A single culture, an unspecified phenotype, or perfect treatment/batch confounding cannot support a reproducible phenotype signature, regardless of the number of sequenced cells.
 
 This is an original, general-purpose implementation of public methods. It does not reproduce any previous employer's code, data, or confidential methodology. The [research review](RESEARCH.md) explains the design and the limited conceptual relationship to Stabilomics.
 
@@ -51,7 +55,7 @@ sigtrellis bulk \
 
 Expression is CSV/TSV, optionally gzipped, with a first identifier column. Both orientations are supported. Auto-detection requires an exact match to metadata sample IDs; ambiguous axes are rejected. Use `--orientation genes_by_samples` or `samples_by_genes` when needed. The first metadata column must match `sample_id`; metadata are aligned by identifier, never guessed from row position.
 
-Raw counts must be finite nonnegative integers. Set `input_scale: log_expression` and `normalization: none` only for a deliberately supplied transformed matrix; its upstream leakage safety cannot be verified. Missing values are rejected. Gene symbols may be joined with `--annotations genes.csv` containing unique `gene_id,gene_symbol`; they never influence selection.
+Raw counts must be finite nonnegative integers; missing counts are rejected. Set `input_scale: log_expression` and `normalization: none` for deliberately supplied transformed expression. `input_scale: features` supports explicitly defined sample-level features. For those two transformed input scales, optional `imputation: median` learns fills independently inside each training fold; all-missing training features are excluded. Upstream transformation safety cannot be inferred from a matrix alone. Gene symbols may be joined with `--annotations genes.csv` containing unique `gene_id,gene_symbol`; they never influence selection.
 
 Binary logistic, multinomial logistic, and continuous elastic-net regression are supported. Class order and positive/reference class are saved. Continuous outcomes must be numeric. Multiclass training folds must contain every class. Covariates are explicit, jointly regularized predictors; donor IDs and batch are excluded from ordinary predictors. Batch enters count-DE designs and robustness diagnostics. Optional paired DE uses `de_pair_group: true`; this is a fixed-effect paired contrast, not a general mixed model.
 
@@ -66,13 +70,33 @@ sigtrellis single-cell \
   --output results/monocytes
 ```
 
-The chosen matrix or layer must contain **raw counts**. `X` is used if `--layer` is absent. Cells are summed per experimental sample and cell type, in chunks. The result is a sample-level model. Cells are never independent phenotype replicates.
+The chosen matrix or layer must contain **raw counts**. `X` is used if `--layer` is absent. Two representations share the donor/culture-aware modeling engine:
 
-Use distinct specimen IDs for two conditions from one donor, and put the shared donor ID in `group`. A donor column can itself be `sample_id` only when one specimen/condition exists per donor. Inconsistent outcome or donor metadata within a sample are rejected. Low-cell-count pseudobulks are logged and excluded using the predeclared `min_cells` threshold. Input cell-type annotations are treated as supplied; learned annotations or integrated data may carry upstream bias. Export Seurat raw counts and metadata to H5AD or use already aggregated sample counts through `bulk`.
+| Mode | Biological question and representation |
+|---|---|
+| `pseudobulk` | Which genes change in sample-level expression within a declared cell type? Raw counts are summed per specimen/type for count DE and gene modeling. |
+| `distribution` | Does phenotype relate to cell-state abundance, detection, variability, or a predefined gene program's distribution? Cells contribute to specimen-level features; they never become independent phenotype replicates. |
+
+Distribution mode supports `abundance`, `gene_mean`, `gene_detection`, `gene_variance`, `program_mean`, `program_variance`, `program_q90`, and threshold-defined `program_fraction`. State names, program members and activation thresholds are declared before validation. Every cell's normalization is sample-local; no cohort-trained embedding is hidden in the adapter. Within-sample cell subsampling probes sensitivity to cellular sampling separately from biological replication. Missing state expression is unavailable, not zero. See [the single-cell methods guide](docs/SINGLE_CELL.md) and `examples/replicated_cell_distributions.yaml`.
+
+Use distinct specimen IDs for conditions/processing aliquots from one donor, and put the shared donor ID in `group`. A donor column can itself be `sample_id` only when one specimen/condition exists per donor. Inconsistent outcome, group or batch metadata within a sample are rejected. Low-cell-count pseudobulks are logged and excluded using the predeclared `min_cells` threshold. Input annotations may carry upstream bias.
+
+Seurat/Matrix Market exports can be converted explicitly:
+
+```bash
+sigtrellis import-mtx --matrix matrix.mtx.gz --genes features.tsv.gz \
+  --barcodes barcodes.tsv.gz --metadata cell_metadata.tsv --output experiment.h5ad
+```
+
+The matrix is genes × cells; feature/barcode files are headerless. Metadata's first column contains exact cell IDs. Other metadata remain strings unless declared using repeated `--numeric-column` arguments. Cells are aligned by barcode and raw counts are checked.
 
 Selecting one cell type in advance is recommended. If all types are run, each is analyzed separately; the CLI applies a Bonferroni threshold across the requested cell-type family for the global permutation gate. This does not provide gene-level FDR control.
 
 ## Public data demonstrations
+
+The expanded demonstrations use **86 independent yeast cultures** (66 training, 20 untouched) and a **261-donor single-cell source** with a predefined 137-donor training subset and 96-donor processing-cohort holdout. The latter is run using both monocyte pseudobulk and cell-state/program distributions. Every holdout donor is purged from training, including their other processing aliquots. Exact commands, source terms and measured results are in [PUBLIC_DEMOS.md](docs/PUBLIC_DEMOS.md) and [VALIDATION.md](VALIDATION.md). The large H5AD download is explicit (12.2 GB); a deterministic 400-cell-per-specimen subset keeps downstream runs practical.
+
+Smaller examples remain useful for testing paired designs and confounding:
 
 ```bash
 python examples/prepare_public.py --dataset all --output data/public
@@ -103,6 +127,8 @@ Downloads are checksum-pinned, licenses and changes are documented, and datasets
 6. Independently subsample whole biological groups and retune to describe feature stability.
 7. Fit a final full-data model, calculate exploratory full-data evidence, and report operational robustness gates.
 
+With `panel_validation: true`, each outer training set performs its own stability selection, applies the predeclared frequency/sign thresholds and `panel_max_features` cap, and refits that panel before predicting the outer test set. Its regularization choice is the modal subsample-tuning result; it is not retuned against inner labels that already selected the panel. The full procedure is repeated under permutation. The final panel and full model have separate numeric states and separate external evaluations. A panel may legitimately contain no genes and predict only the baseline.
+
 No globally selected gene set feeds nested CV. Full-cohort DE, PCA, correlation groups, and coefficient paths are descriptive. The optional `candidate_method: deseq2` performs real count-aware DE **inside every training fold**; `association` is a faster ranking statistic, not a substitute for count-aware inference.
 
 ## Elastic-net parameters and outputs
@@ -123,6 +149,8 @@ No globally selected gene set feeds nested CV. Full-cohort DE, PCA, correlation 
 Tuning minimizes log loss or squared error. Evaluation additionally reports discrimination, average precision, balanced accuracy, sensitivity, specificity, MCC, Brier/calibration, or RMSE/MAE/R². Samples are weighted so each biological group has equal total weight. Classification thresholds are predeclared, not chosen from outer test outcomes.
 
 Default stability uses 50 subsamples and 99 permutations. These are starting settings. `examples/biological_study.yaml` uses more repetitions and permutations. Permutations must be exchangeable for the actual study: use `group` for donor-constant outcomes or `within_group` only for exchangeable repeated conditions. Do not permute an observational time series as independent rows. With covariates, global permutations do not establish conditional gene significance and positive robustness gates are withheld.
+
+`cv_strategy: temporal` with a numeric `time` column supplies forward validation. Training groups must end before the earliest test time minus `temporal_gap`. Inner splits obey the same rule. Unrestricted label permutations are not assumed valid for a time series, so temporal runs retain exploratory evidence status. Survival/censoring models are outside the supported outcome contract.
 
 ## Results and audit trail
 
@@ -151,6 +179,8 @@ results/
 
 Some additional artifacts are conditional, including count-DE results and pseudobulk counts. Exact output hashes are saved in the final manifest. No timestamps enter the numerical evidence. Identical versions, inputs, configuration and hardware produce deterministic seeded fits; portable numerical identity across BLAS/platform versions is not guaranteed. HDF5/gzip container bytes may include serialization metadata, so compare scientific values as well as raw file hashes.
 
+Distribution runs add `feature_schema.json` and `sample_features.tsv.gz`; `feature_id`, source `gene_id`, cell type, program, kind and unit remain distinct. Compact-panel runs add `panel.csv`, `panel_state.json`, panel OOF predictions and panel metrics. DE supports binary contrasts, continuous outcome slopes, and multinomial reference contrasts. Multiclass DE controls the gene-by-contrast family; multiple distribution cell types share a DE family. DE effect units differ from predictive coefficient units and are explicitly recorded.
+
 ## Frozen external validation
 
 ```bash
@@ -159,7 +189,9 @@ sigtrellis external --run results/bulk \
   --output results/external
 ```
 
-The external cohort must have the exact training gene universe and declared metadata. Training normalization and scaling are reused without fitting. Sample/group overlap and exact copied expression profiles are rejected, including copies under renamed IDs. This evaluates the frozen final model, not a new compact panel refitted from the stability table. Near-duplicates and biological relatives still require study-specific review. Covariate categories absent from training are rejected in both CV and external evaluation.
+Add `--model-kind panel` to evaluate the frozen compact panel. For single-cell inputs, use `--input external.h5ad` in place of the expression/metadata pair. The stored representation and training transforms are reused.
+
+The external cohort must have the exact training gene/feature universe and declared metadata. A compact predictor panel is not yet a small targeted assay: count normalization still requires the original gene universe. Sample/group overlap and exact copied expression profiles are rejected, including copies under renamed IDs. Distribution inputs use original cell-profile fingerprints when available; matching low-dimensional summaries alone are not treated as copied specimens. Near-duplicates, reordered copies of cell collections and biological relatives still require study-specific review. Covariate categories absent from training are rejected.
 
 Before prediction, the model, configuration and training metadata must match their saved hashes. Modified artifacts fail verification. External probability columns identify their classes explicitly. Hash verification assumes a trusted manifest; it is not a digital signature.
 
@@ -176,6 +208,14 @@ python -m build
 
 Tests include planted counts, correlated replacements, pure noise, imbalance, outliers, batch-only and batch-specific effects, paired cells, too few donors, a deliberately unsafe global screen, exact duplicates, target copies, and train-boundary spies. See [VALIDATION.md](VALIDATION.md) for measured results and [ARCHITECTURE.md](ARCHITECTURE.md) for extension boundaries.
 
-Version 0.1.1 includes a second adversarial review covering identifier preservation, repeated-condition DE, artifact integrity, multiclass evidence, nonfinite statistics and malformed H5AD inputs. Findings and reproductions are in [REVIEW_0.1.1.md](docs/REVIEW_0.1.1.md).
+Version 0.2.0 adds single-cell distribution features, compact-panel validation, temporal splits, broader DE contrasts, sparse export import, and larger public holdouts. The adversarial review is in [REVIEW_0.2.0.md](docs/REVIEW_0.2.0.md); earlier review evidence is retained with its original version label.
+
+The final installed-wheel suite passes **152 tests**; Ruff and strict mypy pass.
+The yeast compact panel correctly classified all 20 held-out cultures. In the
+larger single-cell holdout, the gene panel's AUC was 0.747 with specificity 0.227;
+the richer cell-state/program panel's AUC was 0.804 with specificity 0.500 and
+failed cross-batch gates. These are same-study demonstrations, not universal
+performance claims. [RELEASE_GUIDE.md](RELEASE_GUIDE.md) summarizes the complete
+deliverable and exact reproduction commands.
 
 MIT software license. Third-party public datasets retain their own licenses. Cite the software with `CITATION.cff` and the methods and datasets used in your analysis.

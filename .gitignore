@@ -19,3 +19,6 @@ build/
 SHA256SUMS.txt
 *.bundle
 coverage.xml
+
+# Retain the measured coverage record with versioned validation evidence.
+!docs/validation/**/coverage.json

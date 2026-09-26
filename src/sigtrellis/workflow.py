@@ -16,8 +16,13 @@ from threadpoolctl import threadpool_limits
 from sigtrellis import __version__
 from sigtrellis.config import Config
 from sigtrellis.correlation import correlation_diagnostics
-from sigtrellis.de import differential_expression
 from sigtrellis.domain import Audit, Dataset, FloatArray, Split, array_hash, file_hash, write_json
+from sigtrellis.evidence import (
+    annotate_features,
+    public_table,
+    supporting_evidence,
+    write_feature_contract,
+)
 from sigtrellis.metrics import group_weights, loss
 from sigtrellis.modeling import Hyperparameters, fit_model, fit_prepared, tune
 from sigtrellis.qc import encode_outcome, group_values, validate_dataset
@@ -64,11 +69,20 @@ def batch_diagnostics(
             )
             if not np.isfinite(improvement):
                 raise ValueError("Batch holdout produced nonfinite loss improvement")
+            panel_improvement = None
+            if config.panel_validation:
+                from sigtrellis.panel import fit_panel
+
+                panel = fit_panel(tr, y[train], config, audit, f"batch:{batch}/panel")
+                panel_improvement = loss(y[test], baseline.predict(te), config, w) - loss(
+                    y[test], panel.model.predict(te), config, w
+                )
             rows.append(
                 {
                     "batch": batch,
                     "status": "tested",
                     "loss_improvement": improvement,
+                    "panel_loss_improvement": panel_improvement,
                     "n_train_groups": len(set(groups[train])),
                     "n_test_groups": len(set(groups[test])),
                     "parameters": {"strength": params.strength, "l1_ratio": params.l1_ratio},
@@ -110,12 +124,31 @@ def evidence_gates(
         blockers.append("nonfinite_held_out_improvement")
     elif metrics["loss_improvement"] <= 0:
         blockers.append("no_held_out_improvement_over_baseline")
+    if config.panel_validation:
+        panel = metrics.get("panel", {})
+        improvement = panel.get("loss_improvement")
+        p = permutation.get("panel_pvalue")
+        if improvement is None or not np.isfinite(improvement) or improvement <= 0:
+            blockers.append("compact_panel_no_held_out_improvement")
+        if p is None or not np.isfinite(p) or not 0 < p <= config.permutation_alpha:
+            blockers.append("compact_panel_permutation_not_passed")
     if config.batch and batch["status"] != "tested":
         blockers.append("cross_batch_robustness_not_established")
     if batch["status"] == "tested" and any(
         not np.isfinite(f["loss_improvement"]) or f["loss_improvement"] <= 0 for f in batch["folds"]
     ):
         blockers.append("cross_batch_performance_failure")
+    if (
+        config.panel_validation
+        and batch["status"] == "tested"
+        and any(
+            f.get("panel_loss_improvement") is None
+            or not np.isfinite(f["panel_loss_improvement"])
+            or f["panel_loss_improvement"] <= 0
+            for f in batch["folds"]
+        )
+    ):
+        blockers.append("compact_panel_cross_batch_performance_failure")
     eligible = (
         (table.selection_frequency >= config.selection_threshold)
         & (table.sign_consistency >= config.sign_threshold)
@@ -127,6 +160,9 @@ def evidence_gates(
     eligible &= np.sign(table.coefficient) == table.outer_dominant_sign
     for norm in config.stability_normalizations or (config.normalization,):
         eligible &= table[f"frequency_{norm}"] >= config.selection_threshold
+    if config.cell_resamples:
+        for perturbation in range(config.cell_resamples + 1):
+            eligible &= table[f"frequency_cells_{perturbation}"] >= config.selection_threshold
     if batch["status"] == "tested":
         eligible &= table.batch_selection_frequency >= config.selection_threshold
         eligible &= table.batch_sign_consistency >= config.sign_threshold
@@ -153,6 +189,19 @@ def _frequency_sign(coefficients: FloatArray, tolerance: float) -> tuple[FloatAr
     )
 
 
+def panel_feature_gates(table: pd.DataFrame, config: Config) -> pd.Series:
+    """A stable full-model feature cannot lend its status to a zero/unstable panel weight."""
+    eligible = (
+        table.passes_robustness_gates
+        & (table.panel_coefficient.abs() > config.coefficient_tolerance)
+        & (np.sign(table.panel_coefficient) == np.sign(table.coefficient_median_selected))
+        & (table.panel_outer_selection_frequency >= config.outer_selection_threshold)
+        & (table.panel_outer_sign_consistency >= config.sign_threshold)
+        & (np.sign(table.panel_coefficient) == table.panel_outer_dominant_sign)
+    )
+    return pd.Series(eligible, index=table.index, dtype=bool)
+
+
 def run_analysis(data: Dataset, config: Config, output: Path) -> dict[str, Any]:
     if output.exists() and any(output.iterdir()):
         raise ValueError("Output directory is not empty; choose a fresh directory")
@@ -177,6 +226,7 @@ def run_analysis(data: Dataset, config: Config, output: Path) -> dict[str, Any]:
         "seed": config.seed,
         "thread_limit": 1,
         "cell_type": data.cell_type,
+        "sample_cell_hashes": data.upstream_qc.get("sample_cell_hashes", {}),
         "software_versions": {},
     }
     for name in (
@@ -217,6 +267,8 @@ def _run(
 ) -> dict[str, Any]:
     from sigtrellis.reporting import generate_report
 
+    if len(data.cell_resamples) != config.cell_resamples:
+        raise ValueError("Declared cell perturbations must be supplied by the single-cell adapter")
     qc = validate_dataset(data, config)
     write_json(output / "qc_report.json", qc)
     y, classes = encode_outcome(data, config)
@@ -229,7 +281,12 @@ def _run(
     metrics = validation.metrics
     metrics["classes"] = classes
     metrics["permutation"] = permutation_control(
-        data, y, config, metrics["loss_improvement"], audit
+        data,
+        y,
+        config,
+        metrics["loss_improvement"],
+        audit,
+        metrics["panel"]["loss_improvement"] if config.panel_validation else None,
     )
     stability = stability_select(data, y, config, contrasts, audit)
     params, final_tuning = tune(data, y, config, audit, "final_refit")
@@ -274,27 +331,25 @@ def _run(
                 )
             ).sum(axis=0)
         ).ravel()
-    table["gene_symbol"] = table.gene_id.map(data.symbols).fillna("")
+    table = annotate_features(table, data)
+    table["gene_symbol"] = table.source_gene_id.map(data.symbols).fillna("")
     table["expression_prevalence"] = (
         table.gene_id.map((data.expression > 0).mean(axis=0))
         if config.input_scale == "counts"
         else np.nan
     )
-    table["cell_type"] = data.cell_type or "bulk"
     table["phenotype_association"] = config.outcome
     de: pd.DataFrame | None = None
     table["de_log2_fold_change"] = np.nan
     table["de_adjusted_pvalue"] = np.nan
+    table["de_effect_unit"] = "not_assessed"
     if config.supporting_de:
-        try:
-            de = differential_expression(data, y, config)
-            de.to_csv(output / "differential_expression.csv")
-            for column in ("de_log2_fold_change", "de_adjusted_pvalue"):
-                table[column] = table.gene_id.map(de[column])
-            audit.warnings.extend(f"EXPLORATORY_DE: {w}" for w in de.attrs["warnings"])
-            write_json(output / "de_design.json", de.attrs)
-        except ValueError as exc:
-            audit.warnings.append(f"EXPLORATORY_DE_UNAVAILABLE: {exc}")
+        de = supporting_evidence(data, y, config, audit, output)
+        if de is not None:
+            evidence = de.reset_index().set_index(["gene_id", "contrast", "cell_type"])
+            keys = list(zip(table.source_gene_id, table.contrast, table.cell_type, strict=True))
+            for column in ("de_log2_fold_change", "de_adjusted_pvalue", "de_effect_unit"):
+                table[column] = [evidence[column].get(key, np.nan) for key in keys]
     correlation = correlation_diagnostics(
         data, stability.coefficients, table, config, contrasts=contrasts
     )
@@ -321,11 +376,21 @@ def _run(
         kind="stable",
     )
     table.insert(0, "rank", np.arange(1, len(table) + 1))
-    table.to_csv(output / "biomarkers.csv", index=False)
-    stability.table.to_csv(output / "biomarker_stability.csv", index=False)
-    table[["gene_id", "contrast", "coefficient", "coefficient_direction"]].to_csv(
-        output / "coefficients.csv", index=False
+    public_table(table, data).to_csv(output / "biomarkers.csv", index=False)
+    public_table(annotate_features(stability.table, data), data).to_csv(
+        output / "biomarker_stability.csv", index=False
     )
+    public_table(table, data)[
+        [
+            "gene_id",
+            "feature_id",
+            "feature_kind",
+            "cell_type",
+            "contrast",
+            "coefficient",
+            "coefficient_direction",
+        ]
+    ].to_csv(output / "coefficients.csv", index=False)
     pd.concat([validation.tuning, final_tuning, stability.tuning], ignore_index=True).to_csv(
         output / "cv_results.csv", index=False
     )
@@ -339,6 +404,9 @@ def _run(
         output / "resample_coefficients.npz",
         stability=stability.coefficients,
         outer=validation.coefficients,
+        panel_outer=validation.panel_coefficients
+        if validation.panel_coefficients is not None
+        else np.empty((0, len(contrasts), data.expression.shape[1])),
         batch=batch_coefficients
         if batch_coefficients is not None
         else np.empty((0, len(contrasts), data.expression.shape[1])),
@@ -371,8 +439,59 @@ def _run(
     path_table = pd.DataFrame(path_rows)
     path_table.to_csv(output / "coefficient_path.csv", index=False)
     write_json(output / "model_state.json", final.to_state())
+    write_feature_contract(data, output)
+    if config.panel_validation:
+        from sigtrellis.panel import fit_panel
+
+        panel = fit_panel(data, y, config, audit, "final_panel", stability)
+        write_json(output / "panel_state.json", panel.model.to_state())
+        panel_table = annotate_features(panel.evidence, data)
+        panel_table["passes_robustness_gates"] = [
+            bool(
+                table.loc[
+                    (table.gene_id == gene) & (table.contrast == contrast),
+                    "passes_robustness_gates",
+                ].iloc[0]
+            )
+            for gene, contrast in zip(panel_table.gene_id, panel_table.contrast, strict=True)
+        ]
+        assert validation.panel_coefficients is not None
+        panel_freq, panel_sign = _frequency_sign(
+            validation.panel_coefficients, config.coefficient_tolerance
+        )
+        panel_dominant = np.sign(
+            np.sign(
+                np.where(
+                    abs(validation.panel_coefficients) > config.coefficient_tolerance,
+                    validation.panel_coefficients,
+                    0,
+                )
+            ).sum(axis=0)
+        )
+        gene_positions = {str(gene): i for i, gene in enumerate(data.expression.columns)}
+        positions = [
+            (contrasts.index(str(contrast)), gene_positions[str(gene)])
+            for gene, contrast in zip(panel_table.gene_id, panel_table.contrast, strict=True)
+        ]
+        for name, values in (
+            ("selection_frequency", panel_freq),
+            ("sign_consistency", panel_sign),
+            ("dominant_sign", panel_dominant),
+        ):
+            panel_table[f"panel_outer_{name}"] = [float(values[c, g]) for c, g in positions]
+        panel_table["passes_robustness_gates"] = panel_feature_gates(panel_table, config)
+        public_table(panel_table, data).to_csv(output / "panel.csv", index=False)
+        metrics["panel"]["final_features"] = panel.features
+        metrics["panel"]["permutation_pvalue"] = metrics["permutation"].get("panel_pvalue")
+        metrics["panel"]["final_panel_size"] = len(panel.features)
+        metrics["panel"]["final_nonzero_feature_count"] = panel_table.loc[
+            panel_table.panel_coefficient.abs() > config.coefficient_tolerance, "gene_id"
+        ].nunique()
+        metrics["panel"]["final_policy"] = (
+            "Frequency/sign thresholds and predefined size cap; modal subsample hyperparameters"
+        )
     data.metadata.to_csv(output / "sample_metadata.csv", index=False)
-    if data.cell_type:
+    if data.cell_type and not data.features:
         data.expression.to_csv(
             output / "pseudobulk_counts.tsv.gz",
             sep="\t",

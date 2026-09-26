@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.0 — 2026-09-26
+
+- Add fixed cell-state abundance, gene detection/mean/variance, and predefined program mean/variance/quantile/activation features, with explicit units and biological sample identity.
+- Add within-sample cell perturbations, per-perturbation stability gates, sparse chunk processing and bounded sample-level accumulators.
+- Fix capture-depth dependence of abundance pseudocounts using a constant offset on proportions; test unequal-cell-count negative controls and reject protected metadata as cell-state labels.
+- Select/refit compact panels inside outer training sets, permutations and batch holdouts. Save panel-specific coefficients, gates, numeric states and external evaluations.
+- Add fold-local median imputation for transformed features; preserve missing-state meaning and reject missing raw counts.
+- Extend count DE to continuous slopes and multiclass reference contrasts, with explicit effects and appropriate joint BH families.
+- Add forward temporal group splitting and conservative exchangeability reporting.
+- Add strict Matrix Market/Seurat-export import and frozen native single-cell external evaluation.
+- Add pinned replicated yeast cultures and a larger donor-level single-cell processing-cohort holdout. Correct repeated-processing specimen identity before purging held-out donors.
+- Expand adversarial tests and documentation for new cell lines, feature interpretation and independent verification; preserve earlier release evidence as historical.
+
 ## 0.1.1 — 2026-09-26
 
 - Preserve sample, donor, batch, stratum and categorical outcome strings during CSV/TSV parsing, including leading zeros and literal `NA`; reject blank required metadata.

@@ -68,7 +68,10 @@ def load_bulk(
         x = x.T
     if set(x.index) != set(m.index):
         raise ValueError("Expression and metadata sample IDs must match exactly")
-    x = x.loc[m.index].astype(np.float64)
+    x = x.loc[m.index]
+    if config.imputation == "median":
+        x = x.replace({"": np.nan, "NaN": np.nan, "nan": np.nan})
+    x = x.astype(np.float64)
     m[config.sample_id] = m.index
     return Dataset(
         x,

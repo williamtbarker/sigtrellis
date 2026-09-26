@@ -2,7 +2,7 @@
 
 ## Scientific data boundary
 
-`Dataset` contains a sample-by-gene expression frame, an exactly aligned metadata frame, optional cell type and gene-symbol mappings, input hashes, and upstream QC. Metadata cannot silently become features. Bulk adapters align either matrix orientation. The single-cell adapter reads HDF5 count chunks, validates integer counts, applies fixed cell QC and sums by sample/type. Both then use the same downstream machinery.
+`Dataset` contains a sample-by-feature frame, exactly aligned metadata, typed `Feature` identities, optional cell-type count tables and cell-perturbed feature frames, gene-symbol mappings, input hashes and upstream QC. Metadata cannot silently become features. Bulk aligns either orientation. Single-cell adapters read sparse HDF5 chunks and use fixed cell QC. Pseudobulk produces count sums; distribution mode produces sample-local moments/program scores and relative abundance. Both share the same downstream machinery without treating their upstream estimands as identical.
 
 ## Components
 
@@ -10,14 +10,16 @@
 |---|---|
 | `config` | Frozen configuration, YAML/TOML/JSON loading, unknown-key rejection |
 | `domain` | Dataset, split/audit types, hashes and strict JSON serialization |
-| `io`, `singlecell` | Modality-specific adapters and raw-count aggregation |
+| `io`, `singlecell`, `cell_features`, `matrix_import` | Bulk alignment, count sums, typed sample-local distributions, strict sparse export import |
 | `qc` | Integrity, replicate, target-copy, duplicate and confounding checks |
 | `preprocessing` | Training-only normalizer, gene screen, scaler and covariate encoder |
-| `de` | Optional rank-checked PyDESeq2 binary NB contrasts |
+| `de` | Rank-checked binary, continuous and multiclass-reference PyDESeq2 contrasts |
 | `splits` | Stratified group splitting, mixed-label group splitting, purged batch splits, subsampling, permutation |
 | `modeling` | Solver wrappers, parameter mapping, inner tuning, coefficient extraction, frozen numeric state |
 | `validation` | Nested out-of-group prediction and full-procedure permutation control |
 | `stability` | Retuned group subsampling, coefficient/sign/rank/frequency/Jaccard evidence |
+| `panel` | Compact feature selection/refit policy inside each outer training boundary |
+| `evidence` | Scientific feature identities and post-validation count-DE joins |
 | `correlation` | Bounded descriptive clustering and substitution diagnostics |
 | `metrics` | Proper-loss selection, group weights, complementary metrics/calibration |
 | `workflow` | Orchestration, positive-gate eligibility, manifests, errors and artifacts |
@@ -32,6 +34,8 @@
 Each training boundary owns a fresh `Prepared` object. It holds the normalization reference, prevalence/variance/candidate decisions, training scales, and covariate categories. Transforming validation rows cannot modify it. Hyperparameter candidates within the **same** training fold share that fitted preprocessing safely; no candidate can access the validation labels except through its scalar scoring step.
 
 Outer folds are never used to choose their own hyperparameters. Final full-data tuning, stability selection and exploratory analyses run after the outer evaluation and do not replace its inputs. The final model is a new fit; its exact performance on an untouched cohort remains unknown until the external command is used.
+
+Panel validation owns a fresh stability engine in each outer training set. It emits separate predictions, coefficients, selected features and tuning records. Batch and permutation evaluations run the same panel policy. Cell perturbations travel inside `Dataset.subset`, so a training subset cannot acquire held-out sample rows. Their definitions use no cross-sample fitted statistics. Imputation and scaling remain within `Prepared`, including when native external H5AD is converted using the frozen configuration.
 
 `Audit` records every observed-data fit and every training/test boundary. Permutation controls reconstruct splits from permuted labels and preserve separate audit records. Fingerprints describe normalization/scaling state; row IDs and gene inclusion/exclusion lists make the boundary inspectable. Output manifests are marked `running`, then `complete` or `failed`. Nonempty output directories are never overwritten.
 

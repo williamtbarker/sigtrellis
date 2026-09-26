@@ -1,0 +1,19 @@
+outcome: condition
+outcome_type: binary
+positive_class: snf2_knockout
+sample_id: sample_id
+group: culture
+normalization: logcpm
+candidate_method: variance
+max_features: 300
+outer_folds: 3
+inner_folds: 3
+strengths: [0.02, 0.08]
+l1_ratios: [0.5, 0.9]
+stability_resamples: 8
+stability_fraction: 0.8
+panel_validation: true
+panel_max_features: 10
+permutations: 19
+supporting_de: true
+seed: 2026

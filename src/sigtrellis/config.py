@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import math
 import tomllib
-from dataclasses import asdict, dataclass, fields
+from dataclasses import asdict, dataclass, field, fields
 from pathlib import Path
 from typing import Any, Literal
 
@@ -68,6 +68,27 @@ class Config:
     max_mito_fraction: float = 1.0
     chunk_size: int = 2048
     max_dense_mb: int = 2048
+    imputation: str = "reject"
+    max_missing_fraction: float = 0.5
+    single_cell_mode: str = "pseudobulk"
+    cell_states: tuple[str, ...] = ()
+    feature_genes: tuple[str, ...] = ()
+    feature_blocks: tuple[str, ...] = (
+        "abundance",
+        "gene_mean",
+        "gene_detection",
+        "program_mean",
+        "program_variance",
+    )
+    programs: dict[str, tuple[str, ...]] = field(default_factory=dict)
+    program_thresholds: dict[str, float] = field(default_factory=dict)
+    cell_resamples: int = 0
+    cell_fraction: float = 0.75
+    panel_validation: bool = False
+    panel_max_features: int = 20
+    time: str | None = None
+    temporal_gap: float = 0.0
+    temporal_train_fraction: float = 0.5
 
     def validate(self) -> None:
         for item in fields(self):
@@ -90,26 +111,33 @@ class Config:
             "layer",
             "permutation_strata",
             "mitochondrial_prefix",
+            "time",
         ):
             value = getattr(self, key)
             if value is not None and (not isinstance(value, str) or not value.strip()):
                 raise ValueError(f"{key} must be a nonempty string")
-        for key in ("supporting_de", "de_pair_group", "assess_batches"):
+        for key in ("supporting_de", "de_pair_group", "assess_batches", "panel_validation"):
             if not isinstance(getattr(self, key), bool):
                 raise ValueError(f"{key} must be a boolean")
         choices = {
             "outcome_type": {"binary", "multiclass", "continuous"},
-            "input_scale": {"counts", "log_expression"},
+            "input_scale": {"counts", "log_expression", "features"},
             "normalization": {"logcpm", "median_ratio", "none"},
             "candidate_method": {"variance", "association", "deseq2", "none"},
-            "cv_strategy": {"grouped", "leave_group_out", "leave_batch_out"},
+            "cv_strategy": {"grouped", "leave_group_out", "leave_batch_out", "temporal"},
             "permutation_scheme": {"group", "within_group"},
             "tuning_rule": {"one_se", "minimum_loss"},
+            "single_cell_mode": {"pseudobulk", "distribution"},
+            "imputation": {"reject", "median"},
         }
         for key, allowed in choices.items():
             if getattr(self, key) not in allowed:
                 raise ValueError(f"{key} must be one of {sorted(allowed)}")
-        protected = {self.outcome, self.sample_id, self.group, self.batch}
+        protected = {self.outcome, self.sample_id, self.group, self.batch, self.time}
+        if self.cell_type and self.cell_type in protected | {self.permutation_strata}:
+            raise ValueError(
+                "Cell-type annotation cannot be the outcome, an identifier, batch, time or permutation stratum"
+            )
         if any(c in protected for c in self.covariates):
             raise ValueError("Outcome, sample/group identifiers, and batch cannot be predictors")
         if len(set(self.covariates)) != len(self.covariates):
@@ -118,17 +146,27 @@ class Config:
             raise ValueError("Covariates must be nonempty column names")
         if self.outcome in {self.sample_id, self.group}:
             raise ValueError("Outcome cannot be a sample or group identifier")
-        if self.input_scale == "log_expression" and self.normalization != "none":
-            raise ValueError("Declared log_expression requires normalization=none")
+        if self.input_scale in {"log_expression", "features"} and self.normalization != "none":
+            raise ValueError("Declared log_expression/features requires normalization=none")
         if self.input_scale == "counts" and self.normalization == "none":
             raise ValueError("Counts require logcpm or median_ratio normalization")
         if self.candidate_method == "deseq2" or self.supporting_de:
-            if self.input_scale != "counts" or self.outcome_type != "binary":
-                raise ValueError("PyDESeq2 integration currently requires binary raw-count data")
+            if self.input_scale != "counts" and not (
+                self.single_cell_mode == "distribution"
+                and self.supporting_de
+                and self.candidate_method != "deseq2"
+            ):
+                raise ValueError(
+                    "PyDESeq2 requires raw counts; mixed features use association/variance screening"
+                )
+        if self.imputation == "median" and self.input_scale == "counts":
+            raise ValueError("Missing raw counts cannot be imputed as expression")
         if self.de_pair_group and not self.group:
             raise ValueError("Paired DE requires an explicit group column")
         if self.cv_strategy == "leave_batch_out" and not self.batch:
             raise ValueError("leave_batch_out requires batch metadata")
+        if self.cv_strategy == "temporal" and (not self.time or self.repeats != 1):
+            raise ValueError("Temporal validation requires time metadata and repeats=1")
         for key in ("outer_folds", "inner_folds", "stability_resamples", "min_groups_gate"):
             if not isinstance(getattr(self, key), int) or getattr(self, key) < 2:
                 raise ValueError(f"{key} must be an integer >= 2")
@@ -142,10 +180,11 @@ class Config:
             "max_dense_mb",
             "cell_min_counts",
             "cell_min_genes",
+            "panel_max_features",
         ):
             if not isinstance(getattr(self, key), int) or getattr(self, key) < 1:
                 raise ValueError(f"{key} must be a positive integer")
-        for key in ("seed", "permutations"):
+        for key in ("seed", "permutations", "cell_resamples"):
             if not isinstance(getattr(self, key), int) or getattr(self, key) < 0:
                 raise ValueError(f"{key} must be a nonnegative integer")
         for key in (
@@ -157,6 +196,7 @@ class Config:
             "permutation_alpha",
             "correlation_threshold",
             "max_mito_fraction",
+            "max_missing_fraction",
         ):
             if (
                 not isinstance(getattr(self, key), (float, int))
@@ -164,7 +204,12 @@ class Config:
                 or not 0 < getattr(self, key) <= 1
             ):
                 raise ValueError(f"{key} must be in (0,1]")
-        for key in ("stability_fraction", "decision_threshold"):
+        for key in (
+            "stability_fraction",
+            "decision_threshold",
+            "cell_fraction",
+            "temporal_train_fraction",
+        ):
             if (
                 not isinstance(getattr(self, key), (float, int))
                 or not math.isfinite(getattr(self, key))
@@ -198,12 +243,64 @@ class Config:
         for norm in self.stability_normalizations:
             if norm not in choices["normalization"]:
                 raise ValueError("Invalid stability normalization")
-            if (norm == "none") != (self.input_scale == "log_expression"):
+            if (norm == "none") != (self.input_scale != "counts"):
                 raise ValueError("Stability normalization is incompatible with input_scale")
         if len(set(self.stability_normalizations)) != len(self.stability_normalizations):
             raise ValueError("Duplicate stability normalizations")
         if len(self.stability_normalizations) > self.stability_resamples:
             raise ValueError("Every stability normalization needs at least one resample")
+        if (
+            not isinstance(self.temporal_gap, (int, float))
+            or not math.isfinite(self.temporal_gap)
+            or self.temporal_gap < 0
+        ):
+            raise ValueError("temporal_gap must be finite and nonnegative")
+        if self.cell_resamples + 1 > self.stability_resamples:
+            raise ValueError("Every cell perturbation needs at least one stability resample")
+        if self.cell_resamples and self.single_cell_mode != "distribution":
+            raise ValueError("Cell perturbations require single_cell_mode=distribution")
+        blocks = {
+            "abundance",
+            "gene_mean",
+            "gene_detection",
+            "gene_variance",
+            "program_mean",
+            "program_variance",
+            "program_q90",
+            "program_fraction",
+        }
+        if not self.feature_blocks or set(self.feature_blocks) - blocks:
+            raise ValueError("Unknown or empty single-cell feature_blocks")
+        for key in ("cell_states", "feature_genes", "feature_blocks"):
+            values = getattr(self, key)
+            if len(set(values)) != len(values) or any(
+                not isinstance(v, str) or not v.strip() for v in values
+            ):
+                raise ValueError(f"{key} must contain unique nonempty strings")
+        if not isinstance(self.programs, dict) or not isinstance(self.program_thresholds, dict):
+            raise ValueError("Programs and program_thresholds must be mappings")
+        for name, genes in self.programs.items():
+            if isinstance(genes, str):
+                raise ValueError("Program genes must be a sequence, not a string")
+            if not isinstance(name, str) or not name.strip() or not genes:
+                raise ValueError("Programs require nonempty names and gene lists")
+            if len(set(genes)) != len(genes) or any(
+                not isinstance(g, str) or not g.strip() for g in genes
+            ):
+                raise ValueError("Program genes must be unique nonempty strings")
+        if set(self.program_thresholds) - set(self.programs):
+            raise ValueError("Threshold names must match declared programs")
+        if any(
+            isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v)
+            for v in self.program_thresholds.values()
+        ):
+            raise ValueError("Program thresholds must be finite numbers")
+        if "program_fraction" in self.feature_blocks and set(self.program_thresholds) != set(
+            self.programs
+        ):
+            raise ValueError(
+                "Activation fractions require a predefined threshold for every program"
+            )
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -229,11 +326,25 @@ def load_config(path: Path | None, overrides: dict[str, Any] | None = None) -> C
     unknown = set(raw) - {f.name for f in fields(Config)}
     if unknown:
         raise ValueError(f"Unknown configuration keys: {sorted(unknown)}")
-    for key in ("covariates", "strengths", "l1_ratios", "stability_normalizations"):
+    for key in (
+        "covariates",
+        "strengths",
+        "l1_ratios",
+        "stability_normalizations",
+        "cell_states",
+        "feature_genes",
+        "feature_blocks",
+    ):
         if key in raw:
             if not isinstance(raw[key], (list, tuple)):
                 raise ValueError(f"{key} must be a sequence")
             raw[key] = tuple(raw[key])
+    if "programs" in raw:
+        if not isinstance(raw["programs"], dict) or any(
+            not isinstance(v, (list, tuple)) for v in raw["programs"].values()
+        ):
+            raise ValueError("programs must map names to gene lists")
+        raw["programs"] = {name: tuple(genes) for name, genes in raw["programs"].items()}
     config = Config(**raw)
     config.validate()
     # Reject non-JSON values before a costly run starts.

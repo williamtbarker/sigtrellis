@@ -22,6 +22,7 @@ class ValidationResult:
     tuning: pd.DataFrame
     coefficients: FloatArray
     metrics: dict[str, Any]
+    panel_coefficients: FloatArray | None = None
 
 
 def nested_validate(
@@ -31,6 +32,8 @@ def nested_validate(
     prediction_rows: list[dict[str, Any]] = []
     all_tuning: list[pd.DataFrame] = []
     coefficients: list[FloatArray] = []
+    panel_coefficients: list[FloatArray] = []
+    panel_folds: list[dict[str, Any]] = []
     fold_metrics: list[dict[str, Any]] = []
     for split in make_splits(data, y, config):
         label = f"{context}/repeat:{split.repeat}/outer:{split.fold}"
@@ -57,6 +60,26 @@ def nested_validate(
             model.prepared, train, y[split.train], baseline_param, covariates_only=True
         )
         baseline = baseline_model.predict(test)
+        panel_prediction: FloatArray | None = None
+        if config.panel_validation:
+            from sigtrellis.panel import fit_panel
+
+            panel = fit_panel(train, y[split.train], config, audit, label + "/panel")
+            panel_prediction = panel.model.predict(test)
+            panel_coefficients.append(panel.model.coefficients())
+            panel_folds.append(
+                {
+                    "context": label,
+                    "features": panel.features,
+                    "n_features": len(panel.features),
+                    "parameters": {
+                        "strength": panel.model.parameters.strength,
+                        "l1_ratio": panel.model.parameters.l1_ratio,
+                    },
+                    "selection_resamples": panel.stability.resamples,
+                }
+            )
+            all_tuning.append(panel.stability.tuning)
         w = group_weights(group_values(test, config))
         measured = evaluate(y[split.test], pred, config, w)
         fold_metrics.append(
@@ -84,6 +107,16 @@ def nested_validate(
                 record.update(
                     {f"baseline_{c}": float(baseline[local, c]) for c in range(n_classes)}
                 )
+            if panel_prediction is not None:
+                if n_classes:
+                    record.update(
+                        {
+                            f"panel_p_{c}": float(panel_prediction[local, c])
+                            for c in range(n_classes)
+                        }
+                    )
+                else:
+                    record["panel_prediction"] = float(panel_prediction[local])
             prediction_rows.append(record)
     frame = pd.DataFrame(prediction_rows)
     # Pool repeated predictions as repeated OOF rows with equal total weight per
@@ -115,16 +148,37 @@ def nested_validate(
         "performance_scope": "Entire training/tuning procedure, not the post-hoc consensus panel",
         "uncertainty": "Fold dispersion is descriptive; overlapping CV folds are not independent",
     }
+    if config.panel_validation:
+        panel_values = (
+            frame[[f"panel_p_{i}" for i in range(n_classes)]].to_numpy()
+            if n_classes
+            else frame["panel_prediction"].to_numpy()
+        )
+        panel_loss = loss(observed, panel_values, config, weights)
+        metrics["panel"] = {
+            "out_of_fold": evaluate(observed, panel_values, config, weights),
+            "model_loss": panel_loss,
+            "baseline_loss": baseline_loss,
+            "loss_improvement": baseline_loss - panel_loss,
+            "folds": panel_folds,
+            "scope": "Entire compact-panel discovery/refit policy, including selection inside each outer training fold; not independent validation of the final fixed panel",
+        }
     return ValidationResult(
         frame,
         pd.concat(all_tuning, ignore_index=True),
         np.asarray(coefficients, dtype=float),
         metrics,
+        np.asarray(panel_coefficients, dtype=float) if panel_coefficients else None,
     )
 
 
 def permutation_control(
-    data: Dataset, y: FloatArray, config: Config, observed: float, audit: Audit
+    data: Dataset,
+    y: FloatArray,
+    config: Config,
+    observed: float,
+    audit: Audit,
+    panel_observed: float | None = None,
 ) -> dict[str, Any]:
     if not np.isfinite(observed):
         raise ValueError("Permutation test requires a finite observed statistic")
@@ -132,6 +186,7 @@ def permutation_control(
         return {"status": "not_run", "pvalue": None, "null_improvements": []}
     rng = np.random.default_rng(config.seed + 7919)
     null: list[float] = []
+    panel_null: list[float] = []
     permutation_audits: list[dict[str, Any]] = []
     for index in range(config.permutations):
         permuted = permute_outcome(data, y, config, rng)
@@ -149,6 +204,11 @@ def permutation_control(
         if not np.isfinite(statistic):
             raise ValueError(f"Permutation {index} produced a nonfinite statistic")
         null.append(statistic)
+        if panel_observed is not None:
+            panel_statistic = float(result.metrics["panel"]["loss_improvement"])
+            if not np.isfinite(panel_statistic) or not np.isfinite(panel_observed):
+                raise ValueError("Nonfinite compact-panel permutation statistic")
+            panel_null.append(panel_statistic)
         permutation_audits.append(
             {
                 "index": index,
@@ -171,6 +231,8 @@ def permutation_control(
     pvalue = (1 + sum(value >= observed - 1e-12 for value in null)) / (1 + len(null))
     # A global label-permutation test is not a conditional gene test given covariates.
     status = "global_only_with_covariates" if config.covariates else "tested"
+    if config.cv_strategy == "temporal":
+        status = "temporal_exchangeability_unverified"
     return {
         "status": status,
         "pvalue": pvalue,
@@ -181,4 +243,9 @@ def permutation_control(
         "exchangeability": "Must be justified by study design; no automatic observational causal inference",
         "resolution": 1 / (1 + len(null)),
         "audits": permutation_audits,
+        "panel_pvalue": (1 + sum(value >= panel_observed - 1e-12 for value in panel_null))
+        / (1 + len(panel_null))
+        if panel_observed is not None
+        else None,
+        "panel_null_improvements": panel_null,
     }

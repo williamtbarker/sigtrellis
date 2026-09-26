@@ -66,6 +66,8 @@ class FittedModel:
             "selected_indices": prep.selected,
             "normalization": prep.normalizer.method,
             "reference": prep.normalizer.reference,
+            "imputation": prep.normalizer.imputation,
+            "fill_values": prep.normalizer.fill_values,
             "gene_center": prep.scaler.mean_ if prep.scaler is not None else [],
             "gene_scale": prep.scaler.scale_ if prep.scaler is not None else [],
             "covariates": prep.covariates.names,
@@ -142,8 +144,14 @@ def fit_model(
     parameters: Hyperparameters,
     audit: Audit,
     context: str,
+    *,
+    allowed_features: set[str] | None = None,
 ) -> FittedModel:
-    prepared = Prepared(config).fit(data, y, audit, context)
+    prepared = Prepared(config)
+    if allowed_features is None:
+        prepared.fit(data, y, audit, context)
+    else:
+        prepared.fit(data, y, audit, context, allowed_features)
     return fit_prepared(prepared, data, y, parameters)
 
 

@@ -1,0 +1,161 @@
+{
+  "status": "verified",
+  "installed_modules_verified": 25,
+  "runs": {
+    "replicated_bulk": {
+      "output_files_verified": 38,
+      "input_files_verified": 2,
+      "execution_source_locations": {
+        "__init__.py": "src/sigtrellis/__init__.py",
+        "__main__.py": "src/sigtrellis/__main__.py",
+        "cell_features.py": "release_evidence/v0.2.0/execution_sources/cell_features_62079b7884f2.py",
+        "cli.py": "src/sigtrellis/cli.py",
+        "config.py": "release_evidence/v0.2.0/execution_sources/config_6f53211d35c4.py",
+        "correlation.py": "src/sigtrellis/correlation.py",
+        "de.py": "src/sigtrellis/de.py",
+        "domain.py": "src/sigtrellis/domain.py",
+        "evidence.py": "src/sigtrellis/evidence.py",
+        "integrity.py": "src/sigtrellis/integrity.py",
+        "io.py": "src/sigtrellis/io.py",
+        "matrix_import.py": "src/sigtrellis/matrix_import.py",
+        "metrics.py": "src/sigtrellis/metrics.py",
+        "modeling.py": "src/sigtrellis/modeling.py",
+        "panel.py": "src/sigtrellis/panel.py",
+        "prediction.py": "src/sigtrellis/prediction.py",
+        "preprocessing.py": "src/sigtrellis/preprocessing.py",
+        "qc.py": "src/sigtrellis/qc.py",
+        "reporting.py": "src/sigtrellis/reporting.py",
+        "simulate.py": "src/sigtrellis/simulate.py",
+        "singlecell.py": "src/sigtrellis/singlecell.py",
+        "splits.py": "src/sigtrellis/splits.py",
+        "stability.py": "src/sigtrellis/stability.py",
+        "validation.py": "src/sigtrellis/validation.py",
+        "workflow.py": "release_evidence/v0.2.0/execution_sources/workflow.py"
+      },
+      "external_artifact_hashes": {
+        "replicated_bulk_external": {
+          "external_predictions.csv": "d05e846a450d3020c1f745bdcdabe70175e871d3bccf1ce86020f08cb069dcc9",
+          "external_metrics.json": "3ae68ca91bfc6efdb54da4b61c23a6e0167bebd93fb7ed4a1770c5b0a46f30c1"
+        },
+        "replicated_bulk_panel_external": {
+          "external_predictions.csv": "52261438ca6b78672177c48058c39a07f0d94d263c6c371a69b0fac1e758777f",
+          "external_metrics.json": "08a2e7ee02236fca75f43ae2cac8754942a7dbb03ef4c829cd37c57b3ab2b304"
+        }
+      }
+    },
+    "replicated_single_cell": {
+      "output_files_verified": 40,
+      "input_files_verified": 1,
+      "execution_source_locations": {
+        "__init__.py": "src/sigtrellis/__init__.py",
+        "__main__.py": "src/sigtrellis/__main__.py",
+        "cell_features.py": "release_evidence/v0.2.0/execution_sources/cell_features_62079b7884f2.py",
+        "cli.py": "src/sigtrellis/cli.py",
+        "config.py": "release_evidence/v0.2.0/execution_sources/config_6f53211d35c4.py",
+        "correlation.py": "src/sigtrellis/correlation.py",
+        "de.py": "src/sigtrellis/de.py",
+        "domain.py": "src/sigtrellis/domain.py",
+        "evidence.py": "src/sigtrellis/evidence.py",
+        "integrity.py": "src/sigtrellis/integrity.py",
+        "io.py": "src/sigtrellis/io.py",
+        "matrix_import.py": "src/sigtrellis/matrix_import.py",
+        "metrics.py": "src/sigtrellis/metrics.py",
+        "modeling.py": "src/sigtrellis/modeling.py",
+        "panel.py": "src/sigtrellis/panel.py",
+        "prediction.py": "src/sigtrellis/prediction.py",
+        "preprocessing.py": "src/sigtrellis/preprocessing.py",
+        "qc.py": "src/sigtrellis/qc.py",
+        "reporting.py": "src/sigtrellis/reporting.py",
+        "simulate.py": "src/sigtrellis/simulate.py",
+        "singlecell.py": "src/sigtrellis/singlecell.py",
+        "splits.py": "src/sigtrellis/splits.py",
+        "stability.py": "src/sigtrellis/stability.py",
+        "validation.py": "src/sigtrellis/validation.py",
+        "workflow.py": "release_evidence/v0.2.0/execution_sources/workflow.py"
+      },
+      "external_artifact_hashes": {
+        "replicated_single_cell_external": {
+          "external_predictions.csv": "07823009846ef975c9cfc09697eacfda2ae54cd6812ac71c682e56ebceeb1030",
+          "external_metrics.json": "29c773b37fe5e812cce62d424380b39f36a56f67bec66a1152ef4be9a92b48a8"
+        },
+        "replicated_single_cell_panel_external": {
+          "external_predictions.csv": "3cc7225d90422cdc9df16ff6faaf656f537f20826391ef584c240bdf5abe1eab",
+          "external_metrics.json": "a0271f494adef37fece35a74a16df124c29d8a821202ca7965fc056303b7d8bb"
+        }
+      }
+    },
+    "replicated_cell_distributions_corrected": {
+      "output_files_verified": 37,
+      "input_files_verified": 1,
+      "execution_source_locations": {
+        "__init__.py": "src/sigtrellis/__init__.py",
+        "__main__.py": "src/sigtrellis/__main__.py",
+        "cell_features.py": "release_evidence/v0.2.0/execution_sources/cell_features_27f94b7e1082.py",
+        "cli.py": "src/sigtrellis/cli.py",
+        "config.py": "src/sigtrellis/config.py",
+        "correlation.py": "src/sigtrellis/correlation.py",
+        "de.py": "src/sigtrellis/de.py",
+        "domain.py": "src/sigtrellis/domain.py",
+        "evidence.py": "src/sigtrellis/evidence.py",
+        "integrity.py": "src/sigtrellis/integrity.py",
+        "io.py": "src/sigtrellis/io.py",
+        "matrix_import.py": "src/sigtrellis/matrix_import.py",
+        "metrics.py": "src/sigtrellis/metrics.py",
+        "modeling.py": "src/sigtrellis/modeling.py",
+        "panel.py": "src/sigtrellis/panel.py",
+        "prediction.py": "src/sigtrellis/prediction.py",
+        "preprocessing.py": "src/sigtrellis/preprocessing.py",
+        "qc.py": "src/sigtrellis/qc.py",
+        "reporting.py": "src/sigtrellis/reporting.py",
+        "simulate.py": "src/sigtrellis/simulate.py",
+        "singlecell.py": "src/sigtrellis/singlecell.py",
+        "splits.py": "src/sigtrellis/splits.py",
+        "stability.py": "src/sigtrellis/stability.py",
+        "validation.py": "src/sigtrellis/validation.py",
+        "workflow.py": "src/sigtrellis/workflow.py"
+      },
+      "external_artifact_hashes": {
+        "replicated_cell_distributions_corrected_full_external": {
+          "external_predictions.csv": "3ff15cccbdd6d2d9301c8206cb9eaa8aed1eb5ce30606afc70cce94fede81b41",
+          "external_metrics.json": "b88d37618f132d5f555a47bbf6b55dea6d356b9a0d1a84478487ca3069c44000"
+        },
+        "replicated_cell_distributions_corrected_panel_external": {
+          "external_predictions.csv": "d9747876c52c79a38b96c1cf585e1db0c1f5a47096f6d2c4e7dd496c567d3d71",
+          "external_metrics.json": "7120e2d37bf5403bde7903352c6e4ba306531fa72da8f6205ef26f4e4cd590f0"
+        }
+      }
+    },
+    "toy": {
+      "output_files_verified": 35,
+      "input_files_verified": 2,
+      "execution_source_locations": {
+        "__init__.py": "src/sigtrellis/__init__.py",
+        "__main__.py": "src/sigtrellis/__main__.py",
+        "cell_features.py": "release_evidence/v0.2.0/execution_sources/cell_features_62079b7884f2.py",
+        "cli.py": "src/sigtrellis/cli.py",
+        "config.py": "release_evidence/v0.2.0/execution_sources/config_6f53211d35c4.py",
+        "correlation.py": "src/sigtrellis/correlation.py",
+        "de.py": "src/sigtrellis/de.py",
+        "domain.py": "src/sigtrellis/domain.py",
+        "evidence.py": "src/sigtrellis/evidence.py",
+        "integrity.py": "src/sigtrellis/integrity.py",
+        "io.py": "src/sigtrellis/io.py",
+        "matrix_import.py": "src/sigtrellis/matrix_import.py",
+        "metrics.py": "src/sigtrellis/metrics.py",
+        "modeling.py": "src/sigtrellis/modeling.py",
+        "panel.py": "src/sigtrellis/panel.py",
+        "prediction.py": "src/sigtrellis/prediction.py",
+        "preprocessing.py": "src/sigtrellis/preprocessing.py",
+        "qc.py": "src/sigtrellis/qc.py",
+        "reporting.py": "src/sigtrellis/reporting.py",
+        "simulate.py": "src/sigtrellis/simulate.py",
+        "singlecell.py": "src/sigtrellis/singlecell.py",
+        "splits.py": "src/sigtrellis/splits.py",
+        "stability.py": "src/sigtrellis/stability.py",
+        "validation.py": "src/sigtrellis/validation.py",
+        "workflow.py": "release_evidence/v0.2.0/execution_sources/workflow_56f65f8b07df.py"
+      },
+      "external_artifact_hashes": {}
+    }
+  }
+}

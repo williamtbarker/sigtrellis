@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from sigtrellis import __version__
+from sigtrellis.cell_features import distribution_features
 from sigtrellis.config import load_config
 from sigtrellis.domain import file_hash
 from sigtrellis.io import load_bulk
@@ -38,6 +39,7 @@ def parser() -> argparse.ArgumentParser:
         sub.add_argument("--outer-folds", type=int)
         sub.add_argument("--inner-folds", type=int)
         sub.add_argument("--supporting-de", action="store_true", default=None)
+        sub.add_argument("--panel-validation", action="store_true", default=None)
         if name == "bulk":
             sub.add_argument("--expression", type=Path, required=True)
             sub.add_argument("--metadata", type=Path, required=True)
@@ -56,6 +58,11 @@ def parser() -> argparse.ArgumentParser:
             sub.add_argument("--cell-type")
             sub.add_argument("--cell-type-value")
             sub.add_argument("--layer")
+            sub.add_argument("--single-cell-mode", choices=["pseudobulk", "distribution"])
+            sub.add_argument("--cell-state", action="append", dest="cell_states")
+            sub.add_argument("--feature-block", action="append", dest="feature_blocks")
+            sub.add_argument("--feature-gene", action="append", dest="feature_genes")
+            sub.add_argument("--cell-resamples", type=int)
     simulate = commands.add_parser("simulate")
     simulate.add_argument("--output", type=Path, required=True)
     simulate.add_argument("--modality", choices=["bulk", "single-cell"], default="bulk")
@@ -80,17 +87,39 @@ def parser() -> argparse.ArgumentParser:
         default="signal",
     )
     external = commands.add_parser("external")
-    for flag in ("run", "expression", "metadata", "output"):
+    for flag in ("run", "output"):
         external.add_argument("--" + flag, type=Path, required=True)
+    for flag in ("expression", "metadata", "input"):
+        external.add_argument("--" + flag, type=Path)
+    external.add_argument("--model-kind", choices=["full", "panel"], default="full")
     external.add_argument(
         "--orientation", default="auto", choices=["auto", "samples_by_genes", "genes_by_samples"]
     )
+    imported = commands.add_parser(
+        "import-mtx", help="Convert raw Matrix Market/Seurat exports to H5AD"
+    )
+    imported.add_argument("--numeric-column", action="append", default=[], dest="numeric_columns")
+    for flag in ("matrix", "genes", "barcodes", "metadata", "output"):
+        imported.add_argument("--" + flag, type=Path, required=True)
     return root
 
 
 def main(argv: list[str] | None = None) -> int:
     args = parser().parse_args(argv)
     try:
+        if args.command == "import-mtx":
+            from sigtrellis.matrix_import import import_matrix_market
+
+            import_matrix_market(
+                args.matrix,
+                args.genes,
+                args.barcodes,
+                args.metadata,
+                args.output,
+                tuple(args.numeric_columns),
+            )
+            print(f"Aligned raw-count H5AD written to {args.output}")
+            return 0
         if args.command == "simulate":
             write_example(
                 args.output, args.modality, args.samples, args.features, args.seed, args.scenario
@@ -99,7 +128,13 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if args.command == "external":
             external_validate(
-                args.run, args.expression, args.metadata, args.output, args.orientation
+                args.run,
+                args.expression,
+                args.metadata,
+                args.output,
+                args.orientation,
+                single_cell=args.input,
+                model_kind=args.model_kind,
             )
             print(f"Frozen external validation written to {args.output}")
             return 0
@@ -131,7 +166,13 @@ def main(argv: list[str] | None = None) -> int:
                 }
                 datasets[0].input_hashes[str(args.annotations)] = file_hash(args.annotations)
         else:
-            datasets = pseudobulk(args.input, config)
+            if config.single_cell_mode == "distribution":
+                config = replace(
+                    config, input_scale="features", normalization="none", imputation="median"
+                )
+                datasets = [distribution_features(args.input, config)]
+            else:
+                datasets = pseudobulk(args.input, config)
         if args.output.exists() and any(args.output.iterdir()):
             raise ValueError("Output directory must be empty")
         for index, data in enumerate(datasets):
@@ -153,7 +194,7 @@ def main(argv: list[str] | None = None) -> int:
             manifest = run_analysis(data, local_config, output)
             n = len({r["gene_id"] for r in manifest["candidate_features"]})
             print(
-                f"COMPLETE: {n} genes pass candidate-association gates; report: {output / 'report.html'}",
+                f"COMPLETE: {n} features pass candidate-association gates; report: {output / 'report.html'}",
                 flush=True,
             )
         return 0

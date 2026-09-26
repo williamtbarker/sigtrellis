@@ -1,0 +1,25 @@
+# Perez et al.: predefined classical-monocyte pseudobulk analysis.
+outcome: disease
+outcome_type: binary
+positive_class: systemic lupus erythematosus
+sample_id: specimen_id
+group: donor_id
+batch: Processing_Cohort
+permutation_strata: Processing_Cohort
+cell_type: author_cell_type
+cell_type_value: cM
+min_cells: 20
+normalization: logcpm
+candidate_method: variance
+max_features: 300
+outer_folds: 3
+inner_folds: 2
+strengths: [0.02, 0.08]
+l1_ratios: [0.5, 0.9]
+stability_resamples: 8
+stability_fraction: 0.8
+panel_validation: true
+panel_max_features: 10
+permutations: 19
+supporting_de: true
+seed: 2026

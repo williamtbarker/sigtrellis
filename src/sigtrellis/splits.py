@@ -27,7 +27,7 @@ def make_splits(
     groups = group_values(data, config)
     unique = np.unique(groups)
     n_folds = config.inner_folds if inner else config.outer_folds
-    strategy = "grouped" if inner else config.cv_strategy
+    strategy = "grouped" if inner and config.cv_strategy != "temporal" else config.cv_strategy
     repeats = 1 if inner else config.repeats
     result: list[Split] = []
     random_seed = config.seed if seed is None else seed
@@ -36,7 +36,29 @@ def make_splits(
     homogeneous = all(len(np.unique(y[groups == group])) == 1 for group in unique)
     for repeat in range(repeats):
         pairs: list[tuple[Any, Any]] = []
-        if strategy == "leave_batch_out":
+        if strategy == "temporal":
+            assert config.time
+            times = data.metadata[config.time].to_numpy(dtype=float)
+            if not np.isfinite(times).all():
+                raise ValueError("Temporal splits require finite numeric time")
+            first = {g: float(times[groups == g].min()) for g in unique}
+            last = {g: float(times[groups == g].max()) for g in unique}
+            occasions = np.unique(list(first.values()))
+            initial = max(1, int(np.ceil(len(occasions) * config.temporal_train_fraction)))
+            if len(occasions) - initial < n_folds:
+                raise ValueError("Too few distinct biological-group start times for temporal folds")
+            for window in np.array_split(occasions[initial:], n_folds):
+                test_groups = [g for g in unique if first[g] in window]
+                train_groups = [
+                    g for g in unique if last[g] < float(window[0]) - config.temporal_gap
+                ]
+                pairs.append(
+                    (
+                        np.flatnonzero(np.isin(groups, train_groups)),
+                        np.flatnonzero(np.isin(groups, test_groups)),
+                    )
+                )
+        elif strategy == "leave_batch_out":
             assert config.batch
             batches = data.metadata[config.batch].astype(str).to_numpy()
             if len(np.unique(batches)) < 2:
@@ -93,6 +115,11 @@ def record_split(audit: Audit, data: Dataset, split: Split, context: str, config
             "test_groups": sorted(set(group_values(data, config)[split.test])),
         }
     )
+    if config.time:
+        audit.splits[-1]["train_time_max"] = float(
+            data.metadata.iloc[split.train][config.time].max()
+        )
+        audit.splits[-1]["test_time_min"] = float(data.metadata.iloc[split.test][config.time].min())
 
 
 def subsample_groups(

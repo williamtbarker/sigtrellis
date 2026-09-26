@@ -1,0 +1,955 @@
+{
+  "package": "sigtrellis",
+  "version": "0.2.0",
+  "executed_date": "2026-09-26",
+  "installed_module_matches": {
+    "__init__.py": true,
+    "simulate.py": true,
+    "io.py": true,
+    "integrity.py": true,
+    "cli.py": true,
+    "preprocessing.py": true,
+    "reporting.py": true,
+    "de.py": true,
+    "evidence.py": true,
+    "panel.py": true,
+    "workflow.py": true,
+    "matrix_import.py": true,
+    "domain.py": true,
+    "metrics.py": true,
+    "__main__.py": true,
+    "qc.py": true,
+    "modeling.py": true,
+    "validation.py": true,
+    "cell_features.py": true,
+    "config.py": true,
+    "splits.py": true,
+    "singlecell.py": true,
+    "stability.py": true,
+    "prediction.py": true,
+    "correlation.py": true
+  },
+  "runs": {
+    "replicated_bulk": {
+      "n_samples": 66,
+      "n_biological_groups": 66,
+      "n_features": 7126,
+      "gate_blockers": [],
+      "candidate_features": [
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YER081W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YPR149W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YHR136C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YML123C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YDR033W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YAR071W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YHR215W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YDR399W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YOR290C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YPL025C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YML122C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YFR015C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YIL121W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YGR234W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YIL169C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YJL077C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YJR010W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YAL061W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YPL095C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YBR070C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YMR056C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YFR055W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YDR077W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YOR348C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YGR087C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YHR095W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YOR376W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YDR281C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YNL160W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YER011W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YER037W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YBL044W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YJR150C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YOL158C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YMR017W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YBR093C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YBR092C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YOR153W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YDR406W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YLR111W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YPR064W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YGR051C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YDR055W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YPR015C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YBR067C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YHR092C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YLL052C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YLR112W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YGR050C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YGL028C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YMR244W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YPL257W-B"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YNL332W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YJR027W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YGR035C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YDR365W-B"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YGR038C-B"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YOL103W-B"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YDR261C-D"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YOL155C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YCR025C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YOL109W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YMR122C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YPR158C-D"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YLR157C-B"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YOR273C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YER138C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YLR227W-B"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YPR137C-B"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YPL062W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YML039W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YDR098C-B"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YJR029W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YLR312C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YML045W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YOR383C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YPL019C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YMR045C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YIL024C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YDR316W-B"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YPR158W-B"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YER001W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YKL062W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YGR027W-B"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YGR161C-D"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YDR210C-D"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YHL047C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YMR050C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YCL048W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YLL060C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YOL104C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YOR142W-B"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YLL053C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YAR009C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YKL162C-A"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YER124C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YFL058W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YDR342C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YIL011W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YHR214C-B"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YNL284C-B"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YDR343C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YEL066W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YBL005W-B"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YIR042C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YNL054W-B"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YDL039C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YER160C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YLR346C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YJL170C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YBR012W-B"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YOR100C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YKL109W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YJR095W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YLR035C-A"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YKL037W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YBR244W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YPL134C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YIR027C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YDR010C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YMR042W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YMR280C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YOR318C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YHR007C-A"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YLR151C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YJR078W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YKR039W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YDL037C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YLR213C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YGR153W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YDR044W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YLR108C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YKL178C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YLR413W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YEL044W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YOL114C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YOR114W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YLR273C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YOR178C"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YLR258W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YEL071W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YIR028W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YGR110W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YOL110W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YMR195W"
+        },
+        {
+          "contrast": "snf2_knockout_vs_wildtype",
+          "gene_id": "YFR030W"
+        }
+      ],
+      "full_nested_metrics": {
+        "balanced_accuracy": 1.0,
+        "brier_score": 0.00012364343604801534,
+        "discrimination_status": "all_classes_observed",
+        "log_loss": 0.01096156628994122,
+        "mcc": 1.0,
+        "pr_auc_average_precision": 1.0,
+        "prevalence": 0.5151515151515151,
+        "roc_auc": 1.0,
+        "sensitivity": 1.0,
+        "specificity": 1.0
+      },
+      "panel_nested_metrics": {
+        "balanced_accuracy": 1.0,
+        "brier_score": 0.00021465444594655314,
+        "discrimination_status": "all_classes_observed",
+        "log_loss": 0.014417684078778997,
+        "mcc": 1.0,
+        "pr_auc_average_precision": 1.0,
+        "prevalence": 0.5151515151515151,
+        "roc_auc": 1.0,
+        "sensitivity": 1.0,
+        "specificity": 1.0
+      },
+      "final_panel_size": 10,
+      "final_nonzero_panel_features": 10,
+      "panel_features_passing_gates": [
+        "YAR071W",
+        "YDR033W",
+        "YDR399W",
+        "YER081W",
+        "YHR136C",
+        "YHR215W",
+        "YML123C",
+        "YOR290C",
+        "YPR149W"
+      ],
+      "full_permutation_p": 0.05,
+      "panel_permutation_p": 0.05,
+      "batch_folds": [],
+      "external": {
+        "full": {
+          "n_samples": 20,
+          "balanced_accuracy": 1.0,
+          "brier_score": 0.00012130000550698431,
+          "discrimination_status": "all_classes_observed",
+          "log_loss": 0.010851018085106757,
+          "mcc": 1.0,
+          "pr_auc_average_precision": 0.9999999999999999,
+          "prevalence": 0.5,
+          "roc_auc": 1.0,
+          "sensitivity": 1.0,
+          "specificity": 1.0
+        },
+        "panel": {
+          "n_samples": 20,
+          "balanced_accuracy": 1.0,
+          "brier_score": 0.0002474693062966966,
+          "discrimination_status": "all_classes_observed",
+          "log_loss": 0.015729730104262644,
+          "mcc": 1.0,
+          "pr_auc_average_precision": 0.9999999999999999,
+          "prevalence": 0.5,
+          "roc_auc": 1.0,
+          "sensitivity": 1.0,
+          "specificity": 1.0
+        }
+      }
+    },
+    "replicated_single_cell": {
+      "n_samples": 136,
+      "n_biological_groups": 136,
+      "n_features": 30172,
+      "gate_blockers": [],
+      "candidate_features": [
+        {
+          "contrast": "systemic lupus erythematosus_vs_normal",
+          "gene_id": "ENSG00000135114"
+        }
+      ],
+      "full_nested_metrics": {
+        "balanced_accuracy": 0.6297995242949371,
+        "brier_score": 0.11468834258823013,
+        "discrimination_status": "all_classes_observed",
+        "log_loss": 0.35182207509190583,
+        "mcc": 0.3650873304005421,
+        "pr_auc_average_precision": 0.972274758695614,
+        "prevalence": 0.8014705882352942,
+        "roc_auc": 0.8871899422358138,
+        "sensitivity": 0.963302752293578,
+        "specificity": 0.2962962962962963
+      },
+      "panel_nested_metrics": {
+        "balanced_accuracy": 0.6529051987767585,
+        "brier_score": 0.10801270908606464,
+        "discrimination_status": "all_classes_observed",
+        "log_loss": 0.34395419797171867,
+        "mcc": 0.4300766981158218,
+        "pr_auc_average_precision": 0.96798431798228,
+        "prevalence": 0.8014705882352942,
+        "roc_auc": 0.8820931022765884,
+        "sensitivity": 0.9724770642201835,
+        "specificity": 0.3333333333333333
+      },
+      "final_panel_size": 3,
+      "final_nonzero_panel_features": 3,
+      "panel_features_passing_gates": [
+        "ENSG00000135114"
+      ],
+      "full_permutation_p": 0.05,
+      "panel_permutation_p": 0.05,
+      "batch_folds": [
+        {
+          "batch": "2.0",
+          "loss_improvement": 0.16210939203408686,
+          "n_test_groups": 116,
+          "n_train_groups": 20,
+          "panel_loss_improvement": 0.04104905600151387,
+          "status": "tested"
+        },
+        {
+          "batch": "3.0",
+          "loss_improvement": 0.14577417292816125,
+          "n_test_groups": 20,
+          "n_train_groups": 116,
+          "panel_loss_improvement": 0.1850159651378106,
+          "status": "tested"
+        }
+      ],
+      "external": {
+        "full": {
+          "n_samples": 96,
+          "balanced_accuracy": 0.6171328671328671,
+          "brier_score": 0.22929113493853417,
+          "discrimination_status": "all_classes_observed",
+          "log_loss": 0.6514982097008518,
+          "mcc": 0.3307240941503918,
+          "pr_auc_average_precision": 0.8836203779233307,
+          "prevalence": 0.5416666666666666,
+          "roc_auc": 0.833041958041958,
+          "sensitivity": 0.9615384615384616,
+          "specificity": 0.2727272727272727
+        },
+        "panel": {
+          "n_samples": 96,
+          "balanced_accuracy": 0.5751748251748252,
+          "brier_score": 0.2537632710240207,
+          "discrimination_status": "all_classes_observed",
+          "log_loss": 0.7194711867937759,
+          "mcc": 0.2122557619174156,
+          "pr_auc_average_precision": 0.802508626730731,
+          "prevalence": 0.5416666666666666,
+          "roc_auc": 0.7469405594405595,
+          "sensitivity": 0.9230769230769231,
+          "specificity": 0.22727272727272727
+        }
+      }
+    },
+    "replicated_cell_distributions_corrected": {
+      "n_samples": 137,
+      "n_biological_groups": 137,
+      "n_features": 35,
+      "gate_blockers": [
+        "cross_batch_performance_failure",
+        "compact_panel_cross_batch_performance_failure"
+      ],
+      "candidate_features": [],
+      "full_nested_metrics": {
+        "balanced_accuracy": 0.7686868686868686,
+        "brier_score": 0.08758507349552917,
+        "discrimination_status": "all_classes_observed",
+        "log_loss": 0.28800190340572934,
+        "mcc": 0.6483948827260559,
+        "pr_auc_average_precision": 0.9869099949006624,
+        "prevalence": 0.8029197080291971,
+        "roc_auc": 0.9454545454545453,
+        "sensitivity": 0.9818181818181818,
+        "specificity": 0.5555555555555556
+      },
+      "panel_nested_metrics": {
+        "balanced_accuracy": 0.7826599326599326,
+        "brier_score": 0.08534788591650205,
+        "discrimination_status": "all_classes_observed",
+        "log_loss": 0.2739849117897347,
+        "mcc": 0.6506608367456891,
+        "pr_auc_average_precision": 0.9865842930642674,
+        "prevalence": 0.8029197080291971,
+        "roc_auc": 0.9434343434343435,
+        "sensitivity": 0.9727272727272728,
+        "specificity": 0.5925925925925926
+      },
+      "final_panel_size": 5,
+      "final_nonzero_panel_features": 5,
+      "panel_features_passing_gates": [],
+      "full_permutation_p": 0.05,
+      "panel_permutation_p": 0.05,
+      "batch_folds": [
+        {
+          "batch": "2.0",
+          "loss_improvement": -0.009665124832549665,
+          "n_test_groups": 116,
+          "n_train_groups": 21,
+          "panel_loss_improvement": -0.0256303923375083,
+          "status": "tested"
+        },
+        {
+          "batch": "3.0",
+          "loss_improvement": -0.037998619680019496,
+          "n_test_groups": 21,
+          "n_train_groups": 116,
+          "panel_loss_improvement": -0.035354685951456855,
+          "status": "tested"
+        }
+      ],
+      "external": {
+        "full": {
+          "n_samples": 96,
+          "balanced_accuracy": 0.6555944055944056,
+          "brier_score": 0.20423108899894302,
+          "discrimination_status": "all_classes_observed",
+          "log_loss": 0.5913115542152326,
+          "mcc": 0.3242027395054863,
+          "pr_auc_average_precision": 0.8543780350155861,
+          "prevalence": 0.5416666666666666,
+          "roc_auc": 0.7884615384615385,
+          "sensitivity": 0.7884615384615384,
+          "specificity": 0.5227272727272727
+        },
+        "panel": {
+          "n_samples": 96,
+          "balanced_accuracy": 0.6634615384615384,
+          "brier_score": 0.2018964728547902,
+          "discrimination_status": "all_classes_observed",
+          "log_loss": 0.5858421321717309,
+          "mcc": 0.3483662411663165,
+          "pr_auc_average_precision": 0.862913094126589,
+          "prevalence": 0.5416666666666666,
+          "roc_auc": 0.8037587412587412,
+          "sensitivity": 0.8269230769230769,
+          "specificity": 0.5
+        }
+      }
+    },
+    "toy": {
+      "n_samples": 80,
+      "n_biological_groups": 80,
+      "n_features": 200,
+      "gate_blockers": [],
+      "candidate_features": [
+        {
+          "contrast": "1_vs_0",
+          "gene_id": "gene_0001"
+        },
+        {
+          "contrast": "1_vs_0",
+          "gene_id": "gene_0003"
+        },
+        {
+          "contrast": "1_vs_0",
+          "gene_id": "gene_0000"
+        },
+        {
+          "contrast": "1_vs_0",
+          "gene_id": "gene_0002"
+        }
+      ],
+      "full_nested_metrics": {
+        "balanced_accuracy": 1.0,
+        "brier_score": 0.00019689208787845408,
+        "discrimination_status": "all_classes_observed",
+        "log_loss": 0.012016359172628718,
+        "mcc": 1.0,
+        "pr_auc_average_precision": 1.0,
+        "prevalence": 0.5,
+        "roc_auc": 1.0,
+        "sensitivity": 1.0,
+        "specificity": 1.0
+      },
+      "panel_nested_metrics": {
+        "balanced_accuracy": 1.0,
+        "brier_score": 0.00019297116827342333,
+        "discrimination_status": "all_classes_observed",
+        "log_loss": 0.012011327132625444,
+        "mcc": 1.0,
+        "pr_auc_average_precision": 1.0,
+        "prevalence": 0.5,
+        "roc_auc": 1.0,
+        "sensitivity": 1.0,
+        "specificity": 1.0
+      },
+      "final_panel_size": 4,
+      "final_nonzero_panel_features": 4,
+      "panel_features_passing_gates": [
+        "gene_0000",
+        "gene_0001",
+        "gene_0002",
+        "gene_0003"
+      ],
+      "full_permutation_p": 0.05,
+      "panel_permutation_p": 0.05,
+      "batch_folds": [],
+      "external": {}
+    }
+  },
+  "coverage": {
+    "covered_lines": 2215,
+    "num_statements": 2457,
+    "percent_covered": 87.10346872220575,
+    "percent_covered_display": "87",
+    "missing_lines": 242,
+    "excluded_lines": 0,
+    "percent_statements_covered": 90.15059015059015,
+    "percent_statements_covered_display": "90",
+    "num_branches": 916,
+    "num_partial_branches": 155,
+    "covered_branches": 723,
+    "missing_branches": 193,
+    "percent_branches_covered": 78.93013100436681,
+    "percent_branches_covered_display": "79"
+  },
+  "tests": {
+    "passed": 152,
+    "warnings": 1,
+    "elapsed_seconds": 197.4,
+    "environment": "installed wheel in a clean Python 3.12.14 venv, outside source tree"
+  },
+  "limitations": [
+    "Same-study holdouts; no independent clinical qualification",
+    "Distribution holdout reused after a synthetic correctness fix; development verification",
+    "Small demonstration resampling grids; operational gates are not gene-level FDR"
+  ]
+}

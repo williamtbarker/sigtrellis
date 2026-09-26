@@ -33,7 +33,13 @@ def pseudobulk(path: Path, config: Config) -> list[Dataset]:
         required = [config.sample_id, config.outcome, *config.covariates]
         required += [
             v
-            for v in (config.group, config.batch, config.cell_type, config.permutation_strata)
+            for v in (
+                config.group,
+                config.batch,
+                config.cell_type,
+                config.permutation_strata,
+                config.time,
+            )
             if v
         ]
         if set(required) - set(obs.columns):

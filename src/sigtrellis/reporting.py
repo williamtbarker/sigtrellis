@@ -21,7 +21,7 @@ from sigtrellis.config import Config
 from sigtrellis.correlation import CorrelationResult
 from sigtrellis.domain import Dataset, FloatArray
 from sigtrellis.metrics import group_weights
-from sigtrellis.preprocessing import Normalizer
+from sigtrellis.preprocessing import descriptive_normalized
 from sigtrellis.validation import ValidationResult
 
 
@@ -47,7 +47,7 @@ def make_figures(
 ) -> list[tuple[str, str]]:
     (output / "figures").mkdir()
     figures: list[tuple[str, str]] = []
-    normalized = Normalizer(config.normalization).fit(data.expression).transform(data.expression)
+    normalized = descriptive_normalized(data, config)
     variable = normalized.var(axis=0) > 1e-12
     if variable.sum() >= 2:
         pc = PCA(n_components=2, svd_solver="full").fit(normalized[:, variable])
@@ -86,7 +86,7 @@ def make_figures(
                 figures,
             )
     top = table.head(20).iloc[::-1]
-    labels = top.gene_id.astype(str) + (
+    labels = (top.feature_label if "feature_label" in top else top.gene_id).astype(str) + (
         " | " + top.contrast.astype(str) if config.outcome_type == "multiclass" else ""
     )
     plt.figure(figsize=(8, max(4, len(top) * 0.25)))
@@ -109,7 +109,7 @@ def make_figures(
         plt.scatter(row[2], i, color="#b04728", s=18)
     plt.yticks(range(len(top)), labels.tolist())
     plt.axvline(0, color="grey", linewidth=0.8)
-    plt.xlabel("Coefficient per training-fold SD of expression")
+    plt.xlabel("Coefficient per training-fold SD of the feature")
     plt.title("Median and interquartile range across subsamples")
     _save(
         output,
@@ -160,28 +160,39 @@ def make_figures(
         plt.xticks(range(len(display)), display.columns.tolist(), rotation=90, fontsize=6)
         plt.yticks(range(len(display)), display.index.tolist(), fontsize=6)
         plt.colorbar(label="Pearson r")
-        plt.title("Descriptive marginal gene correlations")
+        plt.title("Descriptive marginal feature correlations")
         _save(
             output,
             "feature_correlation.png",
-            "Up to 30 candidate genes. Phenotype itself can induce marginal correlation; clusters are not established pathways.",
+            "Up to 30 candidate features. Phenotype itself can induce marginal correlation; clusters are not established pathways.",
             figures,
         )
-    de = table.dropna(subset=["de_log2_fold_change", "de_adjusted_pvalue"])
-    if len(de):
+    de_path = output / "differential_expression.csv"
+    de = pd.read_csv(de_path) if de_path.exists() else pd.DataFrame()
+    de_groups: list[tuple[Any, pd.DataFrame]] = (
+        list(de.groupby(["cell_type", "contrast"], sort=True)) if len(de) else []
+    )
+    for di, ((state, contrast), contrast_table) in enumerate(de_groups):
+        shown = contrast_table.dropna(subset=["de_log2_fold_change", "de_adjusted_pvalue"])
+        if shown.empty:
+            continue
         plt.figure(figsize=(7, 5))
         plt.scatter(
-            de.de_log2_fold_change,
-            -np.log10(np.maximum(de.de_adjusted_pvalue, 1e-300)),
+            shown.de_log2_fold_change,
+            -np.log10(np.maximum(shown.de_adjusted_pvalue, 1e-300)),
             s=6,
             alpha=0.5,
         )
-        plt.xlabel("Count-model log2 fold change")
+        plt.xlabel(
+            "Log2 expression change per outcome unit"
+            if config.outcome_type == "continuous"
+            else "Count-model log2 fold change"
+        )
         plt.ylabel("−log10 adjusted p-value")
-        plt.title("Exploratory full-cohort differential expression")
+        plt.title(f"Exploratory differential expression • {state} • {contrast}")
         _save(
             output,
-            "de_volcano.png",
+            "de_volcano.png" if di == 0 else f"de_volcano_{di}.png",
             "Same-cohort supporting evidence, not independent biological validation; unshrunk effects.",
             figures,
         )
@@ -299,10 +310,11 @@ def generate_report(
 ) -> None:
     figures = make_figures(data, y, config, output, metrics, table, correlation, validation, path)
     count = int(table.loc[table.passes_robustness_gates, "gene_id"].nunique())
+    noun = "features" if data.features else "genes"
     title = f"SigTrellis • {data.cell_type or 'bulk RNA-seq'}"
     summary = (
         f"{len(data.expression)} samples from {qc['n_biological_groups']} biological groups; "
-        f"{data.expression.shape[1]} input genes. {count} genes pass the predefined candidate-association gates."
+        f"{data.expression.shape[1]} input {noun}. {count} {noun} pass the predefined candidate-association gates."
     )
     limits = [
         "Statistical selection is predictive association. Biological validation, mechanism, causality, clinical utility, and biomarker qualification are not established.",
@@ -315,12 +327,24 @@ def generate_report(
         "External preprocessing, annotation, target-derived features, near-duplicate specimens, and unrecorded confounding cannot be ruled out by automated checks.",
         "No automatic imputation or batch correction is applied. Declared covariates are jointly regularized predictors, not unpenalized adjustment terms.",
     ]
+    if config.imputation == "median":
+        limits[-1] = (
+            "Missing feature values are imputed from training-fold medians only. Missing cell populations can reflect recovery bias. No global batch correction is applied."
+        )
+    if config.panel_validation:
+        limits[1] = (
+            "Compact-panel selection and refitting are repeated within outer training folds. Panel metrics evaluate that discovery policy; the final frozen panel still needs untouched external evaluation."
+        )
+    if data.features:
+        limits.append(
+            "State proportions reflect relative sampled-cell recovery. Cell-level variances include measurement noise. Program/state definitions are declared in advance; supplied annotations can carry upstream bias."
+        )
     simple_metrics = {
         k: v for k, v in metrics["out_of_fold"].items() if not isinstance(v, (dict, list))
     }
     preview = table[
         [
-            "gene_id",
+            "feature_label" if data.features else "gene_id",
             "contrast",
             "selection_frequency",
             "sign_consistency",
@@ -361,6 +385,24 @@ def generate_report(
         "## Diagnostics",
         "",
     ]
+    if config.panel_validation:
+        panel_metrics = {
+            k: v
+            for k, v in metrics["panel"]["out_of_fold"].items()
+            if not isinstance(v, (dict, list))
+        }
+        md.extend(
+            [
+                "## Compact-panel discovery",
+                "",
+                json.dumps(panel_metrics, indent=2),
+                "",
+                f"Final panel: {metrics['panel']['final_panel_size']} features. Nested panel permutation p: {metrics['panel']['permutation_pvalue']}.",
+                "",
+                "Selection occurs inside each outer training fold. This evaluates the panel-discovery policy; external validation uses the frozen panel_state.json.",
+                "",
+            ]
+        )
     md.extend(f"![{caption}](figures/{name})\n\n{caption}\n" for name, caption in figures)
     (output / "report.md").write_text("\n".join(md) + "\n")
     style = "body{font:16px/1.55 system-ui;max-width:1100px;margin:40px auto;padding:0 24px;color:#1f2937}h1,h2{color:#164e63}table{border-collapse:collapse;font-size:13px}td,th{padding:6px;border-bottom:1px solid #ddd;text-align:left}figure{margin:24px 0}img{max-width:100%;height:auto}figcaption{color:#475569}pre{white-space:pre-wrap;background:#f1f5f9;padding:16px}.notice{border-left:5px solid #b45309;padding:10px 18px;background:#fffbeb}"
@@ -381,6 +423,14 @@ def generate_report(
         preview.to_html(index=False, escape=True, float_format=lambda x: f"{x:.3g}"),
         "<h2>Diagnostics</h2>",
     ]
+    if config.panel_validation:
+        content.extend(
+            [
+                "<h2>Compact-panel discovery</h2>",
+                pd.DataFrame([panel_metrics]).to_html(index=False, escape=True),
+                f"<p>Final panel: {metrics['panel']['final_panel_size']} features; nested permutation p: {metrics['panel']['permutation_pvalue']}. Selection was repeated inside the outer training folds.</p>",
+            ]
+        )
     for name, caption in figures:
         encoded = base64.b64encode((output / "figures" / name).read_bytes()).decode()
         content.append(

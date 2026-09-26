@@ -1,0 +1,58 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0
+rootdir: /workspace/scratch/e5221b18d874/final_clean
+configfile: pyproject.toml
+testpaths: tests
+plugins: cov-7.1.0, zarr-3.4.0
+collected 152 items
+
+tests/test_expanded_workflows.py .................                       [ 11%]
+tests/test_inputs.py .................................                   [ 32%]
+tests/test_integration.py ........                                       [ 38%]
+tests/test_leakage.py ..............                                     [ 47%]
+tests/test_preprocessing.py .......                                      [ 51%]
+tests/test_release_expansion.py ...................                      [ 64%]
+tests/test_review_regressions.py ...........................             [ 82%]
+tests/test_science.py .....................                              [ 96%]
+tests/test_singlecell.py ......                                          [100%]
+
+=============================== warnings summary ===============================
+tests/test_release_expansion.py::test_abundance_does_not_change_when_the_same_cell_distribution_is_repeated
+  /workspace/scratch/e5221b18d874/final_clean/.venv/lib/python3.12/site-packages/anndata/_core/anndata.py:1882: UserWarning: Observation names are not unique. To make them unique, call `.obs_names_make_unique`.
+    utils.warn_names_duplicates("obs")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.12.14-final-0 _______________
+
+Name                                                             Stmts   Miss Branch BrPart  Cover   Missing
+------------------------------------------------------------------------------------------------------------
+.venv/lib/python3.12/site-packages/sigtrellis/__init__.py            1      0      0      0   100%
+.venv/lib/python3.12/site-packages/sigtrellis/__main__.py            2      2      0      0     0%   1-3
+.venv/lib/python3.12/site-packages/sigtrellis/cell_features.py     198     15     70     17    88%   59->51, 129, 155, 157, 165, 187, 191, 195, 212, 218, 242, 263, 267, 286, 319->309, 327, 336
+.venv/lib/python3.12/site-packages/sigtrellis/cli.py               119     23     34      7    78%   111-122, 130-140, 154-167, 170-173, 177, 181-185, 188-189
+.venv/lib/python3.12/site-packages/sigtrellis/config.py            214     23    136     24    87%   118, 121, 144, 148, 152, 163, 169, 186, 206, 245, 251, 257, 259, 279, 281, 284, 286, 292, 301, 311->320, 319, 325, 340, 346
+.venv/lib/python3.12/site-packages/sigtrellis/correlation.py        58      3     14      3    92%   37, 40, 54
+.venv/lib/python3.12/site-packages/sigtrellis/de.py                 78      7     30      4    88%   24-25, 27, 52-53, 74, 79
+.venv/lib/python3.12/site-packages/sigtrellis/domain.py             65      0     10      0   100%
+.venv/lib/python3.12/site-packages/sigtrellis/evidence.py           67     32     16      0    49%   53-98
+.venv/lib/python3.12/site-packages/sigtrellis/integrity.py          13      0      4      0   100%
+.venv/lib/python3.12/site-packages/sigtrellis/io.py                 50      7     22      8    79%   24, 48->50, 53, 58, 63, 66, 70, 73
+.venv/lib/python3.12/site-packages/sigtrellis/matrix_import.py      45      6     20      7    80%   34, 36, 38, 43, 50, 56, 59->61
+.venv/lib/python3.12/site-packages/sigtrellis/metrics.py            39      0     10      0   100%
+.venv/lib/python3.12/site-packages/sigtrellis/modeling.py          108      4     26      2    96%   187-189, 210, 213->216
+.venv/lib/python3.12/site-packages/sigtrellis/panel.py              35      0      2      0   100%
+.venv/lib/python3.12/site-packages/sigtrellis/prediction.py        107     20     52     14    76%   26, 45, 59, 61-63, 86, 89, 91, 99, 105-112, 115, 128, 131, 146, 151
+.venv/lib/python3.12/site-packages/sigtrellis/preprocessing.py     150      8     56      8    92%   31, 53, 56, 63, 66, 72, 152, 162
+.venv/lib/python3.12/site-packages/sigtrellis/qc.py                165     35    120     23    75%   22, 26, 31, 34, 38, 47, 51, 53, 60, 68, 76, 95, 106, 118-120, 122, 128, 154-159, 161, 162->151, 166-167, 175->178, 190-198
+.venv/lib/python3.12/site-packages/sigtrellis/reporting.py         203      9     42      3    94%   52->88, 156->170, 176-193
+.venv/lib/python3.12/site-packages/sigtrellis/simulate.py           93      5     36      3    94%   20, 130-134
+.venv/lib/python3.12/site-packages/sigtrellis/singlecell.py         95      6     34      6    91%   25, 32, 46, 50, 74, 81
+.venv/lib/python3.12/site-packages/sigtrellis/splits.py            121     13     62     12    86%   21, 35, 43, 49, 65, 76, 98, 140->135, 142-144, 155, 157, 171
+.venv/lib/python3.12/site-packages/sigtrellis/stability.py          73      0     16      0   100%
+.venv/lib/python3.12/site-packages/sigtrellis/validation.py        104      4     30      4    94%   119, 205, 210, 235
+.venv/lib/python3.12/site-packages/sigtrellis/workflow.py          254     20     74     10    90%   42, 60, 71, 74-77, 133->135, 136, 140, 151, 244-245, 297-299, 347-352
+------------------------------------------------------------------------------------------------------------
+TOTAL                                                             2457    242    916    155    87%
+Coverage JSON written to file /workspace/scratch/e5221b18d874/review_work/sigtrellis/release_evidence/v0.2.0/coverage.json
+================== 152 passed, 1 warning in 197.40s (0:03:17) ==================

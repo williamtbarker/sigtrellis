@@ -4,6 +4,15 @@ YAML, TOML and JSON contain the same flat keys. CLI values override file values.
 
 The complete typed contract and defaults are in `src/sigtrellis/config.py`. Use `examples/biological_study.yaml` as a study-design starting point, not as a universal validated protocol. Choose all scientific settings before inspecting held-out performance.
 
+Compact-panel permutation validation is expensive: every null run repeats the
+panel-selection policy, including subsample tuning. Its dominant fit count grows
+approximately as `(permutations + 1) × outer_folds × repeats × stability_resamples
+× inner_folds × grid_size`. The larger example configurations can require hours
+on one CPU; cell-line study templates with larger budgets can take longer. Use a
+small exploratory run to verify inputs, then fix the scientific budget before
+evaluating the reserved cohort. The core limits numerical threads for reproducibility;
+it does not silently substitute a cheaper, differently defined null test.
+
 | Area | Main keys | Contract |
 |---|---|---|
 | Outcome | `outcome`, `outcome_type`, `positive_class` | Binary, multiclass or continuous; reference order is saved. Binary positive class can be explicit. |
@@ -11,7 +20,7 @@ The complete typed contract and defaults are in `src/sigtrellis/config.py`. Use 
 | Nuisance | `batch`, `covariates` | Batch is a diagnostic/DE term. Numeric or categorical covariates are jointly penalized predictors. Unseen categories fail. |
 | Scale | `input_scale`, `normalization` | Counts use logCPM or frozen median ratio. Declared transformed expression uses `none`; upstream validity remains the user's responsibility. |
 | Screening | `candidate_method`, `max_features`, `min_count`, `min_prevalence` | All fitted decisions occur in each training fold. `association` ranks with F statistics; it is not count-DE inference. |
-| DE | `candidate_method: deseq2`, `supporting_de`, `de_fdr`, `de_pair_group` | Binary raw-count NB contrasts only. Optional paired donor fixed effects must be identifiable. Supporting DE is post-evaluation same-cohort evidence. |
+| DE | `candidate_method: deseq2`, `supporting_de`, `de_fdr`, `de_pair_group` | Binary, continuous or reference-class multiclass raw-count NB contrasts. Paired donor fixed effects must be identifiable. Supporting DE is same-cohort evidence. |
 | Validation | `outer_folds`, `inner_folds`, `repeats`, `cv_strategy` | Grouped nesting; optional leave-group/batch-out outer evaluation. Batch holdouts purge overlapping donors. |
 | Model | `strengths`, `l1_ratios`, `tuning_rule`, `max_iter`, `tolerance` | Grid over mean-loss lambda and L1 mixing. One-SE is a sparsity heuristic, not a confidence bound. Nonconvergence is recorded. |
 | Prediction | `decision_threshold`, `coefficient_tolerance` | Predeclared binary threshold and numerical definition of nonzero. No threshold optimization on outer tests. |
@@ -23,6 +32,12 @@ The complete typed contract and defaults are in `src/sigtrellis/config.py`. Use 
 | Cell QC | `cell_min_counts`, `cell_min_genes`, `mitochondrial_prefix`, `max_mito_fraction` | Fixed thresholds. No organism-specific mitochondrial prefix is assumed. |
 | Memory | `chunk_size`, `max_dense_mb` | Cell read chunk and dense pseudobulk-accumulator guard. These do not cap every solver/report allocation. |
 | Reproducibility | `seed` | Seeds all stochastic splits/subsamples/solvers; actual groups, fits and source hashes are recorded. |
+| Imputation | `imputation`, `max_missing_fraction` | Optional training-only medians for transformed expression/features; missing raw counts are rejected. |
+| Compact panel | `panel_validation`, `panel_max_features` | Stability-based selection/refit inside every outer training, permutation and batch boundary. |
+| Temporal | `cv_strategy: temporal`, `time`, `temporal_gap`, `temporal_train_fraction` | Numeric group-aware forward splitting; training ends before testing begins, including inner CV. One forward repeat only. |
+| Cell representation | `single_cell_mode`, `cell_states`, `feature_blocks`, `feature_genes` | Pseudobulk or predefined sample-local distributions. State/gene identities must be explicit. |
+| Programs | `programs`, `program_thresholds` | Maps names to fixed gene lists; activation fractions require a predeclared threshold per program. |
+| Cellular perturbations | `cell_resamples`, `cell_fraction` | Distribution mode only. Perturbed matrices must come from the adapter; every perturbation requires at least one biological-group stability resample. |
 
 ## Paired experiments
 
@@ -34,7 +49,7 @@ Identifiers are exact strings: `001`, `01` and `1` denote different units, and a
 
 ## Compact panels and independent performance
 
-The candidate table is a discovery product assembled after procedure validation. To evaluate a chosen assay panel, freeze the panel and protocol and evaluate on new donors/cohorts; do not report the earlier procedure CV score as that panel's measured accuracy. `sigtrellis external` evaluates the already fitted final model, which can include more genes than the gated candidate list. It does not silently refit a compact panel.
+The candidate table is a discovery product. With `panel_validation: true`, panel discovery is independently evaluated inside outer folds, and the final panel is saved in `panel_state.json`. Use `sigtrellis external --model-kind panel` on untouched specimens to evaluate that fixed panel. Without the flag, external evaluation uses the full model. Neither path silently reselects features. `final_panel_size` is the retained predictor set; `final_nonzero_feature_count` records actual nonzero weights. Count normalization still needs the full gene universe, so a targeted assay needs additional measurement validation.
 
 ## Multiple types and normalization perturbations
 
