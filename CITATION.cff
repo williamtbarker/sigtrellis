@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "Please cite SigTrellis and the statistical methods and datasets used in your analysis."
+title: "SigTrellis: donor-aware, leakage-audited transcriptomic signature discovery"
+type: software
+version: 0.1.0
+date-released: 2026-09-26
+authors:
+  - family-names: Barker
+    given-names: Will
+license: MIT
+keywords:
+  - RNA-seq
+  - pseudobulk
+  - elastic net
+  - stability selection
+  - nested cross-validation
+  - biomarker candidates
+

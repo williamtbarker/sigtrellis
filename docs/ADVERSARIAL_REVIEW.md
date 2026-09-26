@@ -1,0 +1,35 @@
+# Adversarial scientific review — version 0.1.0
+
+This review checks implemented failure modes and states what remains outside the evidence. Executed numerical results and software checks are in `../VALIDATION.md`.
+
+| Attack/question | Implemented defense and evidence | Residual limitation |
+|---|---|---|
+| Global phenotype-informed screening before CV | A boundary spy matches every supervised fit to audited training IDs; a deliberately unsafe high-dimensional noise screen produces inflated AUC while the fold-local procedure does not. DE is called separately for inner and outer training sets. | A user may supply an already globally filtered matrix. This cannot be reconstructed from that matrix. |
+| Normalization/scaling sees test data | Frozen median-ratio references, training-local prevalence/variance/screens/scales/categories, exact frozen-prediction parity tests. LogCPM uses only each sample and its predeclared full gene universe. | An upstream integrated or transformed matrix can already leak. Compositional assumptions still apply. |
+| Cells split across donors | Count aggregation precedes modeling; all split/subsample APIs preserve group IDs. Many cells with two donors are rejected. | Wrong or undisclosed donor identities cannot be inferred reliably. |
+| Paired DE ignores repeated biology | Repeated groups require an explicit fixed-effect paired design; rank and residual degrees of freedom are checked. | Fixed effects do not replace a mixed model and cannot identify donor-constant condition effects alongside donor intercepts. |
+| Batch masquerades as phenotype | Perfect confounding blocks positive gates. Leave-batch-out analysis purges overlapping donors and reports impossible designs. Batch-specific planted features fail cross-batch improvement. | Partial or missing confounding can remain. No algorithm resolves perfectly confounded experimental factors. |
+| Identifiers encode phenotype | IDs, group, outcome and batch cannot be predictor columns. Renaming IDs leaves numerical preprocessing unchanged. Metadata target copies are rejected. Potentially modelable exact expression target copies block claims pending provenance review. | Arbitrary concealed encodings and biological correlates cannot be distinguished automatically. A flagged gene is not an accusation of leakage. |
+| Duplicate or renamed specimens cross evaluation boundaries | Exact expression duplicates across declared groups fail input QC. Frozen external validation rejects overlapping sample/group IDs and exact training-profile copies under new IDs. | Near duplicates, relatives, and technical transformations of a copied profile require external provenance review. |
+| Pure noise appears stable | Negative controls rerun the whole nested procedure. Failed predictive improvement/permutation evidence blocks a panel even when individual noise genes recur. | A finite-level global test can still reject by chance; it is not a gene-level FDR guarantee. |
+| Correlated predictors substitute for one another | A constructed alternating-member experiment yields individual frequency 0.5 and group frequency 1.0. Complete-linkage correlation and co/exclusive-selection diagnostics are separate from individual gates. | Marginal correlation can be induced by phenotype/batch; group size affects any-member frequency. No pathway claim is made. |
+| Final coefficients reverse direction | Gates require final nonzero coefficients and agreement with selected-resample, outer-fold and available batch-holdout dominant signs. | Conditional coefficients can change with correlated predictors; sign stability is not causal direction. |
+| Multiclass/continuous support is only advertised | Solver/frozen-state parity, synthetic predictive tests, and complete report tests cover both. | Their count-DE contrasts are deliberately unsupported. |
+| Tuning manufactures favorable performance | All tuning is inside nested grouped CV. Proper loss chooses hyperparameters; complementary metrics and baseline improvement are reported. A sparsity one-SE rule is labeled heuristic. | Trying many complete pipelines against these results still creates analyst-level selection bias. |
+| Permutations ignore the design | Group labels or exchangeable within-group labels move together; strata are tested; label-dependent CV splits are rebuilt. P-value uses the finite-sample +1 convention. | Exchangeability is a design assumption, not something software can guarantee. Few donors give few possible distinct labelings. |
+| Covariate-only performance is mistaken for gene evidence | Separately tuned covariate baseline; global-only permutation status cannot pass conditional gene gates. Held-out unseen categories are rejected. | Conditional permutation and unpenalized predictive nuisance adjustment are deferred. |
+| Procedure performance is assigned to a post-hoc panel | Reports prominently distinguish procedure CV, the final fitted model, the consensus discovery panel, biological validation and causal claims. | A panel-specific nested selection protocol or frozen independent panel cohort is still needed. |
+| Artifacts cannot be audited | Input/source/version hashes, numeric frozen model, fit/split logs, retained/excluded genes, permutation labels/tuning, sampled groups, coefficients and output hashes. Failed runs preserve status/error where execution has started. | Reproducibility is version/hardware bounded; hashes cannot establish that upstream data provenance is correct. |
+
+## Material corrections made during review
+
+- Replaced an overly strict binary-expression heuristic after the public airway data showed that a low-count biological gene can coincidentally match treatment labels. Low-count genes unable to pass the declared count filter are not treated as target encodings; potentially modelable exact copies trigger a review gate rather than outcome-aware global removal.
+- Rejected unseen categorical covariate levels instead of silently mapping them to the reference encoding.
+- Added expression fingerprints to external evaluation so renamed exact copies cannot pass ID-only checks.
+- Required agreement between final coefficient directions, stability directions, outer-fold directions and available batch directions.
+- Preserved complete permutation fitting/tuning evidence and blocked positive gates when a tuning candidate fails solver convergence.
+- Applied a family threshold when analyzing multiple cell types, and made the distinction from gene-level error control explicit.
+
+## Publication judgment
+
+The implementation is suitable for a public **research software** release with the evidence and limitations attached. It is not yet a clinically validated biomarker platform, a universal confounder-adjusted inference engine, or an externally validated compact-panel assay. Independent statistical review, larger cross-cohort benchmarks, DE agreement checks against established R implementations, and prospective panel evaluation would strengthen future releases. No claim of proprietary-project provenance is made.

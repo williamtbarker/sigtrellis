@@ -1,0 +1,35 @@
+# Starting parameters, not a validated study design or universal biological thresholds.
+outcome: phenotype
+outcome_type: binary
+sample_id: sample_id
+group: donor
+# positive_class: responder
+# batch: sequencing_batch
+covariates: []
+input_scale: counts
+normalization: logcpm
+candidate_method: variance
+max_features: 1000
+min_count: 5
+min_prevalence: 0.2
+outer_folds: 5
+inner_folds: 3
+repeats: 3
+cv_strategy: grouped
+tuning_rule: one_se
+strengths: [0.005, 0.01, 0.05, 0.2]
+l1_ratios: [0.2, 0.5, 0.9]
+stability_resamples: 100
+stability_fraction: 0.75
+stability_normalizations: [logcpm, median_ratio]
+selection_threshold: 0.8
+sign_threshold: 0.9
+outer_selection_threshold: 0.5
+permutations: 999
+permutation_scheme: group
+# permutation_strata: sequencing_batch
+permutation_alpha: 0.05
+min_groups_gate: 20
+supporting_de: false
+seed: 42
+

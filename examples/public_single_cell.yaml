@@ -1,0 +1,25 @@
+outcome: condition
+positive_class: stim
+outcome_type: binary
+sample_id: sample
+group: patient
+batch: condition_library
+cell_type: cell_type
+cell_type_value: CD14+ Monocytes
+min_cells: 20
+normalization: logcpm
+candidate_method: variance
+max_features: 500
+outer_folds: 4
+inner_folds: 2
+strengths: [0.02, 0.1]
+l1_ratios: [0.5, 0.9]
+stability_resamples: 12
+stability_fraction: 0.75
+stability_normalizations: [logcpm, median_ratio]
+permutations: 19
+permutation_scheme: within_group
+supporting_de: true
+de_pair_group: true
+seed: 42
+

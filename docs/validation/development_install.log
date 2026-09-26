@@ -1,0 +1,81 @@
+Defaulting to user installation because normal site-packages is not writeable
+Obtaining file:///workspace/scratch/e5221b18d874/sigtrellis
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Checking if build backend supports build_editable: started
+  Checking if build backend supports build_editable: finished with status 'done'
+  Getting requirements to build editable: started
+  Getting requirements to build editable: finished with status 'done'
+  Installing backend dependencies: started
+  Installing backend dependencies: finished with status 'done'
+  Preparing editable metadata (pyproject.toml): started
+  Preparing editable metadata (pyproject.toml): finished with status 'done'
+Requirement already satisfied: anndata<0.13,>=0.11 in /root/.local/lib/python3.12/site-packages (from sigtrellis==0.1.0) (0.12.19)
+Requirement already satisfied: h5py<4,>=3.11 in /root/.local/lib/python3.12/site-packages (from sigtrellis==0.1.0) (3.16.0)
+Requirement already satisfied: matplotlib<4,>=3.9 in /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages (from sigtrellis==0.1.0) (3.10.8)
+Requirement already satisfied: numpy<3,>=2.0 in /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages (from sigtrellis==0.1.0) (2.3.5)
+Requirement already satisfied: pandas<3,>=2.2 in /root/.local/lib/python3.12/site-packages (from sigtrellis==0.1.0) (2.3.3)
+Requirement already satisfied: pyyaml<7,>=6 in /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages (from sigtrellis==0.1.0) (6.0.3)
+Requirement already satisfied: scikit-learn<1.10,>=1.8 in /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages (from sigtrellis==0.1.0) (1.8.0)
+Requirement already satisfied: scipy<2,>=1.14 in /root/.local/lib/python3.12/site-packages (from sigtrellis==0.1.0) (1.18.1)
+Requirement already satisfied: threadpoolctl<4,>=3.5 in /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages (from sigtrellis==0.1.0) (3.6.0)
+Requirement already satisfied: pydeseq2<0.6,>=0.5.4 in /root/.local/lib/python3.12/site-packages (from sigtrellis==0.1.0) (0.5.4)
+Requirement already satisfied: rdata<2,>=1.0 in /root/.local/lib/python3.12/site-packages (from sigtrellis==0.1.0) (1.1.0)
+Requirement already satisfied: build in /root/.local/lib/python3.12/site-packages (from sigtrellis==0.1.0) (1.6.1)
+Requirement already satisfied: mypy>=1.15 in /root/.local/lib/python3.12/site-packages (from sigtrellis==0.1.0) (2.3.1)
+Requirement already satisfied: pandas-stubs in /root/.local/lib/python3.12/site-packages (from sigtrellis==0.1.0) (3.0.5.260914)
+Requirement already satisfied: pytest-cov>=6 in /root/.local/lib/python3.12/site-packages (from sigtrellis==0.1.0) (7.1.0)
+Requirement already satisfied: pytest>=8 in /root/.local/lib/python3.12/site-packages (from sigtrellis==0.1.0) (9.1.1)
+Requirement already satisfied: ruff>=0.11 in /root/.local/lib/python3.12/site-packages (from sigtrellis==0.1.0) (0.16.9)
+Requirement already satisfied: types-pyyaml in /root/.local/lib/python3.12/site-packages (from sigtrellis==0.1.0) (6.0.12.20260906)
+Requirement already satisfied: array-api-compat>=1.7.1 in /root/.local/lib/python3.12/site-packages (from anndata<0.13,>=0.11->sigtrellis==0.1.0) (1.15.0)
+Requirement already satisfied: legacy-api-wrap in /root/.local/lib/python3.12/site-packages (from anndata<0.13,>=0.11->sigtrellis==0.1.0) (1.5)
+Requirement already satisfied: natsort in /root/.local/lib/python3.12/site-packages (from anndata<0.13,>=0.11->sigtrellis==0.1.0) (8.4.0)
+Requirement already satisfied: packaging>=24.2 in /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages (from anndata<0.13,>=0.11->sigtrellis==0.1.0) (26.3)
+Requirement already satisfied: scverse-misc>=0.0.3 in /root/.local/lib/python3.12/site-packages (from anndata<0.13,>=0.11->sigtrellis==0.1.0) (0.1.6)
+Requirement already satisfied: zarr!=3.0.*,>=2.18.7 in /root/.local/lib/python3.12/site-packages (from anndata<0.13,>=0.11->sigtrellis==0.1.0) (3.4.0)
+Requirement already satisfied: contourpy>=1.0.1 in /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages (from matplotlib<4,>=3.9->sigtrellis==0.1.0) (1.3.3)
+Requirement already satisfied: cycler>=0.10 in /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages (from matplotlib<4,>=3.9->sigtrellis==0.1.0) (0.12.1)
+Requirement already satisfied: fonttools>=4.22.0 in /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages (from matplotlib<4,>=3.9->sigtrellis==0.1.0) (4.61.1)
+Requirement already satisfied: kiwisolver>=1.3.1 in /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages (from matplotlib<4,>=3.9->sigtrellis==0.1.0) (1.4.9)
+Requirement already satisfied: pillow>=8 in /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages (from matplotlib<4,>=3.9->sigtrellis==0.1.0) (12.3.0)
+Requirement already satisfied: pyparsing>=3 in /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages (from matplotlib<4,>=3.9->sigtrellis==0.1.0) (3.3.2)
+Requirement already satisfied: python-dateutil>=2.7 in /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages (from matplotlib<4,>=3.9->sigtrellis==0.1.0) (2.9.0.post0)
+Requirement already satisfied: pytz>=2020.1 in /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages (from pandas<3,>=2.2->sigtrellis==0.1.0) (2026.3.post1)
+Requirement already satisfied: tzdata>=2022.7 in /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages (from pandas<3,>=2.2->sigtrellis==0.1.0) (2026.4)
+Requirement already satisfied: formulaic-contrasts>=0.2.0 in /root/.local/lib/python3.12/site-packages (from pydeseq2<0.6,>=0.5.4->sigtrellis==0.1.0) (1.0.0)
+Requirement already satisfied: formulaic>=1.0.2 in /root/.local/lib/python3.12/site-packages (from pydeseq2<0.6,>=0.5.4->sigtrellis==0.1.0) (1.2.2)
+Requirement already satisfied: xarray in /root/.local/lib/python3.12/site-packages (from rdata<2,>=1.0->sigtrellis==0.1.0) (2026.7.0)
+Requirement already satisfied: typing_extensions>4.4 in /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages (from rdata<2,>=1.0->sigtrellis==0.1.0) (4.16.0)
+Requirement already satisfied: joblib>=1.3.0 in /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages (from scikit-learn<1.10,>=1.8->sigtrellis==0.1.0) (1.5.3)
+Requirement already satisfied: interface-meta>=1.2.0 in /root/.local/lib/python3.12/site-packages (from formulaic>=1.0.2->pydeseq2<0.6,>=0.5.4->sigtrellis==0.1.0) (2.0.1)
+Requirement already satisfied: narwhals>=1.17 in /root/.local/lib/python3.12/site-packages (from formulaic>=1.0.2->pydeseq2<0.6,>=0.5.4->sigtrellis==0.1.0) (2.26.0)
+Requirement already satisfied: wrapt>=1.0 in /root/.local/lib/python3.12/site-packages (from formulaic>=1.0.2->pydeseq2<0.6,>=0.5.4->sigtrellis==0.1.0) (2.4.1)
+Requirement already satisfied: session-info in /root/.local/lib/python3.12/site-packages (from formulaic-contrasts>=0.2.0->pydeseq2<0.6,>=0.5.4->sigtrellis==0.1.0) (1.0.1)
+Requirement already satisfied: mypy_extensions>=1.0.0 in /root/.local/lib/python3.12/site-packages (from mypy>=1.15->sigtrellis==0.1.0) (1.1.0)
+Requirement already satisfied: pathspec>=1.0.0 in /root/.local/lib/python3.12/site-packages (from mypy>=1.15->sigtrellis==0.1.0) (1.1.1)
+Requirement already satisfied: librt>=0.13.0 in /root/.local/lib/python3.12/site-packages (from mypy>=1.15->sigtrellis==0.1.0) (0.15.0)
+Requirement already satisfied: ast-serialize<1.0.0,>=0.6.0 in /root/.local/lib/python3.12/site-packages (from mypy>=1.15->sigtrellis==0.1.0) (0.11.2)
+Requirement already satisfied: iniconfig>=1.0.1 in /root/.local/lib/python3.12/site-packages (from pytest>=8->sigtrellis==0.1.0) (2.3.0)
+Requirement already satisfied: pluggy<2,>=1.5 in /root/.local/lib/python3.12/site-packages (from pytest>=8->sigtrellis==0.1.0) (1.6.0)
+Requirement already satisfied: pygments>=2.7.2 in /root/.local/lib/python3.12/site-packages (from pytest>=8->sigtrellis==0.1.0) (2.21.0)
+Requirement already satisfied: coverage>=7.10.6 in /root/.local/lib/python3.12/site-packages (from coverage[toml]>=7.10.6->pytest-cov>=6->sigtrellis==0.1.0) (7.16.1)
+Requirement already satisfied: six>=1.5 in /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages (from python-dateutil>=2.7->matplotlib<4,>=3.9->sigtrellis==0.1.0) (1.17.0)
+Requirement already satisfied: session-info2 in /root/.local/lib/python3.12/site-packages (from scverse-misc>=0.0.3->anndata<0.13,>=0.11->sigtrellis==0.1.0) (0.4.2)
+Requirement already satisfied: donfig>=0.8 in /root/.local/lib/python3.12/site-packages (from zarr!=3.0.*,>=2.18.7->anndata<0.13,>=0.11->sigtrellis==0.1.0) (0.8.1.post1)
+Requirement already satisfied: google-crc32c>=1.5 in /root/.local/lib/python3.12/site-packages (from zarr!=3.0.*,>=2.18.7->anndata<0.13,>=0.11->sigtrellis==0.1.0) (1.9.0)
+Requirement already satisfied: msgspec>=0.19 in /root/.local/lib/python3.12/site-packages (from zarr!=3.0.*,>=2.18.7->anndata<0.13,>=0.11->sigtrellis==0.1.0) (0.21.1)
+Requirement already satisfied: numcodecs>=0.14 in /root/.local/lib/python3.12/site-packages (from zarr!=3.0.*,>=2.18.7->anndata<0.13,>=0.11->sigtrellis==0.1.0) (0.17.0)
+Requirement already satisfied: pyproject_hooks in /root/.local/lib/python3.12/site-packages (from build->sigtrellis==0.1.0) (1.3.3)
+Requirement already satisfied: stdlib_list in /root/.local/lib/python3.12/site-packages (from session-info->formulaic-contrasts>=0.2.0->pydeseq2<0.6,>=0.5.4->sigtrellis==0.1.0) (0.12.0)
+Building wheels for collected packages: sigtrellis
+  Building editable for sigtrellis (pyproject.toml): started
+  Building editable for sigtrellis (pyproject.toml): finished with status 'done'
+  Created wheel for sigtrellis: filename=sigtrellis-0.1.0-py3-none-any.whl size=7781 sha256=cbaf5ea365933d70bfa84678d3b1d1ee466ca4eae7eb72c6dcbcf896c1ad6bde
+  Stored in directory: /tmp/pip-ephem-wheel-cache-9ll9w_mm/wheels/5c/49/b9/d100b5ed3c31357de0a205ca2d92851a92221026e6050e71cc
+Successfully built sigtrellis
+Installing collected packages: sigtrellis
+  WARNING: The script sigtrellis is installed in '/root/.local/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+Successfully installed sigtrellis-0.1.0
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
