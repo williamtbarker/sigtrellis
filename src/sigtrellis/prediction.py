@@ -114,7 +114,18 @@ def external_validate(
         if expression is None or metadata is None:
             raise ValueError("Supply both expression and metadata")
         data = load_bulk(expression, metadata, config, orientation)
-    validate_dataset(data, config)
+    validate_dataset(data, replace(config, cell_resamples=0))
+    contract = manifest.get("cell_feature_contract")
+    if single_cell is not None and config.single_cell_mode == "distribution":
+        if not contract or contract != data.upstream_qc.get("cell_feature_contract"):
+            raise ValueError(
+                "External cell normalization/identity contract differs or is absent; "
+                "retain the full training RNA gene universe and refit legacy distribution runs"
+            )
+    elif contract:
+        raise ValueError(
+            "A native distribution model requires native single-cell input for external validation"
+        )
     train_metadata = pd.read_csv(
         run / "sample_metadata.csv",
         dtype={config.sample_id: str, config.group or config.sample_id: str},

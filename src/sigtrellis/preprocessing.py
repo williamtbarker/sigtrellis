@@ -12,7 +12,7 @@ from sklearn.preprocessing import StandardScaler
 
 from sigtrellis.config import Config
 from sigtrellis.de import differential_expression
-from sigtrellis.domain import Audit, Dataset, FloatArray, array_hash
+from sigtrellis.domain import Audit, Dataset, FloatArray, array_hash, identifier_hash
 from sigtrellis.qc import group_values
 
 
@@ -187,7 +187,6 @@ class Prepared:
             self.scaler = StandardScaler().fit(normalized[:, self.selected])
         self.covariates = CovariateEncoder(self.config.covariates).fit(data.metadata)
         reference = self.normalizer.reference
-        retained_set = set(self.genes)
         audit.fits.append(
             {
                 "context": context,
@@ -207,7 +206,9 @@ class Prepared:
                 "n_after_supervised_screen": int(eligible.sum()),
                 "n_retained_features": len(self.genes),
                 "retained_genes": self.genes,
-                "removed_genes": [g for g in self.all_genes if g not in retained_set],
+                "removed_gene_count": len(self.all_genes) - len(self.genes),
+                "feature_universe_sha256": identifier_hash(self.all_genes),
+                "filtering_note": "Excluded features are the complement of retained_genes in feature_universe.json",
                 "gene_scale_hash": array_hash(np.asarray(self.scaler.scale_, dtype=float))
                 if self.scaler is not None
                 else None,

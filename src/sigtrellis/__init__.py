@@ -1,3 +1,3 @@
 """SigTrellis: empirical evidence for candidate transcriptomic signatures."""
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"

@@ -28,7 +28,7 @@ it does not silently substitute a cheaper, differently defined null test.
 | Gates | `selection_threshold`, `sign_threshold`, `outer_selection_threshold`, `min_groups_gate` | Operational candidate-association gates; no feature-level false-discovery guarantee. Final and resampled coefficient directions must agree. |
 | Null control | `permutations`, `permutation_scheme`, `permutation_strata`, `permutation_alpha` | Full nested reruns. Group shuffling for constant donor outcomes; within-group shuffling for exchangeable repeated conditions. Strata are only for group shuffling. |
 | Correlation | `correlation_threshold`, `correlation_max_features` | Bounded complete-linkage groups from absolute marginal correlation, after evaluation. |
-| Cells | `cell_type`, `cell_type_value`, `layer`, `min_cells` | Sum raw counts within specimen/type; omit a type value to run every supplied type separately. |
+| Cells | `cell_type`, `cell_type_value`, `layer`, `min_cells` | Pseudobulk uses type/value; native distribution uses declared `cell_states` and rejects `cell_type_value`. Raw counts are required by both adapters. |
 | Cell QC | `cell_min_counts`, `cell_min_genes`, `mitochondrial_prefix`, `max_mito_fraction` | Fixed thresholds. No organism-specific mitochondrial prefix is assumed. |
 | Memory | `chunk_size`, `max_dense_mb` | Cell read chunk and dense pseudobulk-accumulator guard. These do not cap every solver/report allocation. |
 | Reproducibility | `seed` | Seeds all stochastic splits/subsamples/solvers; actual groups, fits and source hashes are recorded. |
@@ -37,6 +37,7 @@ it does not silently substitute a cheaper, differently defined null test.
 | Temporal | `cv_strategy: temporal`, `time`, `temporal_gap`, `temporal_train_fraction` | Numeric group-aware forward splitting; training ends before testing begins, including inner CV. One forward repeat only. |
 | Cell representation | `single_cell_mode`, `cell_states`, `feature_blocks`, `feature_genes` | Pseudobulk or predefined sample-local distributions. State/gene identities must be explicit. |
 | Programs | `programs`, `program_thresholds` | Maps names to fixed gene lists; activation fractions require a predeclared threshold per program. |
+| Joint/tail cell features | `gene_pairs`, `gene_thresholds` | Prespecified pairs for within-cell Pearson correlation and fixed positive log1p(CP10K) thresholds for high-expression fractions. Duplicate/self pairs fail. Program correlations use all pairs of declared programs. |
 | Cellular perturbations | `cell_resamples`, `cell_fraction` | Distribution mode only. Perturbed matrices must come from the adapter; every perturbation requires at least one biological-group stability resample. |
 
 ## Paired experiments

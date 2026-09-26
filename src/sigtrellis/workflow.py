@@ -16,7 +16,16 @@ from threadpoolctl import threadpool_limits
 from sigtrellis import __version__
 from sigtrellis.config import Config
 from sigtrellis.correlation import correlation_diagnostics
-from sigtrellis.domain import Audit, Dataset, FloatArray, Split, array_hash, file_hash, write_json
+from sigtrellis.domain import (
+    Audit,
+    Dataset,
+    FloatArray,
+    Split,
+    array_hash,
+    file_hash,
+    identifier_hash,
+    write_json,
+)
 from sigtrellis.evidence import (
     annotate_features,
     public_table,
@@ -227,6 +236,7 @@ def run_analysis(data: Dataset, config: Config, output: Path) -> dict[str, Any]:
         "thread_limit": 1,
         "cell_type": data.cell_type,
         "sample_cell_hashes": data.upstream_qc.get("sample_cell_hashes", {}),
+        "cell_feature_contract": data.upstream_qc.get("cell_feature_contract"),
         "software_versions": {},
     }
     for name in (
@@ -248,6 +258,11 @@ def run_analysis(data: Dataset, config: Config, output: Path) -> dict[str, Any]:
     }
     write_json(output / "run_manifest.json", manifest)
     write_json(output / "configuration.json", config.to_dict())
+    universe = data.expression.columns.tolist()
+    write_json(
+        output / "feature_universe.json",
+        {"features": universe, "sha256": identifier_hash(universe)},
+    )
     try:
         with threadpool_limits(limits=1):
             result = _run(data, config, output, audit, manifest)
@@ -349,7 +364,10 @@ def _run(
             evidence = de.reset_index().set_index(["gene_id", "contrast", "cell_type"])
             keys = list(zip(table.source_gene_id, table.contrast, table.cell_type, strict=True))
             for column in ("de_log2_fold_change", "de_adjusted_pvalue", "de_effect_unit"):
-                table[column] = [evidence[column].get(key, np.nan) for key in keys]
+                table[column] = [
+                    evidence[column].get(key, np.nan) if kind != "gene_correlation" else np.nan
+                    for key, kind in zip(keys, table.feature_kind, strict=True)
+                ]
     correlation = correlation_diagnostics(
         data, stability.coefficients, table, config, contrasts=contrasts
     )

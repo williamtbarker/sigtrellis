@@ -1,0 +1,164 @@
+{
+  "status": "verified",
+  "installed_modules_verified": 28,
+  "runs": {
+    "public_bulk": {
+      "output_files_verified": 39,
+      "input_files_verified": 2,
+      "execution_source_locations": {
+        "__init__.py": "src/sigtrellis/__init__.py",
+        "__main__.py": "src/sigtrellis/__main__.py",
+        "cell_features.py": "src/sigtrellis/cell_features.py",
+        "cell_identity.py": "src/sigtrellis/cell_identity.py",
+        "cell_moments.py": "release_evidence/v0.3.0/execution_sources/cell_moments_before_vectorization.py",
+        "cell_reporting.py": "src/sigtrellis/cell_reporting.py",
+        "cli.py": "src/sigtrellis/cli.py",
+        "config.py": "src/sigtrellis/config.py",
+        "correlation.py": "src/sigtrellis/correlation.py",
+        "de.py": "src/sigtrellis/de.py",
+        "domain.py": "src/sigtrellis/domain.py",
+        "evidence.py": "src/sigtrellis/evidence.py",
+        "integrity.py": "src/sigtrellis/integrity.py",
+        "io.py": "src/sigtrellis/io.py",
+        "matrix_import.py": "src/sigtrellis/matrix_import.py",
+        "metrics.py": "src/sigtrellis/metrics.py",
+        "modeling.py": "src/sigtrellis/modeling.py",
+        "panel.py": "src/sigtrellis/panel.py",
+        "prediction.py": "src/sigtrellis/prediction.py",
+        "preprocessing.py": "src/sigtrellis/preprocessing.py",
+        "qc.py": "src/sigtrellis/qc.py",
+        "reporting.py": "src/sigtrellis/reporting.py",
+        "simulate.py": "src/sigtrellis/simulate.py",
+        "singlecell.py": "src/sigtrellis/singlecell.py",
+        "splits.py": "src/sigtrellis/splits.py",
+        "stability.py": "src/sigtrellis/stability.py",
+        "validation.py": "src/sigtrellis/validation.py",
+        "workflow.py": "src/sigtrellis/workflow.py"
+      },
+      "external_artifact_hashes": {
+        "public_bulk_external": {
+          "external_predictions.csv": "d05e846a450d3020c1f745bdcdabe70175e871d3bccf1ce86020f08cb069dcc9",
+          "external_metrics.json": "b990ced8d018b15de59f9c7570646d4b9f9ea06cd3491311643df9c6e8ec9c35"
+        },
+        "public_bulk_panel_external": {
+          "external_predictions.csv": "52261438ca6b78672177c48058c39a07f0d94d263c6c371a69b0fac1e758777f",
+          "external_metrics.json": "744593972670922b90ac4b7d9f976890b37db7c3dbffb1e69abb43a8889d8247"
+        }
+      }
+    },
+    "public_single_cell_native": {
+      "output_files_verified": 41,
+      "input_files_verified": 1,
+      "execution_source_locations": {
+        "__init__.py": "src/sigtrellis/__init__.py",
+        "__main__.py": "src/sigtrellis/__main__.py",
+        "cell_features.py": "src/sigtrellis/cell_features.py",
+        "cell_identity.py": "src/sigtrellis/cell_identity.py",
+        "cell_moments.py": "src/sigtrellis/cell_moments.py",
+        "cell_reporting.py": "src/sigtrellis/cell_reporting.py",
+        "cli.py": "src/sigtrellis/cli.py",
+        "config.py": "src/sigtrellis/config.py",
+        "correlation.py": "src/sigtrellis/correlation.py",
+        "de.py": "src/sigtrellis/de.py",
+        "domain.py": "src/sigtrellis/domain.py",
+        "evidence.py": "src/sigtrellis/evidence.py",
+        "integrity.py": "src/sigtrellis/integrity.py",
+        "io.py": "src/sigtrellis/io.py",
+        "matrix_import.py": "src/sigtrellis/matrix_import.py",
+        "metrics.py": "src/sigtrellis/metrics.py",
+        "modeling.py": "src/sigtrellis/modeling.py",
+        "panel.py": "src/sigtrellis/panel.py",
+        "prediction.py": "src/sigtrellis/prediction.py",
+        "preprocessing.py": "src/sigtrellis/preprocessing.py",
+        "qc.py": "src/sigtrellis/qc.py",
+        "reporting.py": "src/sigtrellis/reporting.py",
+        "simulate.py": "src/sigtrellis/simulate.py",
+        "singlecell.py": "src/sigtrellis/singlecell.py",
+        "splits.py": "src/sigtrellis/splits.py",
+        "stability.py": "src/sigtrellis/stability.py",
+        "validation.py": "src/sigtrellis/validation.py",
+        "workflow.py": "src/sigtrellis/workflow.py"
+      },
+      "external_artifact_hashes": {
+        "public_single_cell_native_external": {
+          "external_predictions.csv": "e3e93e29950ad0378da2fb500c887809ddc169b941188a273c1386acb9567f0b",
+          "external_metrics.json": "98e1d6990c1b40e9fab95774952a3b658817b3fca39005ea8214b345044782d9"
+        },
+        "public_single_cell_native_panel_external": {
+          "external_predictions.csv": "2fb1bd1c41187540902313716c1df956e32e2d96d46842f40e7af55d37d0527a",
+          "external_metrics.json": "43a8a280224138520c678717173cdd154aa6a6ca29f9efa819375b74a76d5b72"
+        }
+      }
+    },
+    "native_smoke": {
+      "output_files_verified": 39,
+      "input_files_verified": 1,
+      "execution_source_locations": {
+        "__init__.py": "src/sigtrellis/__init__.py",
+        "__main__.py": "src/sigtrellis/__main__.py",
+        "cell_features.py": "src/sigtrellis/cell_features.py",
+        "cell_identity.py": "src/sigtrellis/cell_identity.py",
+        "cell_moments.py": "release_evidence/v0.3.0/execution_sources/cell_moments_before_vectorization.py",
+        "cell_reporting.py": "src/sigtrellis/cell_reporting.py",
+        "cli.py": "src/sigtrellis/cli.py",
+        "config.py": "src/sigtrellis/config.py",
+        "correlation.py": "src/sigtrellis/correlation.py",
+        "de.py": "src/sigtrellis/de.py",
+        "domain.py": "src/sigtrellis/domain.py",
+        "evidence.py": "src/sigtrellis/evidence.py",
+        "integrity.py": "src/sigtrellis/integrity.py",
+        "io.py": "src/sigtrellis/io.py",
+        "matrix_import.py": "src/sigtrellis/matrix_import.py",
+        "metrics.py": "src/sigtrellis/metrics.py",
+        "modeling.py": "src/sigtrellis/modeling.py",
+        "panel.py": "src/sigtrellis/panel.py",
+        "prediction.py": "src/sigtrellis/prediction.py",
+        "preprocessing.py": "src/sigtrellis/preprocessing.py",
+        "qc.py": "src/sigtrellis/qc.py",
+        "reporting.py": "src/sigtrellis/reporting.py",
+        "simulate.py": "src/sigtrellis/simulate.py",
+        "singlecell.py": "src/sigtrellis/singlecell.py",
+        "splits.py": "src/sigtrellis/splits.py",
+        "stability.py": "src/sigtrellis/stability.py",
+        "validation.py": "src/sigtrellis/validation.py",
+        "workflow.py": "src/sigtrellis/workflow.py"
+      },
+      "external_artifact_hashes": {}
+    },
+    "toy": {
+      "output_files_verified": 36,
+      "input_files_verified": 2,
+      "execution_source_locations": {
+        "__init__.py": "src/sigtrellis/__init__.py",
+        "__main__.py": "src/sigtrellis/__main__.py",
+        "cell_features.py": "src/sigtrellis/cell_features.py",
+        "cell_identity.py": "src/sigtrellis/cell_identity.py",
+        "cell_moments.py": "release_evidence/v0.3.0/execution_sources/cell_moments_before_vectorization.py",
+        "cell_reporting.py": "src/sigtrellis/cell_reporting.py",
+        "cli.py": "src/sigtrellis/cli.py",
+        "config.py": "src/sigtrellis/config.py",
+        "correlation.py": "src/sigtrellis/correlation.py",
+        "de.py": "src/sigtrellis/de.py",
+        "domain.py": "src/sigtrellis/domain.py",
+        "evidence.py": "src/sigtrellis/evidence.py",
+        "integrity.py": "src/sigtrellis/integrity.py",
+        "io.py": "src/sigtrellis/io.py",
+        "matrix_import.py": "src/sigtrellis/matrix_import.py",
+        "metrics.py": "src/sigtrellis/metrics.py",
+        "modeling.py": "src/sigtrellis/modeling.py",
+        "panel.py": "src/sigtrellis/panel.py",
+        "prediction.py": "src/sigtrellis/prediction.py",
+        "preprocessing.py": "src/sigtrellis/preprocessing.py",
+        "qc.py": "src/sigtrellis/qc.py",
+        "reporting.py": "src/sigtrellis/reporting.py",
+        "simulate.py": "src/sigtrellis/simulate.py",
+        "singlecell.py": "src/sigtrellis/singlecell.py",
+        "splits.py": "src/sigtrellis/splits.py",
+        "stability.py": "src/sigtrellis/stability.py",
+        "validation.py": "src/sigtrellis/validation.py",
+        "workflow.py": "src/sigtrellis/workflow.py"
+      },
+      "external_artifact_hashes": {}
+    }
+  }
+}

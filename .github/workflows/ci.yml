@@ -31,4 +31,5 @@ jobs:
           cd /tmp
           /tmp/sigtrellis-wheel/bin/sigtrellis simulate --output ci-toy --samples 24 --features 30
           /tmp/sigtrellis-wheel/bin/sigtrellis bulk --expression ci-toy/counts.tsv --metadata ci-toy/metadata.tsv --config ci-toy/config.yaml --permutations 0 --stability-resamples 2 --output ci-results
-
+          /tmp/sigtrellis-wheel/bin/sigtrellis simulate --modality single-cell --output ci-cells --samples 24 --features 30
+          /tmp/sigtrellis-wheel/bin/sigtrellis single-cell --input ci-cells/experiment.h5ad --config "$GITHUB_WORKSPACE/examples/single_cell_native.yaml" --permutations 0 --stability-resamples 3 --output ci-cell-results

@@ -1,0 +1,26 @@
+# Transparent starting representation, without summed-count pseudobulk.
+# Choose genes, gene pairs, cell states and thresholds BEFORE held-out evaluation.
+outcome: phenotype
+outcome_type: binary
+sample_id: sample_id
+group: donor
+single_cell_mode: distribution
+input_scale: features
+normalization: none
+imputation: median
+feature_blocks: [gene_mean, gene_detection, gene_variance, gene_tail]
+gene_thresholds: [1.0, 2.0, 3.0]
+min_cells: 10
+candidate_method: association
+max_features: 200
+outer_folds: 3
+inner_folds: 2
+strengths: [0.02, 0.08]
+l1_ratios: [0.5, 0.9]
+stability_resamples: 9
+cell_resamples: 2
+cell_fraction: 0.75
+panel_validation: true
+panel_max_features: 10
+permutations: 19
+seed: 2026

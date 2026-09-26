@@ -1,134 +1,121 @@
-# SigTrellis 0.2.0 release guide
+# SigTrellis 0.3.0 release guide
 
-The package is ready for public review as general-purpose **research software**.
-It discovers candidate associations for a supplied phenotype across independent
-cultures or donors. It cannot guarantee a valid biomarker from every experimental
-design. Nothing has been pushed to GitHub or uploaded to PyPI by this preparation.
+This release supports bulk RNA-seq and a native single-cell distribution workflow
+that does not sum cells into pseudobulk. It is a general-purpose research tool for
+candidate phenotype-associated signatures. It is not a pretrained universal
+biomarker classifier, a clinical assay, or a causal discovery method.
 
-## How elastic net finds a candidate
+## What the single-cell model learns
 
-Imagine measuring thousands of genes in independently grown cultures, some resistant
-and some sensitive. The model predicts that label by assigning each gene a weight.
-It pays a penalty for complexity: one part pushes unnecessary weights to zero;
-another restrains large weights and helps handle overlapping information. Genes
-with remaining weights become candidate predictors. The weight's direction describes
-an association within this model, not a causal effect.
+The model can ask whether phenotype relates to a cell state's abundance, a gene's
+mean/detection/variability, rare high-expression cells, predefined program
+activity, or genes/programs varying together within the same cells. Each specimen
+contributes one interpretable feature vector. Related specimens stay together in
+all validation splits. Individual cells improve the measurement of that vector;
+they do not become extra independent donors.
 
-SigTrellis repeatedly changes the training cultures, retunes the model, and tests
-predictions on cultures it did not train on. A useful candidate should recur with
-consistent direction, help predict unseen samples and survive appropriate batch
-and negative-control checks. Correlated genes may substitute for each other, so
-the report also tracks their group. Laboratory experiments and independent cohorts
-provide additional evidence that a coefficient alone cannot establish.
+Elastic net learns a weight for each feature. Its penalty shrinks weak weights
+toward zero while accommodating overlapping predictors. A nonzero weight is only
+an initial association. Nested testing, biological-group resampling, cell
+perturbations, negative controls and batch checks determine how much confidence
+the evidence supports. Correlated groups and substitutions are reported alongside
+individual feature frequencies.
 
-## Repository contents
+## Repository and archive structure
 
 | Path | Purpose |
 |---|---|
-| `README.md`, `RESEARCH.md`, `ARCHITECTURE.md` | Entry point, primary-source rationale, design |
-| `VALIDATION.md`, `LIMITATIONS.md` | Measured execution and scientific boundaries |
-| `src/sigtrellis/` | 25 typed modules plus `py.typed`; no notebook-only logic |
-| `tests/` | Unit, integration, scientific and leakage-adversarial tests |
-| `examples/` | Public/synthetic preparation, culture configurations, runnable studies |
-| `docs/` | Cell-line/single-cell guides, exact commands, source terms, review and verification |
-| `.github/workflows/`, `Dockerfile` | CI and local container build configuration |
-| `pyproject.toml`, `LICENSE`, `CITATION.cff`, `CHANGELOG.md` | Installation, MIT, citation and history |
-| `dist/` | Built 0.2.0 wheel and source distribution in the archive |
-| `release_evidence/` | Reports and exact execution source snapshots in the archive; ignored by Git |
-| `sigtrellis-history.bundle` | Local Git history in the archive |
+| `src/sigtrellis/` | 28 typed production modules: adapters, cell moments/identity, preprocessing, models, splits, stability, panels, DE, external prediction and reporting |
+| `tests/` | Unit, integration, synthetic and adversarial controls; exact coupling benchmark recorder |
+| `examples/` | Generic configurations, pinned public preparation and scientific benchmark commands |
+| `docs/SINGLE_CELL.md` | Exact feature definitions, units, assumptions and missing-value behavior |
+| `docs/REVIEW_0.3.0.md` | Five verified previous-release defects, fixes, new capabilities and remaining risks |
+| `docs/validation/v0.3.0/` | Compact current execution logs, metrics, dependencies, coverage and provenance checks |
+| `README.md`, `RESEARCH.md`, `ARCHITECTURE.md` | Installation, methodological sources and implementation boundaries |
+| `VALIDATION.md`, `LIMITATIONS.md` | Measured results and interpretation limits |
+| `.github/workflows/`, `Dockerfile`, `pyproject.toml` | Local packaging and configured CI; remote CI/Docker execution is not claimed |
+| `LICENSE`, `CITATION.cff`, `CHANGELOG.md` | MIT source license, attribution and release history |
+| `release_evidence/` | Full generated reports and numerical/audit artifacts, included in the archive but ignored by Git |
+| `dist/` | Built 0.3.0 wheel and source distribution |
+| `sigtrellis-history.bundle` | Local commit/tag history for reconstruction; no remote push performed |
+| `RELEASE_INVENTORY.json`, `SHA256SUMS.txt` | Archive inventory and per-file hashes |
 
-Raw public downloads, virtual environments and caches are excluded.
+Large raw data, environments and caches are excluded. Earlier reports retain their
+original version labels. Source commits include compact evidence, not raw studies
+or large generated results. The archive can be unpacked directly, or its Git
+bundle can be cloned to preserve history before copying desired evidence files.
 
-## Architecture and methods
+## Validation boundary
 
-Modality-specific adapters produce a typed specimen-level dataset. Bulk keeps the
-supplied gene matrix. Single-cell either sums counts per specimen/state or computes
-fixed state abundance, gene detection/variability and predefined program distribution
-features. Cells do not become phenotype replicates. Biological groups control splits
-and group weighting.
+The adapters perform only fixed, specimen-local transformations. Inner training
+folds own candidate screening, normalization references where applicable,
+imputation, scaling and model tuning. Outer folds hold out entire biological
+groups. Compact-panel selection repeats inside those boundaries and has its own
+permutation/batch evaluation. Frozen external models never reselect features or
+refit transformations. The native adapter checks both the predictor dictionary
+and full RNA normalization universe.
 
-The shared engine nests learned preprocessing and optional DE/association screening
-inside grouped CV. Binary/multinomial logistic elastic net uses SAGA; continuous
-outcomes use elastic-net regression. Both regularization and L1 mixing are tuned
-on inner proper loss. Group resampling, measurement perturbations and retuning
-characterize selection/sign/rank stability. Compact-panel selection repeats inside
-each outer training set and has its own predictive, permutation and batch evaluation.
+Count DE uses optional PyDESeq2 with explicit design/rank checks. It is either a
+training-fold screen for raw-count models or descriptive supporting evidence.
+Native distribution features are not interpreted as DESeq2 counts. Observed
+within-cell correlations/variances are not technical-noise-deconvolved statistics.
 
-PyDESeq2 supplies binary, continuous and reference-class multiclass count contrasts
-with identifiable fixed covariates/pairing. Full-data DE is supporting/exploratory;
-it never prefilters reported CV globally. Correlation/substitution diagnostics track
-shared signal. Manifests and frozen numeric states preserve the fitted contract.
+## Reproduce
 
-## Measured validation
-
-The clean installed-wheel suite passes **152 tests**, with 87.10% branch-aware
-coverage. Ruff and strict mypy pass. The installed toy recovers all four planted
-genes. Controls include pure noise, confounding, duplicates, supervised-screen
-leakage, annotation leakage and unequal single-cell capture depth.
-
-| Public compact panel | Held-out data | AUC | Specificity at 0.5 | Interpretation |
-|---|---|---:|---:|---|
-| Yeast, 10 genes | 20 cultures | 1.000 | 1.000 | Strong same-study genotype contrast; no cross-lab claim |
-| Monocytes, 3 genes | 96 donors | 0.747 | 0.227 | Poor specificity and probability transfer |
-| Cell-state/program distributions, 5 features | 96 donors | 0.804 | 0.500 | Cross-batch gates fail; no fully supported candidates |
-
-The distribution holdout was reused after a synthetic correctness fix and is
-engineering verification. All holdouts are within their source studies. See
-`VALIDATION.md` for full/panel metrics, gates, source versions and limitations.
-
-## Exact commands
-
-Run inside the unpacked repository. Python 3.12 is the verified runtime.
+From the unpacked source directory, with Python 3.12:
 
 ```bash
-python3 -m venv .venv
+python -m venv .venv
 source .venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install -c docs/validation/v0.2.0/runtime_constraints.txt '.[de,demo]'
-
-sigtrellis simulate --output data/toy --samples 80 --features 200 --seed 7
-sigtrellis bulk --expression data/toy/counts.tsv --metadata data/toy/metadata.tsv \
-  --config data/toy/config.yaml --panel-validation --output results/toy
+python -m pip install -c docs/validation/v0.3.0/runtime_constraints.txt '.[dev,de,demo]'
+python -m pytest
+python -m ruff check .
+python -m ruff format --check .
+python -m mypy src
+python tests/record_cell_benchmarks.py --output results/cell_benchmarks.json
+python examples/validate_science.py --output results/scientific_benchmarks.json
 
 python examples/prepare_replicated.py --dataset yeast --output data/public/yeast
 sigtrellis bulk --expression data/public/yeast/train/counts.tsv.gz \
   --metadata data/public/yeast/train/metadata.tsv \
-  --config examples/replicated_bulk.yaml --output results/replicated_bulk
-sigtrellis external --run results/replicated_bulk --model-kind panel \
+  --config examples/replicated_bulk.yaml --output results/bulk
+sigtrellis external --run results/bulk --model-kind panel \
   --expression data/public/yeast/external/counts.tsv.gz \
-  --metadata data/public/yeast/external/metadata.tsv \
-  --output results/replicated_bulk_panel_external
+  --metadata data/public/yeast/external/metadata.tsv --output results/bulk_panel_external
 
-# Explicit 12.2 GB download; alternatively pass --source /path/to/source.h5ad.
-python examples/prepare_replicated.py --dataset lupus --download --output data/public/lupus
-sigtrellis single-cell --input data/public/lupus/train.h5ad \
-  --config examples/replicated_single_cell.yaml --output results/replicated_single_cell
-sigtrellis external --run results/replicated_single_cell --model-kind panel \
-  --input data/public/lupus/external.h5ad --output results/replicated_single_cell_panel_external
-sigtrellis single-cell --input data/public/lupus/train.h5ad \
-  --config examples/replicated_cell_distributions.yaml --output results/replicated_cell_distributions
-sigtrellis external --run results/replicated_cell_distributions --model-kind panel \
-  --input data/public/lupus/external.h5ad --output results/replicated_cell_distributions_panel_external
+python examples/prepare_replicated.py --dataset lupus --download \
+  --cells-per-sample 0 --output data/public/lupus_all_cells
+sigtrellis single-cell --input data/public/lupus_all_cells/train.h5ad \
+  --config examples/replicated_single_cell_native.yaml --output results/cell_native
+sigtrellis external --run results/cell_native --model-kind panel \
+  --input data/public/lupus_all_cells/external.h5ad --output results/cell_panel_external
 ```
 
-Full-model external commands are in `docs/PUBLIC_DEMOS.md`. Use fresh output
-directories. Nested/permutation analyses take substantial CPU time; the configuration
-guide explains the fitting budget. Open each `report.html`. For a new cell line,
-edit `examples/cell_line.yaml` and follow `docs/CELL_LINE_GUIDE.md`.
+Omit `--model-kind panel` and use a new output directory to evaluate a full model.
+Use `--source /path/to/source.h5ad` instead of `--download` to reuse the pinned
+12.2 GB single-cell source. Both public workflows need substantial CPU time for
+nested selection and permutations. Do not choose scientific settings by repeatedly
+optimizing performance on the reserved cohort. See `docs/PUBLIC_DEMOS.md` for
+source terms, specimen selection and complete commands.
 
-## Limits and remaining research
+## Evidence and publication recommendation
 
-Operational gates are not formal feature-level error control. Penalized covariates
-do not provide conditional gene significance. Cell variability includes technical
-noise, state abundance is compositional, and annotations can carry upstream bias.
-A compact RNA-seq predictor still needs its full gene universe for normalization;
-it is not automatically a small targeted assay. Dataset terms remain separate from MIT.
+See `VALIDATION.md` and its machine-readable summary for current tests, all public
+metrics, gate failures and exact execution scope. The public single-cell rerun
+uses 526,899 training cells and 375,261 reserved cells from 137 and 96 donors.
+It is development validation on a previously examined same-study holdout, not
+independent prospective confirmation. No universal improvement over pseudobulk
+is claimed from these demonstrations.
 
-Research priorities are independent cross-laboratory cohorts, calibration under
-prevalence shift, conditional/correlated-group inference, deconvolved cell variability,
-frozen assignment of learned states and targeted-assay measurement. Cell-level mixed
-models, neighborhood inference and neural bag models are distinct future backends.
+Publication as transparent research software is appropriate when accompanied by
+these evidence records and limitations. Claims of clinical qualification,
+causality, guaranteed transfer across arbitrary systems, or formal gene-level
+stability error control are not supported. A valid input study can correctly yield
+no candidate that passes all robustness gates.
 
-Publication as transparent research software is justified by the implemented
-boundaries and executed evidence. Clinical qualification, causal interpretation
-and guaranteed biomarker recovery from every arbitrary cell line are not justified.
+Remaining research questions include technical-noise-aware cell variability,
+conditional inference with nuisance covariates, learned cell encoders with frozen
+external assignment, comparison with correctly nested neural multiple-instance
+models, independent cross-laboratory transfer, calibration under prevalence shift,
+and targeted-assay measurement/normalization. These are distinct research tasks;
+the current fixed distribution embedding does not claim to implement them.

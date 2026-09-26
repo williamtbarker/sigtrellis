@@ -1,0 +1,2 @@
+train {'samples': 137, 'donors': 137, 'cells': 526899, 'classes': {'systemic lupus erythematosus': 110, 'normal': 27}, 'sha256': 'd2efe23d98a8844ec01ad3274db021ac3c06721a0fb13e04914ecfb691411d7f'}
+external {'samples': 96, 'donors': 96, 'cells': 375261, 'classes': {'systemic lupus erythematosus': 52, 'normal': 44}, 'sha256': '332f0dbfe7f55e3d0e5a6b49aa4b418effa7092b66b1f4fa4c3d0c9f60db5786'}

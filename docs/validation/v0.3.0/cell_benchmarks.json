@@ -1,0 +1,832 @@
+{
+  "biological_samples": 48,
+  "cells_per_sample": 80,
+  "fixture": "tests/test_cell_adversarial.py:joint_fixture",
+  "records": {
+    "count_pseudobulk": {
+      "configuration": {
+        "assess_batches": true,
+        "batch": null,
+        "candidate_method": "variance",
+        "cell_fraction": 0.75,
+        "cell_min_counts": 1,
+        "cell_min_genes": 1,
+        "cell_resamples": 0,
+        "cell_states": [
+          "A"
+        ],
+        "cell_type": "state",
+        "cell_type_value": "A",
+        "chunk_size": 2048,
+        "coefficient_tolerance": 1e-07,
+        "correlation_max_features": 100,
+        "correlation_threshold": 0.85,
+        "covariates": [],
+        "cv_strategy": "grouped",
+        "de_fdr": 0.1,
+        "de_pair_group": false,
+        "decision_threshold": 0.5,
+        "feature_blocks": [
+          "gene_correlation",
+          "program_correlation"
+        ],
+        "feature_genes": [
+          "g0",
+          "g1"
+        ],
+        "gene_pairs": [
+          [
+            "g0",
+            "g1"
+          ],
+          [
+            "g2",
+            "g3"
+          ]
+        ],
+        "gene_thresholds": [
+          1.0,
+          2.0,
+          3.0
+        ],
+        "group": "donor",
+        "imputation": "reject",
+        "inner_folds": 2,
+        "input_scale": "counts",
+        "l1_ratios": [
+          0.5
+        ],
+        "layer": null,
+        "max_dense_mb": 2048,
+        "max_features": 30,
+        "max_iter": 10000,
+        "max_missing_fraction": 0.5,
+        "max_mito_fraction": 1.0,
+        "min_cells": 5,
+        "min_count": 5.0,
+        "min_groups_gate": 20,
+        "min_prevalence": 0.2,
+        "mitochondrial_prefix": null,
+        "normalization": "logcpm",
+        "outcome": "phenotype",
+        "outcome_type": "binary",
+        "outer_folds": 3,
+        "outer_selection_threshold": 0.5,
+        "panel_max_features": 20,
+        "panel_validation": false,
+        "permutation_alpha": 0.05,
+        "permutation_scheme": "group",
+        "permutation_strata": null,
+        "permutations": 0,
+        "positive_class": null,
+        "program_thresholds": {},
+        "programs": {
+          "first": [
+            "g0"
+          ],
+          "second": [
+            "g1"
+          ]
+        },
+        "repeats": 1,
+        "sample_id": "sample_id",
+        "seed": 42,
+        "selection_threshold": 0.8,
+        "sign_threshold": 0.9,
+        "single_cell_mode": "pseudobulk",
+        "stability_fraction": 0.75,
+        "stability_normalizations": [],
+        "stability_resamples": 4,
+        "strengths": [
+          0.03,
+          0.12
+        ],
+        "supporting_de": false,
+        "temporal_gap": 0.0,
+        "temporal_train_fraction": 0.5,
+        "time": null,
+        "tolerance": 0.0001,
+        "tuning_rule": "one_se"
+      },
+      "metrics": {
+        "baseline": {
+          "balanced_accuracy": 0.5,
+          "brier_score": 0.25,
+          "calibration": [
+            {
+              "mean_probability": 0.5,
+              "n_rows": 48,
+              "observed_fraction": 0.5,
+              "weight": 48.0
+            }
+          ],
+          "discrimination_status": "all_classes_observed",
+          "log_loss": 0.6931471805599453,
+          "mcc": 0.0,
+          "pr_auc_average_precision": 0.5,
+          "prevalence": 0.5,
+          "roc_auc": 0.5,
+          "sensitivity": 1.0,
+          "specificity": 0.0
+        },
+        "baseline_loss": 0.6931471805599453,
+        "estimand": "Equal weight per biological group; prediction of a sample from an unseen group",
+        "folds": [
+          {
+            "baseline_loss": 0.6931471805599453,
+            "context": "evaluation/repeat:0/outer:0",
+            "metrics": {
+              "balanced_accuracy": 0.5625,
+              "brier_score": 0.3207356076176244,
+              "calibration": [
+                {
+                  "mean_probability": 0.33092757659517186,
+                  "n_rows": 4,
+                  "observed_fraction": 0.5,
+                  "weight": 4.0
+                },
+                {
+                  "mean_probability": 0.5070581547429459,
+                  "n_rows": 6,
+                  "observed_fraction": 0.6666666666666666,
+                  "weight": 6.0
+                },
+                {
+                  "mean_probability": 0.6861127228523692,
+                  "n_rows": 5,
+                  "observed_fraction": 0.4,
+                  "weight": 5.0
+                },
+                {
+                  "mean_probability": 0.8575035594918771,
+                  "n_rows": 1,
+                  "observed_fraction": 0.0,
+                  "weight": 1.0
+                }
+              ],
+              "discrimination_status": "all_classes_observed",
+              "log_loss": 0.8631306627234856,
+              "mcc": 0.1259881576697424,
+              "pr_auc_average_precision": 0.460515873015873,
+              "prevalence": 0.5,
+              "roc_auc": 0.390625,
+              "sensitivity": 0.625,
+              "specificity": 0.5
+            },
+            "model_loss": 0.8631306627234856,
+            "n_test_groups": 16,
+            "parameters": {
+              "l1_ratio": 0.5,
+              "strength": 0.12
+            }
+          },
+          {
+            "baseline_loss": 0.6931471805599453,
+            "context": "evaluation/repeat:0/outer:1",
+            "metrics": {
+              "balanced_accuracy": 0.5,
+              "brier_score": 0.2812074072241377,
+              "calibration": [
+                {
+                  "mean_probability": 0.289128170932837,
+                  "n_rows": 7,
+                  "observed_fraction": 0.5714285714285714,
+                  "weight": 7.0
+                },
+                {
+                  "mean_probability": 0.49488164612780006,
+                  "n_rows": 5,
+                  "observed_fraction": 0.4,
+                  "weight": 5.0
+                },
+                {
+                  "mean_probability": 0.6598599443153113,
+                  "n_rows": 4,
+                  "observed_fraction": 0.5,
+                  "weight": 4.0
+                }
+              ],
+              "discrimination_status": "all_classes_observed",
+              "log_loss": 0.7632504767686982,
+              "mcc": 0.0,
+              "pr_auc_average_precision": 0.6189102564102564,
+              "prevalence": 0.5,
+              "roc_auc": 0.421875,
+              "sensitivity": 0.375,
+              "specificity": 0.625
+            },
+            "model_loss": 0.7632504767686982,
+            "n_test_groups": 16,
+            "parameters": {
+              "l1_ratio": 0.5,
+              "strength": 0.12
+            }
+          },
+          {
+            "baseline_loss": 0.6931471805599453,
+            "context": "evaluation/repeat:0/outer:2",
+            "metrics": {
+              "balanced_accuracy": 0.3125,
+              "brier_score": 0.31120644190929553,
+              "calibration": [
+                {
+                  "mean_probability": 0.32848659131101554,
+                  "n_rows": 3,
+                  "observed_fraction": 1.0,
+                  "weight": 3.0
+                },
+                {
+                  "mean_probability": 0.46457519444387013,
+                  "n_rows": 7,
+                  "observed_fraction": 0.42857142857142855,
+                  "weight": 7.0
+                },
+                {
+                  "mean_probability": 0.648899902309518,
+                  "n_rows": 6,
+                  "observed_fraction": 0.3333333333333333,
+                  "weight": 6.0
+                }
+              ],
+              "discrimination_status": "all_classes_observed",
+              "log_loss": 0.821016821122793,
+              "mcc": -0.3779644730092272,
+              "pr_auc_average_precision": 0.47610930735930734,
+              "prevalence": 0.5,
+              "roc_auc": 0.234375,
+              "sensitivity": 0.25,
+              "specificity": 0.375
+            },
+            "model_loss": 0.821016821122793,
+            "n_test_groups": 16,
+            "parameters": {
+              "l1_ratio": 0.5,
+              "strength": 0.12
+            }
+          }
+        ],
+        "loss_improvement": -0.12265213964504706,
+        "model_loss": 0.8157993202049924,
+        "out_of_fold": {
+          "balanced_accuracy": 0.45833333333333337,
+          "brier_score": 0.30438315225035256,
+          "calibration": [
+            {
+              "mean_probability": 0.309504805488828,
+              "n_rows": 14,
+              "observed_fraction": 0.6428571428571429,
+              "weight": 14.0
+            },
+            {
+              "mean_probability": 0.4871546400113204,
+              "n_rows": 18,
+              "observed_fraction": 0.5,
+              "weight": 18.0
+            },
+            {
+              "mean_probability": 0.6642268536920132,
+              "n_rows": 15,
+              "observed_fraction": 0.4,
+              "weight": 15.0
+            },
+            {
+              "mean_probability": 0.8575035594918771,
+              "n_rows": 1,
+              "observed_fraction": 0.0,
+              "weight": 1.0
+            }
+          ],
+          "discrimination_status": "all_classes_observed",
+          "log_loss": 0.8157993202049924,
+          "mcc": -0.08362420100070908,
+          "pr_auc_average_precision": 0.4728797626013611,
+          "prevalence": 0.5,
+          "roc_auc": 0.3854166666666667,
+          "sensitivity": 0.4166666666666667,
+          "specificity": 0.5
+        },
+        "performance_scope": "Entire training/tuning procedure, not the post-hoc consensus panel",
+        "uncertainty": "Fold dispersion is descriptive; overlapping CV folds are not independent"
+      }
+    },
+    "marginal_summaries": {
+      "configuration": {
+        "assess_batches": true,
+        "batch": null,
+        "candidate_method": "variance",
+        "cell_fraction": 0.75,
+        "cell_min_counts": 1,
+        "cell_min_genes": 1,
+        "cell_resamples": 0,
+        "cell_states": [
+          "A"
+        ],
+        "cell_type": "state",
+        "cell_type_value": null,
+        "chunk_size": 2048,
+        "coefficient_tolerance": 1e-07,
+        "correlation_max_features": 100,
+        "correlation_threshold": 0.85,
+        "covariates": [],
+        "cv_strategy": "grouped",
+        "de_fdr": 0.1,
+        "de_pair_group": false,
+        "decision_threshold": 0.5,
+        "feature_blocks": [
+          "gene_mean",
+          "gene_variance",
+          "gene_detection"
+        ],
+        "feature_genes": [
+          "g0",
+          "g1"
+        ],
+        "gene_pairs": [
+          [
+            "g0",
+            "g1"
+          ],
+          [
+            "g2",
+            "g3"
+          ]
+        ],
+        "gene_thresholds": [
+          1.0,
+          2.0,
+          3.0
+        ],
+        "group": "donor",
+        "imputation": "median",
+        "inner_folds": 2,
+        "input_scale": "features",
+        "l1_ratios": [
+          0.5
+        ],
+        "layer": null,
+        "max_dense_mb": 2048,
+        "max_features": 30,
+        "max_iter": 10000,
+        "max_missing_fraction": 0.5,
+        "max_mito_fraction": 1.0,
+        "min_cells": 5,
+        "min_count": 5.0,
+        "min_groups_gate": 20,
+        "min_prevalence": 0.2,
+        "mitochondrial_prefix": null,
+        "normalization": "none",
+        "outcome": "phenotype",
+        "outcome_type": "binary",
+        "outer_folds": 3,
+        "outer_selection_threshold": 0.5,
+        "panel_max_features": 20,
+        "panel_validation": false,
+        "permutation_alpha": 0.05,
+        "permutation_scheme": "group",
+        "permutation_strata": null,
+        "permutations": 0,
+        "positive_class": null,
+        "program_thresholds": {},
+        "programs": {
+          "first": [
+            "g0"
+          ],
+          "second": [
+            "g1"
+          ]
+        },
+        "repeats": 1,
+        "sample_id": "sample_id",
+        "seed": 42,
+        "selection_threshold": 0.8,
+        "sign_threshold": 0.9,
+        "single_cell_mode": "distribution",
+        "stability_fraction": 0.75,
+        "stability_normalizations": [],
+        "stability_resamples": 4,
+        "strengths": [
+          0.03,
+          0.12
+        ],
+        "supporting_de": false,
+        "temporal_gap": 0.0,
+        "temporal_train_fraction": 0.5,
+        "time": null,
+        "tolerance": 0.0001,
+        "tuning_rule": "one_se"
+      },
+      "metrics": {
+        "baseline": {
+          "balanced_accuracy": 0.5,
+          "brier_score": 0.25,
+          "calibration": [
+            {
+              "mean_probability": 0.5,
+              "n_rows": 48,
+              "observed_fraction": 0.5,
+              "weight": 48.0
+            }
+          ],
+          "discrimination_status": "all_classes_observed",
+          "log_loss": 0.6931471805599453,
+          "mcc": 0.0,
+          "pr_auc_average_precision": 0.5,
+          "prevalence": 0.5,
+          "roc_auc": 0.5,
+          "sensitivity": 1.0,
+          "specificity": 0.0
+        },
+        "baseline_loss": 0.6931471805599453,
+        "estimand": "Equal weight per biological group; prediction of a sample from an unseen group",
+        "folds": [
+          {
+            "baseline_loss": 0.6931471805599453,
+            "context": "evaluation/repeat:0/outer:0",
+            "metrics": {
+              "balanced_accuracy": 0.5,
+              "brier_score": 0.2500000033850882,
+              "calibration": [
+                {
+                  "mean_probability": 0.500058181510891,
+                  "n_rows": 16,
+                  "observed_fraction": 0.5,
+                  "weight": 16.0
+                }
+              ],
+              "discrimination_status": "all_classes_observed",
+              "log_loss": 0.6931471873301218,
+              "mcc": 0.0,
+              "pr_auc_average_precision": 0.5,
+              "prevalence": 0.5,
+              "roc_auc": 0.5,
+              "sensitivity": 1.0,
+              "specificity": 0.0
+            },
+            "model_loss": 0.6931471873301218,
+            "n_test_groups": 16,
+            "parameters": {
+              "l1_ratio": 0.5,
+              "strength": 0.12
+            }
+          },
+          {
+            "baseline_loss": 0.6931471805599453,
+            "context": "evaluation/repeat:0/outer:1",
+            "metrics": {
+              "balanced_accuracy": 0.3125,
+              "brier_score": 0.2819129005428616,
+              "calibration": [
+                {
+                  "mean_probability": 0.5015932069758056,
+                  "n_rows": 16,
+                  "observed_fraction": 0.5,
+                  "weight": 16.0
+                }
+              ],
+              "discrimination_status": "all_classes_observed",
+              "log_loss": 0.7575348382553113,
+              "mcc": -0.3779644730092272,
+              "pr_auc_average_precision": 0.39734015984015986,
+              "prevalence": 0.5,
+              "roc_auc": 0.25,
+              "sensitivity": 0.25,
+              "specificity": 0.375
+            },
+            "model_loss": 0.7575348382553113,
+            "n_test_groups": 16,
+            "parameters": {
+              "l1_ratio": 0.5,
+              "strength": 0.12
+            }
+          },
+          {
+            "baseline_loss": 0.6931471805599453,
+            "context": "evaluation/repeat:0/outer:2",
+            "metrics": {
+              "balanced_accuracy": 0.375,
+              "brier_score": 0.2554837667251523,
+              "calibration": [
+                {
+                  "mean_probability": 0.5049408957177794,
+                  "n_rows": 16,
+                  "observed_fraction": 0.5,
+                  "weight": 16.0
+                }
+              ],
+              "discrimination_status": "all_classes_observed",
+              "log_loss": 0.7041805204079875,
+              "mcc": -0.2581988897471611,
+              "pr_auc_average_precision": 0.5103896103896104,
+              "prevalence": 0.5,
+              "roc_auc": 0.4375,
+              "sensitivity": 0.5,
+              "specificity": 0.25
+            },
+            "model_loss": 0.7041805204079875,
+            "n_test_groups": 16,
+            "parameters": {
+              "l1_ratio": 0.5,
+              "strength": 0.12
+            }
+          }
+        ],
+        "loss_improvement": -0.025140334771194928,
+        "model_loss": 0.7182875153311402,
+        "out_of_fold": {
+          "balanced_accuracy": 0.39583333333333337,
+          "brier_score": 0.26246555688436735,
+          "calibration": [
+            {
+              "mean_probability": 0.5021974280681586,
+              "n_rows": 48,
+              "observed_fraction": 0.5,
+              "weight": 48.0
+            }
+          ],
+          "discrimination_status": "all_classes_observed",
+          "log_loss": 0.7182875153311402,
+          "mcc": -0.22473328748774737,
+          "pr_auc_average_precision": 0.4195851180721478,
+          "prevalence": 0.5,
+          "roc_auc": 0.3541666666666667,
+          "sensitivity": 0.5833333333333334,
+          "specificity": 0.20833333333333334
+        },
+        "performance_scope": "Entire training/tuning procedure, not the post-hoc consensus panel",
+        "uncertainty": "Fold dispersion is descriptive; overlapping CV folds are not independent"
+      }
+    },
+    "within_cell_coupling": {
+      "configuration": {
+        "assess_batches": true,
+        "batch": null,
+        "candidate_method": "variance",
+        "cell_fraction": 0.75,
+        "cell_min_counts": 1,
+        "cell_min_genes": 1,
+        "cell_resamples": 0,
+        "cell_states": [
+          "A"
+        ],
+        "cell_type": "state",
+        "cell_type_value": null,
+        "chunk_size": 2048,
+        "coefficient_tolerance": 1e-07,
+        "correlation_max_features": 100,
+        "correlation_threshold": 0.85,
+        "covariates": [],
+        "cv_strategy": "grouped",
+        "de_fdr": 0.1,
+        "de_pair_group": false,
+        "decision_threshold": 0.5,
+        "feature_blocks": [
+          "gene_correlation",
+          "program_correlation"
+        ],
+        "feature_genes": [
+          "g0",
+          "g1"
+        ],
+        "gene_pairs": [
+          [
+            "g0",
+            "g1"
+          ],
+          [
+            "g2",
+            "g3"
+          ]
+        ],
+        "gene_thresholds": [
+          1.0,
+          2.0,
+          3.0
+        ],
+        "group": "donor",
+        "imputation": "median",
+        "inner_folds": 2,
+        "input_scale": "features",
+        "l1_ratios": [
+          0.5
+        ],
+        "layer": null,
+        "max_dense_mb": 2048,
+        "max_features": 30,
+        "max_iter": 10000,
+        "max_missing_fraction": 0.5,
+        "max_mito_fraction": 1.0,
+        "min_cells": 5,
+        "min_count": 5.0,
+        "min_groups_gate": 20,
+        "min_prevalence": 0.2,
+        "mitochondrial_prefix": null,
+        "normalization": "none",
+        "outcome": "phenotype",
+        "outcome_type": "binary",
+        "outer_folds": 3,
+        "outer_selection_threshold": 0.5,
+        "panel_max_features": 20,
+        "panel_validation": false,
+        "permutation_alpha": 0.05,
+        "permutation_scheme": "group",
+        "permutation_strata": null,
+        "permutations": 0,
+        "positive_class": null,
+        "program_thresholds": {},
+        "programs": {
+          "first": [
+            "g0"
+          ],
+          "second": [
+            "g1"
+          ]
+        },
+        "repeats": 1,
+        "sample_id": "sample_id",
+        "seed": 42,
+        "selection_threshold": 0.8,
+        "sign_threshold": 0.9,
+        "single_cell_mode": "distribution",
+        "stability_fraction": 0.75,
+        "stability_normalizations": [],
+        "stability_resamples": 4,
+        "strengths": [
+          0.03,
+          0.12
+        ],
+        "supporting_de": false,
+        "temporal_gap": 0.0,
+        "temporal_train_fraction": 0.5,
+        "time": null,
+        "tolerance": 0.0001,
+        "tuning_rule": "one_se"
+      },
+      "metrics": {
+        "baseline": {
+          "balanced_accuracy": 0.5,
+          "brier_score": 0.25,
+          "calibration": [
+            {
+              "mean_probability": 0.5,
+              "n_rows": 48,
+              "observed_fraction": 0.5,
+              "weight": 48.0
+            }
+          ],
+          "discrimination_status": "all_classes_observed",
+          "log_loss": 0.6931471805599453,
+          "mcc": 0.0,
+          "pr_auc_average_precision": 0.5,
+          "prevalence": 0.5,
+          "roc_auc": 0.5,
+          "sensitivity": 1.0,
+          "specificity": 0.0
+        },
+        "baseline_loss": 0.6931471805599453,
+        "estimand": "Equal weight per biological group; prediction of a sample from an unseen group",
+        "folds": [
+          {
+            "baseline_loss": 0.6931471805599453,
+            "context": "evaluation/repeat:0/outer:0",
+            "metrics": {
+              "balanced_accuracy": 1.0,
+              "brier_score": 0.0010561070908306697,
+              "calibration": [
+                {
+                  "mean_probability": 0.0315371907837102,
+                  "n_rows": 8,
+                  "observed_fraction": 0.0,
+                  "weight": 8.0
+                },
+                {
+                  "mean_probability": 0.9668381074756689,
+                  "n_rows": 8,
+                  "observed_fraction": 1.0,
+                  "weight": 8.0
+                }
+              ],
+              "discrimination_status": "all_classes_observed",
+              "log_loss": 0.0328894821238368,
+              "mcc": 1.0,
+              "pr_auc_average_precision": 1.0,
+              "prevalence": 0.5,
+              "roc_auc": 1.0,
+              "sensitivity": 1.0,
+              "specificity": 1.0
+            },
+            "model_loss": 0.0328894821238368,
+            "n_test_groups": 16,
+            "parameters": {
+              "l1_ratio": 0.5,
+              "strength": 0.03
+            }
+          },
+          {
+            "baseline_loss": 0.6931471805599453,
+            "context": "evaluation/repeat:0/outer:1",
+            "metrics": {
+              "balanced_accuracy": 1.0,
+              "brier_score": 0.0010644903258776076,
+              "calibration": [
+                {
+                  "mean_probability": 0.03152785481601415,
+                  "n_rows": 8,
+                  "observed_fraction": 0.0,
+                  "weight": 8.0
+                },
+                {
+                  "mean_probability": 0.9665260635271566,
+                  "n_rows": 8,
+                  "observed_fraction": 1.0,
+                  "weight": 8.0
+                }
+              ],
+              "discrimination_status": "all_classes_observed",
+              "log_loss": 0.03304515403500143,
+              "mcc": 1.0,
+              "pr_auc_average_precision": 1.0,
+              "prevalence": 0.5,
+              "roc_auc": 1.0,
+              "sensitivity": 1.0,
+              "specificity": 1.0
+            },
+            "model_loss": 0.03304515403500143,
+            "n_test_groups": 16,
+            "parameters": {
+              "l1_ratio": 0.5,
+              "strength": 0.03
+            }
+          },
+          {
+            "baseline_loss": 0.6931471805599453,
+            "context": "evaluation/repeat:0/outer:2",
+            "metrics": {
+              "balanced_accuracy": 1.0,
+              "brier_score": 0.001027247360744258,
+              "calibration": [
+                {
+                  "mean_probability": 0.03348213744451155,
+                  "n_rows": 8,
+                  "observed_fraction": 0.0,
+                  "weight": 8.0
+                },
+                {
+                  "mean_probability": 0.9699719376775475,
+                  "n_rows": 8,
+                  "observed_fraction": 1.0,
+                  "weight": 8.0
+                }
+              ],
+              "discrimination_status": "all_classes_observed",
+              "log_loss": 0.03228029827922632,
+              "mcc": 1.0,
+              "pr_auc_average_precision": 1.0,
+              "prevalence": 0.5,
+              "roc_auc": 1.0,
+              "sensitivity": 1.0,
+              "specificity": 1.0
+            },
+            "model_loss": 0.03228029827922632,
+            "n_test_groups": 16,
+            "parameters": {
+              "l1_ratio": 0.5,
+              "strength": 0.03
+            }
+          }
+        ],
+        "loss_improvement": 0.6604088690805905,
+        "model_loss": 0.03273831147935485,
+        "out_of_fold": {
+          "balanced_accuracy": 1.0,
+          "brier_score": 0.0010492815924841787,
+          "calibration": [
+            {
+              "mean_probability": 0.03218239434807863,
+              "n_rows": 24,
+              "observed_fraction": 0.0,
+              "weight": 24.0
+            },
+            {
+              "mean_probability": 0.9677787028934577,
+              "n_rows": 24,
+              "observed_fraction": 1.0,
+              "weight": 24.0
+            }
+          ],
+          "discrimination_status": "all_classes_observed",
+          "log_loss": 0.03273831147935485,
+          "mcc": 1.0,
+          "pr_auc_average_precision": 0.9999999999999999,
+          "prevalence": 0.5,
+          "roc_auc": 1.0,
+          "sensitivity": 1.0,
+          "specificity": 1.0
+        },
+        "performance_scope": "Entire training/tuning procedure, not the post-hoc consensus panel",
+        "uncertainty": "Fold dispersion is descriptive; overlapping CV folds are not independent"
+      }
+    }
+  },
+  "scope": "Controlled synthetic capability test, not general performance superiority",
+  "seed": 314
+}

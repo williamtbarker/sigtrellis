@@ -1,0 +1,3 @@
+within_cell_coupling 1.0
+marginal_summaries 0.3541666666666667
+count_pseudobulk 0.3854166666666667

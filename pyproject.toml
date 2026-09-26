@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "sigtrellis"
-version = "0.2.0"
+version = "0.3.0"
 description = "Donor-aware, leakage-audited elastic-net transcriptomic signature discovery"
 readme = "README.md"
 requires-python = ">=3.12"

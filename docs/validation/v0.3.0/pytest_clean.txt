@@ -1,0 +1,62 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0
+rootdir: /workspace/scratch/e5221b18d874/v030_clean
+configfile: pyproject.toml
+testpaths: tests
+plugins: cov-7.1.0, zarr-3.4.0
+collected 175 items
+
+tests/test_cell_adversarial.py .......................                   [ 13%]
+tests/test_expanded_workflows.py .................                       [ 22%]
+tests/test_inputs.py .................................                   [ 41%]
+tests/test_integration.py ........                                       [ 46%]
+tests/test_leakage.py ..............                                     [ 54%]
+tests/test_preprocessing.py .......                                      [ 58%]
+tests/test_release_expansion.py ...................                      [ 69%]
+tests/test_review_regressions.py ...........................             [ 84%]
+tests/test_science.py .....................                              [ 96%]
+tests/test_singlecell.py ......                                          [100%]
+
+=============================== warnings summary ===============================
+tests/test_release_expansion.py::test_abundance_does_not_change_when_the_same_cell_distribution_is_repeated
+  /workspace/scratch/e5221b18d874/v030_clean/.venv/lib/python3.12/site-packages/anndata/_core/anndata.py:1882: UserWarning: Observation names are not unique. To make them unique, call `.obs_names_make_unique`.
+    utils.warn_names_duplicates("obs")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.12.14-final-0 _______________
+
+Name                                                              Stmts   Miss Branch BrPart  Cover   Missing
+-------------------------------------------------------------------------------------------------------------
+.venv/lib/python3.12/site-packages/sigtrellis/__init__.py             1      0      0      0   100%
+.venv/lib/python3.12/site-packages/sigtrellis/__main__.py             2      2      0      0     0%   1-3
+.venv/lib/python3.12/site-packages/sigtrellis/cell_features.py      201     15     80     16    89%   149, 175, 177, 185, 207, 211, 215, 242, 248, 299, 332, 336, 355, 403->393, 411, 420
+.venv/lib/python3.12/site-packages/sigtrellis/cell_identity.py       28      0      0      0   100%
+.venv/lib/python3.12/site-packages/sigtrellis/cell_moments.py        72      1     14      1    98%   74
+.venv/lib/python3.12/site-packages/sigtrellis/cell_reporting.py      44      2     12      2    93%   19->33, 43-44
+.venv/lib/python3.12/site-packages/sigtrellis/cli.py                119     23     34      7    78%   111-122, 130-140, 154-167, 170-173, 177, 181-185, 188-189
+.venv/lib/python3.12/site-packages/sigtrellis/config.py             238     25    156     26    87%   120, 123, 146, 150, 154, 165, 171, 188, 208, 247, 253, 259, 261, 284, 286, 317, 322, 324, 330, 339, 349->358, 357, 363, 380, 384, 390
+.venv/lib/python3.12/site-packages/sigtrellis/correlation.py         58      3     14      3    92%   37, 40, 54
+.venv/lib/python3.12/site-packages/sigtrellis/de.py                  78      7     30      4    88%   24-25, 27, 52-53, 74, 79
+.venv/lib/python3.12/site-packages/sigtrellis/domain.py              78      1     14      1    98%   39
+.venv/lib/python3.12/site-packages/sigtrellis/evidence.py            70     32     16      0    51%   55-101
+.venv/lib/python3.12/site-packages/sigtrellis/integrity.py           13      0      4      0   100%
+.venv/lib/python3.12/site-packages/sigtrellis/io.py                  50      7     22      8    79%   24, 48->50, 53, 58, 63, 66, 70, 73
+.venv/lib/python3.12/site-packages/sigtrellis/matrix_import.py       45      6     20      7    80%   34, 36, 38, 43, 50, 56, 59->61
+.venv/lib/python3.12/site-packages/sigtrellis/metrics.py             39      0     10      0   100%
+.venv/lib/python3.12/site-packages/sigtrellis/modeling.py           108      4     26      2    96%   187-189, 210, 213->216
+.venv/lib/python3.12/site-packages/sigtrellis/panel.py               35      0      2      0   100%
+.venv/lib/python3.12/site-packages/sigtrellis/prediction.py         113     21     58     15    77%   26, 45, 59, 61-63, 86, 89, 91, 99, 105-112, 115, 126, 139, 142, 157, 162
+.venv/lib/python3.12/site-packages/sigtrellis/preprocessing.py      149      8     56      8    92%   31, 53, 56, 63, 66, 72, 152, 162
+.venv/lib/python3.12/site-packages/sigtrellis/qc.py                 173     37    128     25    75%   22, 26, 31, 34, 38, 47, 54, 64, 66, 68, 75, 83, 91, 110, 121, 133-135, 137, 143, 169-174, 176, 177->166, 181-182, 190->193, 205-213
+.venv/lib/python3.12/site-packages/sigtrellis/reporting.py          207      9     44      2    95%   158->172, 178-195
+.venv/lib/python3.12/site-packages/sigtrellis/simulate.py            93      5     36      3    94%   20, 130-134
+.venv/lib/python3.12/site-packages/sigtrellis/singlecell.py          95      6     34      6    91%   25, 32, 46, 50, 74, 81
+.venv/lib/python3.12/site-packages/sigtrellis/splits.py             121     13     62     12    86%   21, 35, 43, 49, 65, 76, 98, 140->135, 142-144, 155, 157, 171
+.venv/lib/python3.12/site-packages/sigtrellis/stability.py           73      0     16      0   100%
+.venv/lib/python3.12/site-packages/sigtrellis/validation.py         104      4     30      4    94%   119, 205, 210, 235
+.venv/lib/python3.12/site-packages/sigtrellis/workflow.py           256     20     74     10    90%   51, 69, 80, 83-86, 142->144, 145, 149, 160, 254-255, 312-314, 362-367
+-------------------------------------------------------------------------------------------------------------
+TOTAL                                                              2663    251    992    162    88%
+Coverage JSON written to file /workspace/scratch/e5221b18d874/review_work/sigtrellis/release_evidence/v0.3.0/coverage.json
+================== 175 passed, 1 warning in 226.95s (0:03:46) ==================

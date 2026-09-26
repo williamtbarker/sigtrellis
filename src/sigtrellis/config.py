@@ -73,6 +73,8 @@ class Config:
     single_cell_mode: str = "pseudobulk"
     cell_states: tuple[str, ...] = ()
     feature_genes: tuple[str, ...] = ()
+    gene_thresholds: tuple[float, ...] = (1.0, 2.0, 3.0)
+    gene_pairs: tuple[tuple[str, str], ...] = ()
     feature_blocks: tuple[str, ...] = (
         "abundance",
         "gene_mean",
@@ -264,10 +266,13 @@ class Config:
             "gene_mean",
             "gene_detection",
             "gene_variance",
+            "gene_tail",
+            "gene_correlation",
             "program_mean",
             "program_variance",
             "program_q90",
             "program_fraction",
+            "program_correlation",
         }
         if not self.feature_blocks or set(self.feature_blocks) - blocks:
             raise ValueError("Unknown or empty single-cell feature_blocks")
@@ -279,6 +284,39 @@ class Config:
                 raise ValueError(f"{key} must contain unique nonempty strings")
         if not isinstance(self.programs, dict) or not isinstance(self.program_thresholds, dict):
             raise ValueError("Programs and program_thresholds must be mappings")
+        if (
+            not self.gene_thresholds
+            or any(
+                isinstance(t, bool)
+                or not isinstance(t, (float, int))
+                or not math.isfinite(t)
+                or t <= 0
+                for t in self.gene_thresholds
+            )
+            or len(set(self.gene_thresholds)) != len(self.gene_thresholds)
+        ):
+            raise ValueError("gene_thresholds must be unique finite positive log1p(CP10K) values")
+        pairs: set[tuple[str, ...]] = set()
+        for pair in self.gene_pairs:
+            if (
+                not isinstance(pair, (tuple, list))
+                or len(pair) != 2
+                or any(not isinstance(g, str) or not g.strip() for g in pair)
+                or pair[0] == pair[1]
+            ):
+                raise ValueError("gene_pairs must contain two distinct nonempty gene IDs per pair")
+            pair_key = tuple(sorted(pair))
+            if pair_key in pairs:
+                raise ValueError("Duplicate or reversed gene pair")
+            pairs.add(pair_key)
+        if "gene_correlation" in self.feature_blocks and not self.gene_pairs:
+            raise ValueError("gene_correlation requires prespecified gene_pairs")
+        if "program_correlation" in self.feature_blocks and len(self.programs) < 2:
+            raise ValueError("program_correlation requires at least two programs")
+        if self.cell_states and not self.cell_type and self.cell_states != ("all_cells",):
+            raise ValueError("Named cell_states require a cell_type annotation column")
+        if self.single_cell_mode == "distribution" and self.cell_type_value:
+            raise ValueError("Distribution mode uses cell_states, not cell_type_value")
         for name, genes in self.programs.items():
             if isinstance(genes, str):
                 raise ValueError("Program genes must be a sequence, not a string")
@@ -334,11 +372,17 @@ def load_config(path: Path | None, overrides: dict[str, Any] | None = None) -> C
         "cell_states",
         "feature_genes",
         "feature_blocks",
+        "gene_thresholds",
+        "gene_pairs",
     ):
         if key in raw:
             if not isinstance(raw[key], (list, tuple)):
                 raise ValueError(f"{key} must be a sequence")
             raw[key] = tuple(raw[key])
+    if "gene_pairs" in raw:
+        if any(not isinstance(p, (tuple, list)) for p in raw["gene_pairs"]):
+            raise ValueError("gene_pairs must be a sequence of pairs")
+        raw["gene_pairs"] = tuple(tuple(p) for p in raw["gene_pairs"])
     if "programs" in raw:
         if not isinstance(raw["programs"], dict) or any(
             not isinstance(v, (list, tuple)) for v in raw["programs"].values()

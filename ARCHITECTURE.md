@@ -2,7 +2,7 @@
 
 ## Scientific data boundary
 
-`Dataset` contains a sample-by-feature frame, exactly aligned metadata, typed `Feature` identities, optional cell-type count tables and cell-perturbed feature frames, gene-symbol mappings, input hashes and upstream QC. Metadata cannot silently become features. Bulk aligns either orientation. Single-cell adapters read sparse HDF5 chunks and use fixed cell QC. Pseudobulk produces count sums; distribution mode produces sample-local moments/program scores and relative abundance. Both share the same downstream machinery without treating their upstream estimands as identical.
+`Dataset` contains a sample-by-feature frame, exactly aligned metadata, typed `Feature` identities, optional cell-type count tables and cell-perturbed feature frames, gene-symbol mappings, input hashes and upstream QC. Metadata cannot silently become features. Bulk aligns either orientation. Single-cell adapters read sparse HDF5 chunks and use fixed cell QC. Pseudobulk produces count sums; distribution mode produces sample-local distribution moments, tails, within-cell gene/program correlations and relative abundance. Both share the same downstream machinery without treating their upstream estimands as identical.
 
 ## Components
 
@@ -11,6 +11,8 @@
 | `config` | Frozen configuration, YAML/TOML/JSON loading, unknown-key rejection |
 | `domain` | Dataset, split/audit types, hashes and strict JSON serialization |
 | `io`, `singlecell`, `cell_features`, `matrix_import` | Bulk alignment, count sums, typed sample-local distributions, strict sparse export import |
+| `cell_moments`, `cell_identity` | Streaming cellular statistics, stable cell perturbations, multiset duplicate hashes and normalization-universe contracts |
+| `cell_reporting` | Specimen-level distribution evidence and technical cell QC |
 | `qc` | Integrity, replicate, target-copy, duplicate and confounding checks |
 | `preprocessing` | Training-only normalizer, gene screen, scaler and covariate encoder |
 | `de` | Rank-checked binary, continuous and multiclass-reference PyDESeq2 contrasts |
@@ -37,7 +39,7 @@ Outer folds are never used to choose their own hyperparameters. Final full-data 
 
 Panel validation owns a fresh stability engine in each outer training set. It emits separate predictions, coefficients, selected features and tuning records. Batch and permutation evaluations run the same panel policy. Cell perturbations travel inside `Dataset.subset`, so a training subset cannot acquire held-out sample rows. Their definitions use no cross-sample fitted statistics. Imputation and scaling remain within `Prepared`, including when native external H5AD is converted using the frozen configuration.
 
-`Audit` records every observed-data fit and every training/test boundary. Permutation controls reconstruct splits from permuted labels and preserve separate audit records. Fingerprints describe normalization/scaling state; row IDs and gene inclusion/exclusion lists make the boundary inspectable. Output manifests are marked `running`, then `complete` or `failed`. Nonempty output directories are never overwritten.
+`Audit` records every observed-data fit and every training/test boundary. Permutation controls reconstruct splits from permuted labels and preserve separate audit records. Fingerprints describe normalization/scaling state; row IDs, retained features, and a hash of the shared `feature_universe.json` make the boundary inspectable. Exclusions are the universe minus each retained list; the excluded universe is not copied into every fit record. Output manifests are marked `running`, then `complete` or `failed`. Nonempty output directories are never overwritten.
 
 ## Statistical scope
 
@@ -55,7 +57,7 @@ CSV identifiers are parsed as strings before constructing the index; a numeric-l
 
 ## Performance and scale
 
-HDF5 cell matrices remain sparse/backed and are read in `chunk_size` blocks. Dense memory scales primarily with sample × cell type × genes. `max_dense_mb` bounds the accumulator, and a single cell type can be selected. Model fitting uses dense sample-level arrays and a training-local feature cap; this is not an out-of-core solver for millions of biological donors. Correlation analysis is capped separately to avoid quadratic all-gene memory. Repeated DE and nested permutations are intentionally expensive; manifests expose the actual work.
+HDF5 cell matrices remain sparse/backed and are read in `chunk_size` blocks. Dense memory scales with sample × cell state × declared statistics; optional supporting count DE retains the full gene universe. Exact program quantiles additionally retain per-cell scores; other distribution statistics stream. `max_dense_mb` bounds the accumulator, and a single cell type can be selected. Model fitting uses dense sample-level arrays and a training-local feature cap; this is not an out-of-core solver for millions of biological donors. Correlation analysis is capped separately to avoid quadratic all-gene memory. Repeated DE and nested permutations are intentionally expensive; manifests expose the actual work.
 
 BLAS/OpenMP threads are limited to one within `run_analysis` for reproducibility and to avoid oversubscription. CV is sequential in this release. No model is loaded from pickle and no model-generated code is executed. Analysis commands make no network calls; public downloads are confined to an explicit example script.
 
@@ -63,4 +65,4 @@ BLAS/OpenMP threads are limited to one within `run_analysis` for reproducibility
 
 New supervised screens must implement the training-only `Prepared.fit` boundary and pass the boundary-spy and global-screen attack tests. New normalization must separate fitted reference state from sample-local transform. New validators must preserve biological groups and declare their estimand. New DE backends must expose design rank, replicate assumptions, effect contrasts and missing/filtered tests rather than mapping all methods onto a misleading universal p-value schema.
 
-Deferred extensions include conditional/random-effect inference, validated continuous/multiclass count contrasts, temporal splits, exchangeability diagnostics, feature-level error control, train-frozen batch harmonization, pathway-score feature adapters, and panel-specific nested stability selection. They require statistical design and validation, not merely more configuration switches.
+Deferred extensions include conditional/random-effect inference, formal feature-level error control, train-frozen batch harmonization, deconvolved variability, learned state assignment, and nonlinear multiple-instance models. They require statistical design and validation, not merely more configuration switches.

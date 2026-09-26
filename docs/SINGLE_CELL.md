@@ -2,7 +2,13 @@
 
 The prediction target belongs to a biological specimen or donor. The package
 therefore produces one feature row per specimen and keeps related specimens in
-one validation group. This holds in both supported representations.
+one validation group. This holds in both supported representations. Use
+`single_cell_mode: distribution` for the native distribution workflow. It reads
+individual cells without summing them into a count pseudobulk. An elastic net
+needs a fixed predictor vector: this mode encodes the cell distribution in that
+vector while preserving the correct independent unit. It is not a cell classifier
+or an attention network, and it does not retain every possible property of the
+joint distribution.
 
 Pseudobulk is the baseline for sample-level gene expression and negative-binomial
 count DE. It is not an inferior substitute merely because it reduces cell count:
@@ -17,16 +23,40 @@ Distribution mode retains other interpretable information from the cells:
 | `gene_mean` | Mean of cell-local `log1p(count/library * 10000)` | Mean transformed expression, not pseudobulk log fold change |
 | `gene_detection` | Fraction of state cells with a positive count | Sensitive to depth and dropout |
 | `gene_variance` | Unbiased sample variance of transformed expression | Includes measurement noise; not deconvolved biological variance |
+| `gene_tail` | Fraction above each fixed `gene_thresholds` value in log1p(CP10K) units | Rare high-expression subpopulations; thresholds require independent justification |
+| `gene_correlation` | Pearson correlation of two declared genes' transformed values across cells | Within-cell coupling, including shared technical/compositional effects |
 | `program_mean` | Mean of a fixed equal-weight program score | Defined gene set, not an inferred pathway mechanism |
 | `program_variance` | Sample variance of that score | Biological and technical variability combined |
 | `program_q90` | Empirical 90th percentile | Sampling sensitive, especially with few cells |
 | `program_fraction` | Fraction of scores above a supplied fixed threshold | Threshold must be chosen independently of held-out outcomes |
+| `program_correlation` | Pearson correlation between each pair of predefined program scores across cells | Shared genes, depth and cell mixtures can induce coupling |
 
 A cell's program score is the mean transformed expression of the explicitly
 listed genes. All program genes must exist; the adapter refuses silent identifier
 substitution. Gene names, states and programs are user-defined and species agnostic.
 The human immune programs in one example are **demonstration hypotheses**, not
 hard-coded biology or a general-purpose pathway database.
+
+Declare `gene_pairs: [[gene_A, gene_B], [gene_C, gene_D]]` to request joint gene
+features. Do not enumerate every possible pair in an atlas: that grows quadratically
+and invites overfitting. Pairs and threshold grids must be chosen without inspecting
+held-out outcomes. Correlations need at least three cells and nonconstant members;
+otherwise they are unavailable. Variances need at least two cells. The chosen
+`min_cells` can impose a stronger floor. Program pair identities are canonical
+across YAML/JSON serialization. Gene-pair rows carry both genes in their schema;
+they do not inherit a mean-count DE p-value from either member.
+
+Within-cell correlation predictors are distinct from `correlation_groups.csv`:
+the latter describes correlations between predictors **across specimens** to
+diagnose elastic-net substitution. Neither analysis establishes a causal
+gene-regulatory network.
+
+Synthetic controls hold the marginal gene distributions approximately fixed while
+changing which genes are expressed together in the same cells. The correlation
+features recover that phenotype when marginal summaries and count pseudobulk do
+not. A separate fixture plants rare high-expression cells with equal bulk totals.
+These establish capabilities under controlled assumptions, not universal advantages
+over pseudobulk or evidence of a gene-regulatory mechanism.
 
 The fixed abundance offset acts on proportions. Duplicating the same recovered
 cell distribution leaves this feature unchanged. Absent/pure states are constant
@@ -47,6 +77,12 @@ RNA library. Without gene blocks or supporting DE, gene accumulators are not
 allocated. Programs-only runs can therefore read large sparse inputs in chunks.
 Accumulator/output estimates respect `max_dense_mb`; sparse chunks and Python
 object overhead are additional memory. This is not an atlas-scale benchmark.
+Only `program_q90` retains per-cell program scores. Means, variances, activation
+fractions, tails and correlations use streaming moments. Exact quantiles therefore
+use additional memory proportional to cells × programs × cellular perturbations.
+The public all-cell preparation is also streamed and does not create a dense
+cells-by-genes array. `--cells-per-sample 0` retains every cell of the selected
+specimens; no automatic cell cap is imposed by the analysis adapter.
 
 States below `min_cells` have missing expression/program measurements. A missing
 state is not assigned zero expression. Abundance remains measurable when a state
@@ -61,6 +97,26 @@ Stability cycles through baseline and perturbed matrices while subsampling whole
 biological groups and retuning. Frequencies are saved separately per perturbation;
 positive feature gates require the declared frequency threshold in each. More
 resamples improve descriptive resolution but do not create independent trials.
+
+Cell inclusion is keyed to the cell identifier, seed and perturbation index. Row
+ordering, chunk size and removing an unrelated donor do not change a retained
+cell's inclusion. Renaming cell IDs can change perturbations and is a provenance
+change. Separate order-invariant raw-cell fingerprints detect exact copied cell
+collections even with renamed cells/specimens; partial overlaps, changed state
+annotations and biological relatives still need study-specific review.
+
+The frozen model records the complete RNA gene universe used for per-cell
+normalization. External native inputs must match that universe, even when their
+selected predictors are unchanged. Distribution models from 0.2.0 lack this
+contract and require refitting before native external validation in 0.3.0.
+
+Reports add a distribution plot with one point per biological specimen for each
+displayed feature, plus `cell_distribution_evidence.csv` and
+`cell_quality_by_sample.csv`. Missing feature values are explicitly omitted from
+the plot and remain missing in the table. Cell counts, raw depth and detected-gene
+means help investigate collection bias; they are not silently added as predictors.
+These post-selection visualizations are descriptive evidence, not new hypothesis
+tests or independent validation.
 
 `supporting_de: true` performs separate count DE on eligible specimen/state sums.
 It retains the full supplied RNA gene universe for count normalization even when

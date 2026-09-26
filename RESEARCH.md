@@ -81,6 +81,39 @@ The implemented extension computes fixed state abundance and sample-local means,
 
 We chose this representation because its training boundary is inspectable and frozen deployment is well defined. Hierarchical cell models and learned embeddings remain distinct extensions requiring comparative validation and held-out-cell assignment. Imported annotations may already encode an integrated or phenotype-informed analysis; the package records this upstream limitation rather than claiming to reverse it.
 
+## 0.3.0: distribution shape and within-cell dependence
+
+Memento demonstrates why variance and gene-gene correlation can carry information
+beyond expression means, while explicitly modeling single-cell sampling noise
+[26]. We adopt the scientific question, not its inference machinery. SigTrellis
+computes observed log1p(CP10K) moments/correlations as prediction features; it does
+not deconvolve technical variance or produce Memento p-values. Fixed tail fractions
+capture rare high-expression populations. Correlations retain pairing within the
+same cells, which marginal summaries and count sums can erase. Low-information
+correlations remain missing rather than being assigned zero.
+
+Multiple-instance learning treats each sample as a bag of cells. The CELLECTION
+preprint explores this phenotype-prediction setting [27]. A neural attention model
+would require additional regularization, donor-level nested evaluation, frozen
+cell encoders and substantially broader comparative validation. This release uses
+a transparent fixed distribution embedding followed by elastic net; it does not
+implement that neural method or equate attention with biological causation.
+
+Distribution-preserving sketching is another scale strategy [28]. We use streaming
+moments and, in the current public demonstration, all cells in the selected
+specimens. We do not claim to implement kernel herding or to preserve the complete
+joint distribution. Exact program quantiles retain small per-cell score arrays;
+other moments need no retained cell matrix. The preparation writer follows the
+AnnData sparse on-disk encoding [29] and is round-trip tested against AnnData.
+
+Independent units remain donors/cultures. Hypothesized gene pairs, states,
+programs and thresholds are fixed before validation; data-derived screening,
+imputation, scaling and elastic-net tuning stay inside training folds. Cellular
+subsampling uses cell-ID-keyed randomness so an unrelated donor or row reordering
+cannot alter a cell's inclusion. Exact multiset fingerprints and an explicit full
+RNA gene-universe contract make frozen deployment auditable. These engineering
+properties prevent specific leakage paths, not hidden upstream confounding.
+
 ## Compact-panel validation
 
 Global stability summaries do not inherit the full model's CV performance. With `panel_validation`, each outer training set repeats subsample tuning/selection and applies fixed frequency/sign thresholds plus a maximum panel size. The modal subsample hyperparameters define its refit; there is no second inner-CV search that reuses inner labels after selecting the panel. Only outer predictions estimate this complete policy. The full panel policy is rerun for permutation and batch holdouts. Final panel coefficients and panel-specific outer stability must independently satisfy feature gates. Empty panels become explicit baseline/covariate models. `external --model-kind panel` evaluates the frozen final state without re-selection. Count normalization still requires the original gene universe; a smaller targeted assay needs its own measurement/normalization validation.
@@ -132,3 +165,7 @@ No Stabilomics source files or data are copied. The repository is MIT-licensed, 
 23. Büttner et al. (2021). scCODA is a Bayesian model for compositional single-cell data analysis. [Nature Communications](https://doi.org/10.1038/s41467-021-27150-6).
 24. Schurch et al. (2016). How many biological replicates are needed in an RNA-seq experiment and which differential expression tool should you use? [RNA](https://doi.org/10.1261/rna.053959.115).
 25. Perez et al. (2022). Single-cell RNA-seq reveals cell type-specific molecular and genetic associations to lupus. [Science](https://doi.org/10.1126/science.abf1970).
+26. Kim et al. (2024). Method of moments framework for differential expression analysis of single-cell RNA sequencing data. [Cell paper](https://doi.org/10.1016/j.cell.2024.09.044), [full text](https://pmc.ncbi.nlm.nih.gov/articles/PMC11556465/).
+27. Hu et al. (2025). Predicting emergent phenotypes from single cell populations using CELLECTION. **bioRxiv preprint**, [doi:10.1101/2025.09.02.673886](https://doi.org/10.1101/2025.09.02.673886), [full text](https://pmc.ncbi.nlm.nih.gov/articles/PMC12424641/).
+28. Distribution-based Sketching of Single-Cell Samples (2022). [arXiv:2207.00584](https://arxiv.org/abs/2207.00584).
+29. AnnData. [On-disk format specification](https://anndata.readthedocs.io/en/stable/fileformat-prose.html).

@@ -17,6 +17,7 @@ import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.metrics import precision_recall_curve, roc_curve
 
+from sigtrellis.cell_reporting import cell_evidence
 from sigtrellis.config import Config
 from sigtrellis.correlation import CorrelationResult
 from sigtrellis.domain import Dataset, FloatArray
@@ -124,7 +125,8 @@ def make_figures(
         sub = path[(path.gene_id == gene) & (path.contrast == first_contrast)].sort_values(
             "strength"
         )
-        plt.plot(sub.strength, sub.coefficient, marker="o", label=gene)
+        label = data.features[gene].label if gene in data.features else gene
+        plt.plot(sub.strength, sub.coefficient, marker="o", label=label)
     plt.xscale("log")
     plt.xlabel("Lambda on mean loss")
     plt.ylabel("Standardized coefficient")
@@ -290,6 +292,13 @@ def make_figures(
             "permutation_control.png",
             "The full nested procedure is repeated after exchangeability-aware label permutation.",
             figures,
+        )
+    if cell_evidence(data, table, config, output):
+        figures.append(
+            (
+                "cell_distributions.png",
+                "Post-selection descriptive evidence in the original feature units. Each point is a specimen, not a cell; related specimens remain dependent. No post-selection p-values are inferred. See cell_distribution_evidence.csv for group IDs and state cell counts.",
+            )
         )
     return figures
 

@@ -11,7 +11,7 @@ cd sigtrellis
 git init -b main
 git add .
 git diff --cached --stat
-git commit -m "Release SigTrellis 0.1.1 with adversarial validation"
+git commit -m "Release SigTrellis 0.3.0 with native single-cell validation"
 gh repo create williamtbarker/sigtrellis --public --source=. --remote=origin --push
 gh run list --repo williamtbarker/sigtrellis
 ```

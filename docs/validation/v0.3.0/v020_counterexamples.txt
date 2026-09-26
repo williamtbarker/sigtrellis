@@ -1,0 +1,119 @@
+FFFFF                                                                    [100%]
+=================================== FAILURES ===================================
+________ test_reordering_cells_preserves_perturbations_and_fingerprints ________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-16/test_reordering_cells_preserve0')
+
+    def test_reordering_cells_preserves_perturbations_and_fingerprints(tmp_path):
+        path = cell_fixture(tmp_path / "cells.h5ad", samples=12)
+        config = cell_config(cell_resamples=2)
+        original = distribution_features(path, config)
+        cells = ad.read_h5ad(path)
+        perm = np.random.default_rng(15).permutation(cells.n_obs)
+        cells[perm, :].copy()[:, np.arange(cells.n_vars)[::-1]].copy().write_h5ad(
+            tmp_path / "reordered.h5ad"
+        )
+        reordered = distribution_features(tmp_path / "reordered.h5ad", config)
+>       assert original.upstream_qc["sample_cell_hashes"] == reordered.upstream_qc["sample_cell_hashes"]
+E       AssertionError: assert {'s000': 'ebb...1280802', ...} == {'s000': '2d5...03d5ad4', ...}
+E         
+E         Differing items:
+E         {'s005': '17733bc24a9a34225b4f3add01d99adfb2a813ca9f1c842418d53d3b97e15286'} != {'s005': 'b2202c1a3309cb329ae5e2b101d9ed24e1cb9d948d7a66c2c9f6a1c7fb4f21b5'}
+E         {'s002': '937f03bfddf32f170174fdeca4b1c15efea9c679638f74901ddfd965e03601c4'} != {'s002': '584598c1ba56f47a5da18376cdebeef825fe9ff1b57892089ef79b45c54731af'}
+E         {'s004': 'fc2692dca7888b122d38b7de3b1d309009c5ef61cdbe3c3925ad7d31d84212b5'} != {'s004': 'c1d13f0e88fe4c7893e2f4c143af5f0f5a4944b2d9a4c8d897e59757c3bd94e9'}
+E         {'s010': '18c24ed24fcb07d7500b254321699404af9e1f5de01af19dcc1b6c223fbbcd91'} != {'s010': '06...
+E         
+E         ...Full output truncated (10 lines hidden), use '-vv' to show
+
+tests/test_cell_adversarial.py:71: AssertionError
+_________ test_unrelated_donor_removal_does_not_change_cell_resampling _________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-16/test_unrelated_donor_removal_d0')
+
+    def test_unrelated_donor_removal_does_not_change_cell_resampling(tmp_path):
+        path = cell_fixture(tmp_path / "cells.h5ad", samples=12)
+        config = cell_config(cell_resamples=2)
+        original = distribution_features(path, config)
+        cells = ad.read_h5ad(path)
+        cells[cells.obs.sample_id != "s000"].copy().write_h5ad(tmp_path / "subset.h5ad")
+        subset = distribution_features(tmp_path / "subset.h5ad", config)
+        for a, b in zip(original.cell_resamples, subset.cell_resamples, strict=True):
+>           np.testing.assert_allclose(a.loc[b.index], b, equal_nan=True, atol=1e-10)
+E           AssertionError: 
+E           Not equal to tolerance rtol=1e-07, atol=1e-10
+E           
+E           Mismatched elements: 217 / 286 (75.9%)
+E           First 5 mismatches are at indices:
+E            [0, 0]: 1.2604456321066018 (ACTUAL), 1.050638632611207 (DESIRED)
+E            [0, 1]: 4.281752016202681 (ACTUAL), 4.259695943303243 (DESIRED)
+E            [0, 2]: 4.358627286014424 (ACTUAL), 4.361268691190998 (DESIRED)
+E            [0, 3]: 4.261522077815429 (ACTUAL), 4.218926497221405 (DESIRED)
+E            [0, 7]: 0.1706453321414099 (ACTUAL), 0.20124207947565406 (DESIRED)
+E           Max absolute difference among violations: 0.44072195
+E           Max relative difference among violations: 1.60916892
+E            ACTUAL: array([[ 1.260446,  4.281752,  4.358627,  4.261522,  1.      ,  1.      ,
+E                    1.      ,  0.170645,  0.089141,  0.140186,  4.300634,  0.047643,
+E                    4.516318, -1.260446,  4.362822,  4.37021 ,  4.352326,  1.      ,...
+E            DESIRED: array([[ 1.050639,  4.259696,  4.361269,  4.218926,  1.      ,  1.      ,
+E                    1.      ,  0.201242,  0.107984,  0.231807,  4.279964,  0.047711,
+E                    4.483147, -1.050639,  4.333692,  4.4447  ,  4.323302,  1.      ,...
+
+tests/test_cell_adversarial.py:88: AssertionError
+_________________ test_renamed_reordered_cell_copy_is_rejected _________________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-16/test_renamed_reordered_cell_co0')
+
+    def test_renamed_reordered_cell_copy_is_rejected(tmp_path):
+        path = cell_fixture(tmp_path / "cells.h5ad", samples=12)
+        cells = ad.read_h5ad(path)
+        original = cells[cells.obs.sample_id == "s000"].copy()
+        original.obs["sample_id"] = "copy"
+        original.obs["donor"] = "copy_donor"
+        original.obs_names = [f"new_{i}" for i in range(len(original))]
+        combined = ad.concat([cells, original[::-1]], index_unique="-")
+        combined.write_h5ad(tmp_path / "duplicate.h5ad")
+        data = distribution_features(tmp_path / "duplicate.h5ad", cell_config())
+>       with pytest.raises(ValueError, match="Identical expression"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_cell_adversarial.py:101: Failed
+_________ test_external_requires_original_cell_normalization_universe __________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-16/test_external_requires_origina0')
+
+    def test_external_requires_original_cell_normalization_universe(tmp_path):
+        path = cell_fixture(tmp_path / "train.h5ad", samples=12)
+        config = cell_config(stability_resamples=2, outer_folds=2)
+        data = distribution_features(path, config)
+        run_analysis(data, config, tmp_path / "run")
+        cells = ad.read_h5ad(path)
+        cells.obs["sample_id"] = "external_" + cells.obs.sample_id.astype(str)
+        cells.obs["donor"] = "external_" + cells.obs.donor.astype(str)
+        # Removing an unmodeled background gene changes every cell's library size.
+        cells[:, :-1].copy().write_h5ad(tmp_path / "external.h5ad")
+>       with pytest.raises(ValueError, match="normalization/identity contract"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_cell_adversarial.py:183: Failed
+__________ test_permuted_perturbation_metadata_cannot_cross_boundary ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-16/test_permuted_perturbation_met0')
+
+    def test_permuted_perturbation_metadata_cannot_cross_boundary(tmp_path):
+        config = cell_config(cell_resamples=1)
+        data = distribution_features(cell_fixture(tmp_path / "cells.h5ad", samples=12), config)
+        data.cell_resamples = (data.cell_resamples[0].iloc[::-1],)
+>       with pytest.raises(ValueError, match="perturbation rows/columns"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_cell_adversarial.py:197: Failed
+=========================== short test summary info ============================
+FAILED tests/test_cell_adversarial.py::test_reordering_cells_preserves_perturbations_and_fingerprints
+FAILED tests/test_cell_adversarial.py::test_unrelated_donor_removal_does_not_change_cell_resampling
+FAILED tests/test_cell_adversarial.py::test_renamed_reordered_cell_copy_is_rejected
+FAILED tests/test_cell_adversarial.py::test_external_requires_original_cell_normalization_universe
+FAILED tests/test_cell_adversarial.py::test_permuted_perturbation_metadata_cannot_cross_boundary
+5 failed, 15 deselected in 9.79s

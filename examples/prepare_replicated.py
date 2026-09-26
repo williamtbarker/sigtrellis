@@ -138,8 +138,50 @@ def lupus_partitions(obs: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.
     return obs, train, external
 
 
+def write_count_subset(matrix, rows, obs, var, target: Path, policy: str) -> None:
+    """Write selected raw cells in bounded sparse chunks using the AnnData schema."""
+    import h5py
+    from anndata.io import write_elem
+
+    temporary = target.with_suffix(".partial.h5ad")
+    with h5py.File(temporary, "w") as destination:
+        destination.attrs.update({"encoding-type": "anndata", "encoding-version": "0.1.0"})
+        write_elem(destination, "obs", obs)
+        write_elem(destination, "var", var)
+        write_elem(destination, "uns", {"source": LUPUS_URL, "subset_policy": policy})
+        group = destination.create_group("X")
+        group.attrs.update(
+            {
+                "encoding-type": "csr_matrix",
+                "encoding-version": "0.1.0",
+                "shape": (len(rows), len(var)),
+            }
+        )
+        options = {"shape": (0,), "maxshape": (None,), "compression": "gzip", "chunks": True}
+        stored_data = group.create_dataset("data", dtype="int64", **options)
+        stored_indices = group.create_dataset("indices", dtype="int32", **options)
+        stored_indptr = group.create_dataset("indptr", shape=(len(rows) + 1,), dtype="int64")
+        nnz = 0
+        stored_indptr[0] = 0
+        for start in range(0, len(rows), 2048):
+            end = min(start + 2048, len(rows))
+            values = matrix[rows[start:end], :].tocsr()
+            if (
+                not np.isfinite(values.data).all()
+                or (values.data < 0).any()
+                or not np.allclose(values.data, np.rint(values.data), atol=1e-6, rtol=0)
+            ):
+                raise ValueError("The pinned raw matrix is not integer counts")
+            stored_data.resize((nnz + values.nnz,))
+            stored_indices.resize((nnz + values.nnz,))
+            stored_data[nnz:] = values.data.astype(np.int64)
+            stored_indices[nnz:] = values.indices
+            stored_indptr[start + 1 : end + 1] = nnz + values.indptr[1:]
+            nnz += values.nnz
+    temporary.replace(target)
+
+
 def lupus(source: Path, output: Path, cells_per_sample: int = 400) -> None:
-    import anndata as ad
     import h5py
     from anndata.io import read_elem, sparse_dataset
 
@@ -170,26 +212,23 @@ def lupus(source: Path, output: Path, cells_per_sample: int = 400) -> None:
             for sample in sorted(selected.specimen_id):
                 candidates = np.flatnonzero(obs.specimen_id.to_numpy() == sample)
                 rows.extend(
-                    rng.choice(
+                    candidates.tolist()
+                    if cells_per_sample == 0
+                    else rng.choice(
                         candidates, min(cells_per_sample, len(candidates)), replace=False
                     ).tolist()
                 )
             rows = np.sort(rows)
             cells = obs.iloc[rows].copy()
             cells.index = pd.Index([f"source_cell_{i}" for i in rows])
-            values = matrix[rows, :].tocsr()
-            if (
-                not np.isfinite(values.data).all()
-                or (values.data < 0).any()
-                or not np.allclose(values.data, np.rint(values.data), rtol=0, atol=1e-6)
-            ):
-                raise ValueError("The pinned raw matrix is not integer counts")
-            prepared = ad.AnnData(values, obs=cells, var=var.copy())
-            prepared.uns["source"] = LUPUS_URL
-            prepared.uns["subset_policy"] = (
-                "Seed 2026 sample-local cell subsampling; all genes retained; no expression/phenotype-based cell selection"
+            policy = (
+                "All source cells in the declared specimens; no cell downsampling"
+                if cells_per_sample == 0
+                else (
+                    "Seed 2026 sample-local cell subsampling; all genes retained; no expression/phenotype-based cell selection"
+                )
             )
-            prepared.write_h5ad(output / f"{label}.h5ad", compression="gzip")
+            write_count_subset(matrix, rows, cells, var.copy(), output / f"{label}.h5ad", policy)
             selected.to_csv(output / f"{label}_samples.tsv", sep="\t", index=False)
             records[label] = {
                 "samples": len(selected),
@@ -226,9 +265,17 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--source", type=Path)
     parser.add_argument(
+        "--cells-per-sample",
+        type=int,
+        default=400,
+        help="0 retains every source cell in each declared specimen",
+    )
+    parser.add_argument(
         "--download", action="store_true", help="Explicitly allow the 12.2 GB lupus source download"
     )
     args = parser.parse_args()
+    if args.cells_per_sample < 0:
+        parser.error("cells-per-sample must be nonnegative")
     if args.dataset == "yeast":
         yeast(args.output)
     else:
@@ -239,7 +286,7 @@ def main() -> None:
             source = download_checked(
                 LUPUS_URL, LUPUS_SHA256, args.output / "downloads/source.h5ad"
             )
-        lupus(source, args.output)
+        lupus(source, args.output, args.cells_per_sample)
 
 
 if __name__ == "__main__":

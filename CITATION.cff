@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: "Please cite SigTrellis and the statistical methods and datasets used in your analysis."
 title: "SigTrellis: donor-aware, leakage-audited transcriptomic signature discovery"
 type: software
-version: 0.2.0
+version: 0.3.0
 date-released: 2026-09-26
 authors:
   - family-names: Barker
@@ -10,6 +10,8 @@ authors:
 license: MIT
 keywords:
   - RNA-seq
+  - single-cell distributions
+  - within-cell coexpression
   - pseudobulk
   - elastic net
   - stability selection

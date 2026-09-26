@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.0 — 2026-09-26
+
+- Add fixed expression-tail fractions and within-cell gene/program correlation predictors without count pseudobulk or cell pseudoreplication.
+- Make cell perturbations invariant to row order, chunking and unrelated-donor removal; detect renamed/reordered exact copies of cell collections.
+- Enforce the complete RNA normalization-universe contract for frozen native single-cell evaluation; legacy distribution models require refitting.
+- Reject misaligned perturbation matrices and ambiguous joint-feature configuration; preserve canonical program-pair identity across serialization.
+- Stream cellular moments without retaining score arrays unless exact quantiles are requested; stream public AnnData subset preparation and support all cells per specimen.
+- Report specimen-level feature distributions, technical cell-quality summaries, explicit partner genes/programs and thresholds; do not attach mean-count DE to correlation features.
+- Support a single informative predictor and missing low-information variance/correlation estimates.
+- Preserve reconstructable filtering decisions using a shared feature universe instead of repeating excluded features in every fit record.
+- Add 23 adversarial/scientific tests and rerun public bulk and native all-cell workflows; retain earlier release evidence with its original labels.
+
 ## 0.2.0 — 2026-09-26
 
 - Add fixed cell-state abundance, gene detection/mean/variance, and predefined program mean/variance/quantile/activation features, with explicit units and biological sample identity.

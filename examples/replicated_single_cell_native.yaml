@@ -1,0 +1,120 @@
+# Same prespecified program genes; new features probe distributions and within-cell coupling.
+outcome: disease
+outcome_type: binary
+positive_class: systemic lupus erythematosus
+sample_id: specimen_id
+group: donor_id
+batch: Processing_Cohort
+permutation_strata: Processing_Cohort
+cell_type: author_cell_type
+single_cell_mode: distribution
+cell_states:
+- cM
+- T4
+- T8
+- B
+- NK
+input_scale: features
+normalization: none
+imputation: median
+min_cells: 10
+feature_blocks:
+- abundance
+- gene_mean
+- gene_detection
+- gene_variance
+- gene_tail
+- gene_correlation
+- program_mean
+- program_variance
+- program_q90
+- program_correlation
+programs:
+  interferon_response:
+  - ENSG00000187608
+  - ENSG00000126709
+  - ENSG00000119917
+  - ENSG00000185745
+  - ENSG00000089127
+  - ENSG00000157601
+  immediate_early_response:
+  - ENSG00000118503
+  - ENSG00000100906
+  - ENSG00000170345
+  - ENSG00000171223
+candidate_method: association
+max_features: 300
+outer_folds: 3
+inner_folds: 2
+strengths:
+- 0.02
+- 0.08
+l1_ratios:
+- 0.5
+- 0.9
+stability_resamples: 9
+stability_fraction: 0.8
+cell_resamples: 2
+cell_fraction: 0.75
+panel_validation: true
+panel_max_features: 8
+permutations: 19
+seed: 2026
+feature_genes:
+- ENSG00000187608
+- ENSG00000126709
+- ENSG00000119917
+- ENSG00000185745
+- ENSG00000089127
+- ENSG00000157601
+- ENSG00000118503
+- ENSG00000100906
+- ENSG00000170345
+- ENSG00000171223
+gene_pairs:
+- - ENSG00000187608
+  - ENSG00000126709
+- - ENSG00000187608
+  - ENSG00000119917
+- - ENSG00000187608
+  - ENSG00000185745
+- - ENSG00000187608
+  - ENSG00000089127
+- - ENSG00000187608
+  - ENSG00000157601
+- - ENSG00000126709
+  - ENSG00000119917
+- - ENSG00000126709
+  - ENSG00000185745
+- - ENSG00000126709
+  - ENSG00000089127
+- - ENSG00000126709
+  - ENSG00000157601
+- - ENSG00000119917
+  - ENSG00000185745
+- - ENSG00000119917
+  - ENSG00000089127
+- - ENSG00000119917
+  - ENSG00000157601
+- - ENSG00000185745
+  - ENSG00000089127
+- - ENSG00000185745
+  - ENSG00000157601
+- - ENSG00000089127
+  - ENSG00000157601
+- - ENSG00000118503
+  - ENSG00000100906
+- - ENSG00000118503
+  - ENSG00000170345
+- - ENSG00000118503
+  - ENSG00000171223
+- - ENSG00000100906
+  - ENSG00000170345
+- - ENSG00000100906
+  - ENSG00000171223
+- - ENSG00000170345
+  - ENSG00000171223
+gene_thresholds:
+- 1.0
+- 2.0
+- 3.0

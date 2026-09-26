@@ -1,0 +1,498 @@
+{
+  "config": {
+    "assess_batches": true,
+    "batch": null,
+    "candidate_method": "variance",
+    "cell_fraction": 0.75,
+    "cell_min_counts": 1,
+    "cell_min_genes": 1,
+    "cell_resamples": 0,
+    "cell_states": [],
+    "cell_type": null,
+    "cell_type_value": null,
+    "chunk_size": 2048,
+    "coefficient_tolerance": 1e-07,
+    "correlation_max_features": 100,
+    "correlation_threshold": 0.85,
+    "covariates": [],
+    "cv_strategy": "grouped",
+    "de_fdr": 0.1,
+    "de_pair_group": false,
+    "decision_threshold": 0.5,
+    "feature_blocks": [
+      "abundance",
+      "gene_mean",
+      "gene_detection",
+      "program_mean",
+      "program_variance"
+    ],
+    "feature_genes": [],
+    "gene_pairs": [],
+    "gene_thresholds": [
+      1.0,
+      2.0,
+      3.0
+    ],
+    "group": "donor",
+    "imputation": "reject",
+    "inner_folds": 2,
+    "input_scale": "counts",
+    "l1_ratios": [
+      0.5
+    ],
+    "layer": null,
+    "max_dense_mb": 2048,
+    "max_features": 150,
+    "max_iter": 10000,
+    "max_missing_fraction": 0.5,
+    "max_mito_fraction": 1.0,
+    "min_cells": 20,
+    "min_count": 5.0,
+    "min_groups_gate": 20,
+    "min_prevalence": 0.2,
+    "mitochondrial_prefix": null,
+    "normalization": "logcpm",
+    "outcome": "phenotype",
+    "outcome_type": "binary",
+    "outer_folds": 3,
+    "outer_selection_threshold": 0.5,
+    "panel_max_features": 20,
+    "panel_validation": false,
+    "permutation_alpha": 0.05,
+    "permutation_scheme": "group",
+    "permutation_strata": null,
+    "permutations": 19,
+    "positive_class": null,
+    "program_thresholds": {},
+    "programs": {},
+    "repeats": 1,
+    "sample_id": "sample_id",
+    "seed": 42,
+    "selection_threshold": 0.8,
+    "sign_threshold": 0.9,
+    "single_cell_mode": "pseudobulk",
+    "stability_fraction": 0.75,
+    "stability_normalizations": [],
+    "stability_resamples": 12,
+    "strengths": [
+      0.02,
+      0.15
+    ],
+    "supporting_de": false,
+    "temporal_gap": 0.0,
+    "temporal_train_fraction": 0.5,
+    "time": null,
+    "tolerance": 0.0001,
+    "tuning_rule": "one_se"
+  },
+  "records": [
+    {
+      "loss_improvement": 0.6688269233346512,
+      "metrics": {
+        "balanced_accuracy": 1.0,
+        "brier_score": 0.0008410232802121033,
+        "discrimination_status": "all_classes_observed",
+        "log_loss": 0.02491218223608767,
+        "mcc": 1.0,
+        "pr_auc_average_precision": 1.0,
+        "prevalence": 0.5,
+        "roc_auc": 1.0,
+        "sensitivity": 1.0,
+        "specificity": 1.0
+      },
+      "n_features": 200,
+      "n_samples": 80,
+      "permutation_pvalue": 0.05,
+      "planted_genes": [
+        "gene_0000",
+        "gene_0001",
+        "gene_0002",
+        "gene_0003"
+      ],
+      "planted_recovered": 4,
+      "qc_gate_blockers": [],
+      "qc_warnings": [],
+      "scenario": "signal",
+      "seed": 17,
+      "stable_genes": [
+        "gene_0000",
+        "gene_0001",
+        "gene_0002",
+        "gene_0003",
+        "gene_0064"
+      ],
+      "stable_nonplanted": 1
+    },
+    {
+      "loss_improvement": -0.045576913234267824,
+      "metrics": {
+        "balanced_accuracy": 0.475,
+        "brier_score": 0.2721546168854242,
+        "discrimination_status": "all_classes_observed",
+        "log_loss": 0.7393160188050067,
+        "mcc": -0.05006261743217589,
+        "pr_auc_average_precision": 0.5505735115569402,
+        "prevalence": 0.5,
+        "roc_auc": 0.47187500000000004,
+        "sensitivity": 0.45,
+        "specificity": 0.5
+      },
+      "n_features": 200,
+      "n_samples": 80,
+      "permutation_pvalue": 0.5,
+      "planted_genes": [],
+      "planted_recovered": 0,
+      "qc_gate_blockers": [],
+      "qc_warnings": [],
+      "scenario": "noise",
+      "seed": 17,
+      "stable_genes": [
+        "gene_0000",
+        "gene_0046",
+        "gene_0059"
+      ],
+      "stable_nonplanted": 3
+    },
+    {
+      "loss_improvement": 0.6452849275010162,
+      "metrics": {
+        "balanced_accuracy": 1.0,
+        "brier_score": 0.006584921044742469,
+        "discrimination_status": "all_classes_observed",
+        "log_loss": 0.0484541780697228,
+        "mcc": 1.0,
+        "pr_auc_average_precision": 1.0,
+        "prevalence": 0.5,
+        "roc_auc": 1.0,
+        "sensitivity": 1.0,
+        "specificity": 1.0
+      },
+      "n_features": 200,
+      "n_samples": 80,
+      "qc_gate_blockers": [],
+      "qc_warnings": [],
+      "scenario": "correlated",
+      "seed": 17
+    },
+    {
+      "batch_validation": {
+        "folds": [
+          {
+            "batch": "batch_case",
+            "reason": "Training data lack an outcome class",
+            "status": "unidentifiable"
+          },
+          {
+            "batch": "batch_control",
+            "reason": "Training data lack an outcome class",
+            "status": "unidentifiable"
+          }
+        ],
+        "status": "incomplete"
+      },
+      "loss_improvement": 0.6798227610225588,
+      "metrics": {
+        "balanced_accuracy": 1.0,
+        "brier_score": 0.0002162310656140501,
+        "discrimination_status": "all_classes_observed",
+        "log_loss": 0.013916344548180137,
+        "mcc": 1.0,
+        "pr_auc_average_precision": 1.0,
+        "prevalence": 0.5,
+        "roc_auc": 1.0,
+        "sensitivity": 1.0,
+        "specificity": 1.0
+      },
+      "n_features": 200,
+      "n_samples": 80,
+      "qc_gate_blockers": [
+        "perfect_batch_confounding"
+      ],
+      "qc_warnings": [
+        "PERFECT_BATCH_CONFOUNDING: phenotype cannot be separated from batch"
+      ],
+      "scenario": "batch_confounded",
+      "seed": 17
+    },
+    {
+      "batch_validation": {
+        "folds": [
+          {
+            "baseline_parameters": {
+              "l1_ratio": 0.5,
+              "strength": 0.02
+            },
+            "baseline_tuning_results": [],
+            "batch": "batch_0",
+            "loss_improvement": -0.09849353603085154,
+            "n_test_groups": 27,
+            "n_train_groups": 53,
+            "panel_loss_improvement": null,
+            "parameters": {
+              "l1_ratio": 0.5,
+              "strength": 0.15
+            },
+            "status": "tested",
+            "tuning_results": [
+              {
+                "chosen": false,
+                "context": "batch:batch_0",
+                "failure": "",
+                "inner_fold": 0,
+                "l1_ratio": 0.5,
+                "loss": 1.1485870079372715,
+                "n_selected": 34,
+                "strength": 0.02
+              },
+              {
+                "chosen": true,
+                "context": "batch:batch_0",
+                "failure": "",
+                "inner_fold": 0,
+                "l1_ratio": 0.5,
+                "loss": 0.9376582456758188,
+                "n_selected": 17,
+                "strength": 0.15
+              },
+              {
+                "chosen": false,
+                "context": "batch:batch_0",
+                "failure": "",
+                "inner_fold": 1,
+                "l1_ratio": 0.5,
+                "loss": 1.0630072555866623,
+                "n_selected": 35,
+                "strength": 0.02
+              },
+              {
+                "chosen": true,
+                "context": "batch:batch_0",
+                "failure": "",
+                "inner_fold": 1,
+                "l1_ratio": 0.5,
+                "loss": 0.8261475789244064,
+                "n_selected": 18,
+                "strength": 0.15
+              }
+            ]
+          },
+          {
+            "baseline_parameters": {
+              "l1_ratio": 0.5,
+              "strength": 0.02
+            },
+            "baseline_tuning_results": [],
+            "batch": "batch_1",
+            "loss_improvement": -0.09300570601468461,
+            "n_test_groups": 27,
+            "n_train_groups": 53,
+            "panel_loss_improvement": null,
+            "parameters": {
+              "l1_ratio": 0.5,
+              "strength": 0.15
+            },
+            "status": "tested",
+            "tuning_results": [
+              {
+                "chosen": false,
+                "context": "batch:batch_1",
+                "failure": "",
+                "inner_fold": 0,
+                "l1_ratio": 0.5,
+                "loss": 0.9937236684656974,
+                "n_selected": 36,
+                "strength": 0.02
+              },
+              {
+                "chosen": true,
+                "context": "batch:batch_1",
+                "failure": "",
+                "inner_fold": 0,
+                "l1_ratio": 0.5,
+                "loss": 0.6793855827601554,
+                "n_selected": 23,
+                "strength": 0.15
+              },
+              {
+                "chosen": false,
+                "context": "batch:batch_1",
+                "failure": "",
+                "inner_fold": 1,
+                "l1_ratio": 0.5,
+                "loss": 0.7661380475255665,
+                "n_selected": 46,
+                "strength": 0.02
+              },
+              {
+                "chosen": true,
+                "context": "batch:batch_1",
+                "failure": "",
+                "inner_fold": 1,
+                "l1_ratio": 0.5,
+                "loss": 0.7386748194110127,
+                "n_selected": 23,
+                "strength": 0.15
+              }
+            ]
+          },
+          {
+            "baseline_parameters": {
+              "l1_ratio": 0.5,
+              "strength": 0.02
+            },
+            "baseline_tuning_results": [],
+            "batch": "batch_2",
+            "loss_improvement": 0.005750093268334089,
+            "n_test_groups": 26,
+            "n_train_groups": 54,
+            "panel_loss_improvement": null,
+            "parameters": {
+              "l1_ratio": 0.5,
+              "strength": 0.15
+            },
+            "status": "tested",
+            "tuning_results": [
+              {
+                "chosen": false,
+                "context": "batch:batch_2",
+                "failure": "",
+                "inner_fold": 0,
+                "l1_ratio": 0.5,
+                "loss": 0.8776088229079577,
+                "n_selected": 48,
+                "strength": 0.02
+              },
+              {
+                "chosen": true,
+                "context": "batch:batch_2",
+                "failure": "",
+                "inner_fold": 0,
+                "l1_ratio": 0.5,
+                "loss": 0.667610825108177,
+                "n_selected": 23,
+                "strength": 0.15
+              },
+              {
+                "chosen": false,
+                "context": "batch:batch_2",
+                "failure": "",
+                "inner_fold": 1,
+                "l1_ratio": 0.5,
+                "loss": 0.9591325059678879,
+                "n_selected": 47,
+                "strength": 0.02
+              },
+              {
+                "chosen": true,
+                "context": "batch:batch_2",
+                "failure": "",
+                "inner_fold": 1,
+                "l1_ratio": 0.5,
+                "loss": 0.7372962782895918,
+                "n_selected": 27,
+                "strength": 0.15
+              }
+            ]
+          }
+        ],
+        "status": "tested"
+      },
+      "loss_improvement": -0.002603098312840557,
+      "metrics": {
+        "balanced_accuracy": 0.5249999999999999,
+        "brier_score": 0.25207069855694464,
+        "discrimination_status": "all_classes_observed",
+        "log_loss": 0.6963422038835795,
+        "mcc": 0.050251890762960605,
+        "pr_auc_average_precision": 0.6086757682573716,
+        "prevalence": 0.5,
+        "roc_auc": 0.544375,
+        "sensitivity": 0.475,
+        "specificity": 0.575
+      },
+      "n_features": 200,
+      "n_samples": 80,
+      "qc_gate_blockers": [],
+      "qc_warnings": [],
+      "scenario": "batch_specific",
+      "seed": 17
+    },
+    {
+      "loss_improvement": 0.47958100209791876,
+      "metrics": {
+        "balanced_accuracy": 1.0,
+        "brier_score": 0.0013457710301397875,
+        "discrimination_status": "all_classes_observed",
+        "log_loss": 0.021865857841756427,
+        "mcc": 1.0,
+        "pr_auc_average_precision": 1.0,
+        "prevalence": 0.2,
+        "roc_auc": 1.0,
+        "sensitivity": 1.0,
+        "specificity": 1.0
+      },
+      "n_features": 200,
+      "n_samples": 80,
+      "qc_gate_blockers": [],
+      "qc_warnings": [],
+      "scenario": "imbalance",
+      "seed": 17
+    },
+    {
+      "loss_improvement": 0.6688269233346512,
+      "metrics": {
+        "balanced_accuracy": 1.0,
+        "brier_score": 0.0008410232802121033,
+        "discrimination_status": "all_classes_observed",
+        "log_loss": 0.02491218223608767,
+        "mcc": 1.0,
+        "pr_auc_average_precision": 1.0,
+        "prevalence": 0.5,
+        "roc_auc": 1.0,
+        "sensitivity": 1.0,
+        "specificity": 1.0
+      },
+      "n_features": 200,
+      "n_samples": 80,
+      "qc_gate_blockers": [],
+      "qc_warnings": [
+        "LIBRARY_OUTLIERS: flagged for review; no data-driven sample removal"
+      ],
+      "scenario": "outliers",
+      "seed": 17
+    },
+    {
+      "loss_improvement": 1.0628309188890803,
+      "metrics": {
+        "balanced_accuracy": 1.0,
+        "brier_multiclass_sum": 0.0025672346349812874,
+        "discrimination_status": "all_classes_observed",
+        "log_loss": 0.0360248231098149,
+        "mcc": 1.0,
+        "pr_auc_macro_ovr": 1.0,
+        "roc_auc_macro_ovr": 1.0
+      },
+      "n_features": 200,
+      "n_samples": 80,
+      "qc_gate_blockers": [],
+      "qc_warnings": [],
+      "scenario": "multiclass",
+      "seed": 17
+    },
+    {
+      "loss_improvement": 0.9454413391233899,
+      "metrics": {
+        "mae": 0.09410593459142383,
+        "r2": 0.9833833513703787,
+        "rmse": 0.12597172320392008
+      },
+      "n_features": 200,
+      "n_samples": 80,
+      "qc_gate_blockers": [],
+      "qc_warnings": [],
+      "scenario": "continuous",
+      "seed": 17
+    }
+  ],
+  "scope": "Controlled synthetic validation; no biological claims"
+}

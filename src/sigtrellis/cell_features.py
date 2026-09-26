@@ -6,9 +6,8 @@ declared in advance; cohort-trained embeddings are deliberately not implied.
 
 from __future__ import annotations
 
-import hashlib
 import json
-from dataclasses import dataclass, field
+from itertools import combinations
 from pathlib import Path
 from typing import Any
 
@@ -18,6 +17,8 @@ import pandas as pd
 from anndata.io import read_elem, sparse_dataset
 from scipy import sparse
 
+from sigtrellis.cell_identity import CellFingerprint, cell_uniforms, gene_universe_hash
+from sigtrellis.cell_moments import CellMoments, correlations
 from sigtrellis.config import Config
 from sigtrellis.domain import Dataset, Feature, FloatArray, file_hash
 
@@ -25,39 +26,6 @@ from sigtrellis.domain import Dataset, Feature, FloatArray, file_hash
 def feature_id(kind: str, state: str, source: str = "") -> str:
     """JSON encoding avoids collisions when source identifiers contain separators."""
     return json.dumps([kind, state, source], ensure_ascii=False, separators=(",", ":"))
-
-
-@dataclass
-class CellMoments:
-    n_pairs: int
-    n_genes: int
-    n_programs: int
-    counts: FloatArray = field(init=False)
-    sums: FloatArray = field(init=False)
-    squares: FloatArray = field(init=False)
-    detected: FloatArray = field(init=False)
-    n: FloatArray = field(init=False)
-    programs: list[list[FloatArray]] = field(init=False)
-
-    def __post_init__(self) -> None:
-        self.counts = np.zeros((self.n_pairs, self.n_genes))
-        self.sums = np.zeros_like(self.counts)
-        self.squares = np.zeros_like(self.counts)
-        self.detected = np.zeros_like(self.counts)
-        self.n = np.zeros(self.n_pairs)
-        self.programs = [[] for _ in range(self.n_pairs)]
-
-    def add(self, counts: Any, log_values: Any, scores: FloatArray, dest: Any) -> None:
-        for pair in np.unique(dest):
-            rows = np.flatnonzero(dest == pair)
-            c, v = counts[rows], log_values[rows]
-            self.n[pair] += len(rows)
-            self.counts[pair] += np.asarray(c.sum(axis=0)).ravel()
-            self.sums[pair] += np.asarray(v.sum(axis=0)).ravel()
-            self.squares[pair] += np.asarray(v.multiply(v).sum(axis=0)).ravel()
-            self.detected[pair] += np.asarray((c > 0).sum(axis=0)).ravel()
-            if self.n_programs:
-                self.programs[pair].append(scores[rows])
 
 
 def _render(
@@ -95,6 +63,48 @@ def _render(
                 values[totals == 0] = np.nan
                 columns[key] = values
                 identities[key] = Feature(key, kind, state, unit="log_relative_odds")
+            elif kind in {"gene_correlation", "program_correlation"}:
+                is_gene = kind == "gene_correlation"
+                pairs = moments.gene_pairs if is_gene else moments.program_pairs
+                names = genes if is_gene else program_names
+                values = correlations(
+                    (moments.sums if is_gene else moments.program_sums)[positions],
+                    (moments.squares if is_gene else moments.program_squares)[positions],
+                    (moments.cross if is_gene else moments.program_cross)[positions],
+                    numbers,
+                    pairs,
+                )
+                for pi, (a, b) in enumerate(pairs):
+                    first, second = names[a], names[b]
+                    key = feature_id(kind, state, json.dumps([first, second]))
+                    columns[key] = np.where(available, values[:, pi], np.nan)
+                    identities[key] = Feature(
+                        key,
+                        kind,
+                        state,
+                        gene_id=first if is_gene else None,
+                        gene_partner=second if is_gene else None,
+                        program=first if not is_gene else None,
+                        program_partner=second if not is_gene else None,
+                        unit="within_cell_pearson_correlation",
+                    )
+            elif kind == "gene_tail":
+                for ti, threshold in enumerate(moments.thresholds):
+                    for gi, gene in enumerate(genes):
+                        if gene not in rendered_genes:
+                            continue
+                        key = feature_id(kind, state, json.dumps([gene, float(threshold)]))
+                        columns[key] = np.where(
+                            available, moments.tails[positions, ti, gi] / safe_n, np.nan
+                        )
+                        identities[key] = Feature(
+                            key,
+                            kind,
+                            state,
+                            gene_id=gene,
+                            threshold=float(threshold),
+                            unit="fraction_cells_above_log1p_cp10k_threshold",
+                        )
             elif kind.startswith("gene_"):
                 values = {
                     "gene_mean": means,
@@ -105,7 +115,11 @@ def _render(
                     if gene not in rendered_genes:
                         continue
                     key = feature_id(kind, state, gene)
-                    columns[key] = np.where(available, values[:, gi], np.nan)
+                    columns[key] = np.where(
+                        available & ((numbers >= 2) if kind == "gene_variance" else True),
+                        values[:, gi],
+                        np.nan,
+                    )
                     unit = {
                         "gene_mean": "mean_log1p_cp10k",
                         "gene_variance": "variance_log1p_cp10k",
@@ -118,15 +132,21 @@ def _render(
                     for si, pair in enumerate(positions):
                         if not available[si]:
                             continue
-                        scores = np.concatenate(moments.programs[pair], axis=0)[:, pi]
+                        n = numbers[si]
+                        total = moments.program_sums[pair, pi]
                         if kind == "program_mean":
-                            values[si] = scores.mean()
+                            values[si] = total / n
                         elif kind == "program_variance":
-                            values[si] = scores.var(ddof=1) if len(scores) > 1 else np.nan
+                            values[si] = (
+                                max(moments.program_squares[pair, pi] - total**2 / n, 0) / (n - 1)
+                                if n > 1
+                                else np.nan
+                            )
                         elif kind == "program_q90":
+                            scores = np.concatenate(moments.programs[pair], axis=0)[:, pi]
                             values[si] = np.quantile(scores, 0.9)
                         else:
-                            values[si] = (scores > config.program_thresholds[program]).mean()
+                            values[si] = moments.program_active[pair, pi] / n
                     key = feature_id(kind, state, program)
                     columns[key] = values
                     identities[key] = Feature(
@@ -198,8 +218,17 @@ def distribution_features(path: Path, config: Config) -> Dataset:
         samples = sorted(obs[config.sample_id].unique())
         sample_indices = {s: i for i, s in enumerate(samples)}
         all_genes = var.index.astype(str).tolist()
-        needs_genes = config.supporting_de or any(
-            block.startswith("gene_") for block in config.feature_blocks
+        gene_blocks = set(config.feature_blocks) & {
+            "gene_mean",
+            "gene_detection",
+            "gene_variance",
+            "gene_tail",
+        }
+        needs_genes = config.supporting_de or bool(gene_blocks)
+        pair_members = (
+            {g for pair in config.gene_pairs for g in pair}
+            if "gene_correlation" in config.feature_blocks
+            else set()
         )
         # Count-DE normalization must retain the full supplied RNA universe,
         # even when the predictive gene-feature dictionary is deliberately small.
@@ -208,11 +237,12 @@ def distribution_features(path: Path, config: Config) -> Dataset:
             if needs_genes
             else []
         )
-        if set(config.feature_genes) - set(all_genes):
+        genes = list(dict.fromkeys([*genes, *sorted(pair_members)]))
+        if (set(config.feature_genes) | pair_members) - set(all_genes):
             raise ValueError("A declared feature gene is absent from the count matrix")
         gene_lookup = {g: i for i, g in enumerate(all_genes)}
         gene_indices = [gene_lookup[g] for g in genes]
-        program_names = list(config.programs)
+        program_names = sorted(config.programs)
         for name, members in config.programs.items():
             if set(members) - set(all_genes):
                 raise ValueError(
@@ -224,18 +254,45 @@ def distribution_features(path: Path, config: Config) -> Dataset:
                 program_weights[gene_lookup[gene], pi] = 1 / len(config.programs[name])
         program_weights = program_weights.tocsr()
         n_pairs = len(samples) * len(states)
-        n_gene_blocks = sum(b.startswith("gene_") for b in config.feature_blocks)
-        n_program_blocks = sum(b.startswith("program_") for b in config.feature_blocks)
+        gene_positions = {g: i for i, g in enumerate(genes)}
+        gene_pairs = (
+            tuple(
+                (gene_positions[sorted(pair)[0]], gene_positions[sorted(pair)[1]])
+                for pair in config.gene_pairs
+            )
+            if "gene_correlation" in config.feature_blocks
+            else ()
+        )
+        program_pairs = (
+            tuple(combinations(range(len(program_names)), 2))
+            if "program_correlation" in config.feature_blocks
+            else ()
+        )
+        tail_thresholds = config.gene_thresholds if "gene_tail" in config.feature_blocks else ()
+        retain_scores = "program_q90" in config.feature_blocks
+        n_gene_blocks = len(gene_blocks - {"gene_tail"}) + len(tail_thresholds)
+        n_program_blocks = sum(
+            b.startswith("program_") and b != "program_correlation" for b in config.feature_blocks
+        )
         output_columns = len(states) * (
             n_gene_blocks * len(config.feature_genes or genes)
             + n_program_blocks * len(program_names)
             + int("abundance" in config.feature_blocks)
+            + len(gene_pairs)
+            + len(program_pairs)
         )
         # Budget accumulator and output copies as well as retained program scores.
         # Sparse input chunks and Python object overhead remain additional costs.
         required_bytes = (1 + config.cell_resamples) * (
-            n_pairs * len(genes) * 8 * 4
-            + len(obs) * len(program_names) * 8
+            n_pairs
+            * (
+                len(genes) * (4 + len(tail_thresholds))
+                + len(program_names) * 3
+                + len(gene_pairs)
+                + len(program_pairs)
+            )
+            * 8
+            + (len(obs) * len(program_names) * 16 if retain_scores else 0)
             + len(samples) * output_columns * 8 * 3
         )
         if required_bytes > config.max_dense_mb * 1024**2:
@@ -243,14 +300,26 @@ def distribution_features(path: Path, config: Config) -> Dataset:
                 "Cell feature accumulators exceed max_dense_mb; use feature_genes/programs or fewer resamples"
             )
         moments = [
-            CellMoments(n_pairs, len(genes), len(program_names))
+            CellMoments(
+                n_pairs,
+                len(genes),
+                len(program_names),
+                tail_thresholds,
+                gene_pairs,
+                program_pairs,
+                retain_scores,
+                np.array([config.program_thresholds[name] for name in program_names])
+                if "program_fraction" in config.feature_blocks
+                else None,
+            )
             for _ in range(1 + config.cell_resamples)
         ]
         totals = np.zeros((len(moments), len(samples)))
-        generators = [
-            np.random.default_rng(config.seed + 65537 + i) for i in range(config.cell_resamples)
-        ]
-        sample_hashes = {s: hashlib.sha256() for s in samples}
+        technical_totals = np.zeros((len(samples), 3))
+        failed_per_sample = np.zeros(len(samples), dtype=np.int64)
+        universe_hash = gene_universe_hash(all_genes)
+        canonical_gene_indices = np.argsort(np.argsort(np.array(all_genes))).astype(np.int64)
+        sample_hashes = {s: CellFingerprint(universe_hash) for s in samples}
         state_indices = {s: i for i, s in enumerate(states)}
         labels = (
             obs[config.cell_type].astype(str).to_numpy()
@@ -295,16 +364,31 @@ def distribution_features(path: Path, config: Config) -> Dataset:
             scores = np.asarray((normalized @ program_weights).toarray(), dtype=float)
             local_samples, local_labels = specimen[start:end], labels[start:end]
             sample_dest = np.array([sample_indices[s] for s in local_samples])
+            failed_per_sample += np.bincount(sample_dest[~keep], minlength=len(samples))
+            for qi, measurement in enumerate(
+                (libraries, detected, mito_counts / np.maximum(libraries, 1))
+            ):
+                technical_totals[:, qi] += np.bincount(
+                    sample_dest[keep], weights=measurement[keep], minlength=len(samples)
+                )
             for ci in np.flatnonzero(keep):
                 lo, hi = chunk.indptr[ci : ci + 2]
                 digest = sample_hashes[local_samples[ci]]
-                digest.update(np.asarray([hi - lo], dtype="<i8").tobytes())
-                digest.update(chunk.indices[lo:hi].astype("<i8").tobytes())
-                digest.update(chunk.data[lo:hi].astype("<f8").tobytes())
-                digest.update(str(local_labels[ci]).encode() + b"\0")
+                digest.add(
+                    canonical_gene_indices[chunk.indices[lo:hi]],
+                    chunk.data[lo:hi],
+                    str(local_labels[ci]),
+                )
             selections = [
                 keep,
-                *[keep & (rng.random(end - start) < config.cell_fraction) for rng in generators],
+                *[
+                    keep
+                    & (
+                        cell_uniforms(obs.index[start:end].astype(str).tolist(), config.seed, i)
+                        < config.cell_fraction
+                    )
+                    for i in range(config.cell_resamples)
+                ],
             ]
             for ri, selected in enumerate(selections):
                 totals[ri] += np.bincount(sample_dest[selected], minlength=len(samples))
@@ -332,8 +416,8 @@ def distribution_features(path: Path, config: Config) -> Dataset:
             for m, total in zip(moments, totals, strict=True)
         ]
         expression, identities = frames[0]
-        if expression.shape[1] < 2:
-            raise ValueError("Declare at least two identifiable single-cell features")
+        if expression.shape[1] < 1:
+            raise ValueError("Declare at least one identifiable single-cell feature")
         meta = obs.drop_duplicates(config.sample_id).set_index(config.sample_id, drop=False)
         meta = meta.loc[samples, [config.sample_id, *invariant]].copy()
         meta["n_cells"] = totals[0].astype(int)
@@ -344,7 +428,7 @@ def distribution_features(path: Path, config: Config) -> Dataset:
                 columns=genes,
             )
             for ti, state in enumerate(states)
-            if genes
+            if genes and config.supporting_de
         }
         qc: dict[str, Any] = {
             "modality": "single_cell_distributions",
@@ -354,6 +438,17 @@ def distribution_features(path: Path, config: Config) -> Dataset:
             "unmodeled_states": sorted(set(labels) - set(states)),
             "sample_cell_hashes": {s: h.hexdigest() for s, h in sample_hashes.items()},
             "cells_per_sample": dict(zip(samples, totals[0].astype(int).tolist(), strict=True)),
+            "sample_cell_quality": {
+                sample: {
+                    "mean_counts_per_cell": technical_totals[i, 0] / totals[0, i],
+                    "mean_detected_genes": technical_totals[i, 1] / totals[0, i],
+                    "mean_mito_fraction": technical_totals[i, 2] / totals[0, i]
+                    if config.mitochondrial_prefix
+                    else None,
+                    "failed_cells": int(failed_per_sample[i]),
+                }
+                for i, sample in enumerate(samples)
+            },
             "cells_per_state": {
                 state: dict(
                     zip(
@@ -367,6 +462,15 @@ def distribution_features(path: Path, config: Config) -> Dataset:
                 )
                 for ti, state in enumerate(states)
             },
+            "cell_feature_contract": {
+                "version": 2,
+                "rna_gene_universe_sha256": universe_hash,
+                "n_rna_genes": len(all_genes),
+                "normalization": "per_cell_log1p_cp10k_full_rna_universe",
+                "fingerprint": "sha256_multiset_v2",
+            },
+            "retained_program_scores": retain_scores,
+            "estimated_dense_bytes": required_bytes,
             "cell_resamples": config.cell_resamples,
             "cell_fraction": config.cell_fraction,
             "feature_definition": "Fixed state annotations/programs; sample-local log1p(CP10K) moments; no phenotype-trained embedding",

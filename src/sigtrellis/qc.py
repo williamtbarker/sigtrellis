@@ -47,8 +47,23 @@ def validate_dataset(data: Dataset, config: Config) -> dict[str, Any]:
         raise ValueError("Expression/metadata row order mismatch")
     if x.index.has_duplicates or x.columns.has_duplicates:
         raise ValueError("Duplicate sample or gene identifiers")
-    if x.shape[0] < 4 or x.shape[1] < 2:
-        raise ValueError("Need at least four samples and two candidate genes")
+    if data.features and (
+        set(data.features) != set(x.columns)
+        or any(key != value.feature_id for key, value in data.features.items())
+    ):
+        raise ValueError("Feature identities must match every expression column exactly")
+    for frame in data.cell_resamples:
+        if not frame.index.equals(x.index) or not frame.columns.equals(x.columns):
+            raise ValueError(
+                "Cell perturbation rows/columns must match the original feature matrix"
+            )
+        perturbed_values = frame.to_numpy(dtype=float)
+        if np.isinf(perturbed_values).any() or (
+            np.isnan(perturbed_values).any() and config.imputation == "reject"
+        ):
+            raise ValueError("Cell perturbations contain invalid nonfinite values")
+    if x.shape[0] < 4 or x.shape[1] < 1:
+        raise ValueError("Need at least four samples and one candidate feature")
     if any(not str(v).strip() or str(v).lower() == "nan" for v in [*x.index, *x.columns]):
         raise ValueError("Empty/invalid sample or gene identifier")
     required = {config.outcome, config.sample_id, *config.covariates}

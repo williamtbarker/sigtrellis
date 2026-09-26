@@ -31,12 +31,14 @@ def annotate_features(table: pd.DataFrame, data: Dataset) -> pd.DataFrame:
     result["cell_type"] = result.gene_id.map({k: v.cell_type for k, v in data.features.items()})
     result["program"] = result.gene_id.map({k: v.program or "" for k, v in data.features.items()})
     result["feature_unit"] = result.gene_id.map({k: v.unit for k, v in data.features.items()})
-    result["feature_label"] = result.gene_id.map(
-        {
-            k: f"{v.gene_id or v.program or 'population'} | {v.cell_type} | {v.kind}"
-            for k, v in data.features.items()
-        }
+    result["gene_partner"] = result.gene_id.map(
+        {k: v.gene_partner or "" for k, v in data.features.items()}
     )
+    result["program_partner"] = result.gene_id.map(
+        {k: v.program_partner or "" for k, v in data.features.items()}
+    )
+    result["threshold"] = result.gene_id.map({k: v.threshold for k, v in data.features.items()})
+    result["feature_label"] = result.gene_id.map({k: v.label for k, v in data.features.items()})
     return result
 
 
@@ -71,6 +73,7 @@ def supporting_evidence(
                 imputation="reject",
                 single_cell_mode="pseudobulk",
                 stability_normalizations=(),
+                cell_resamples=0,
             )
             positions = data.expression.index.get_indexer(source.expression.index)
             result = differential_expression(source, y[positions], local)

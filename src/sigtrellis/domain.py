@@ -26,6 +26,18 @@ class Feature:
     gene_id: str | None = None
     program: str | None = None
     unit: str = "expression"
+    gene_partner: str | None = None
+    program_partner: str | None = None
+    threshold: float | None = None
+
+    @property
+    def label(self) -> str:
+        source = self.gene_id or self.program or "population"
+        if self.gene_partner or self.program_partner:
+            source += " / " + str(self.gene_partner or self.program_partner)
+        if self.threshold is not None:
+            source += f" > {self.threshold:g}"
+        return f"{source} | {self.cell_type} | {self.kind}"
 
 
 @dataclass
@@ -83,6 +95,10 @@ def array_hash(values: FloatArray) -> str:
     canonical = np.array(values, dtype="<f8", order="C", copy=True)
     canonical[canonical == 0] = 0.0
     return hashlib.sha256(canonical.tobytes()).hexdigest()
+
+
+def identifier_hash(names: list[str]) -> str:
+    return hashlib.sha256(json.dumps(names, ensure_ascii=False).encode()).hexdigest()
 
 
 def write_json(path: Path, value: Any) -> None:
