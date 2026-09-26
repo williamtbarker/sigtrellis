@@ -12,6 +12,7 @@ from scipy.special import expit, softmax
 
 from sigtrellis.config import load_config
 from sigtrellis.domain import Dataset, FloatArray, array_hash, write_json
+from sigtrellis.integrity import verify_run_artifacts
 from sigtrellis.io import load_bulk
 from sigtrellis.metrics import evaluate, group_weights
 from sigtrellis.preprocessing import Normalizer
@@ -71,15 +72,19 @@ def external_validate(
 ) -> dict[str, Any]:
     if output.exists() and any(output.iterdir()):
         raise ValueError("External output directory must be empty")
-    config = load_config(run / "configuration.json")
     manifest = json.loads((run / "run_manifest.json").read_text())
     if manifest["status"] != "complete":
         raise ValueError("Training run did not complete")
+    verified = verify_run_artifacts(
+        run, manifest, ("configuration.json", "model_state.json", "sample_metadata.csv")
+    )
+    config = load_config(run / "configuration.json")
     data = load_bulk(expression, metadata, config, orientation)
     validate_dataset(data, config)
     train_metadata = pd.read_csv(
         run / "sample_metadata.csv",
         dtype={config.sample_id: str, config.group or config.sample_id: str},
+        keep_default_na=False,
     )
     if set(data.expression.index) & set(train_metadata[config.sample_id].astype(str)):
         raise ValueError("External sample identifiers overlap training")
@@ -107,12 +112,20 @@ def external_validate(
         y = labels.map(mapping).to_numpy(dtype=float)
     metrics = evaluate(y, prediction, config, group_weights(group_values(data, config)))
     output.mkdir(parents=True, exist_ok=True)
-    frame = pd.DataFrame(prediction, index=data.expression.index)
+    columns = (
+        ["prediction"]
+        if config.outcome_type == "continuous"
+        else [f"probability:{label}" for label in manifest["classes"]]
+    )
+    frame = pd.DataFrame(prediction, index=data.expression.index, columns=columns)
     frame.to_csv(output / "external_predictions.csv", index_label="sample_id")
     record = {
         "metrics": metrics,
         "input_hashes": data.input_hashes,
         "training_expression_hash": manifest["expression_hash"],
+        "training_model_sha256": verified["model_state.json"],
+        "verified_training_artifacts": verified,
+        "classes": manifest["classes"],
         "scope": "Frozen final full-data model; does not validate a separately refitted consensus panel",
         "training_transform_refit": False,
     }

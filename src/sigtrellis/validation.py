@@ -126,6 +126,8 @@ def nested_validate(
 def permutation_control(
     data: Dataset, y: FloatArray, config: Config, observed: float, audit: Audit
 ) -> dict[str, Any]:
+    if not np.isfinite(observed):
+        raise ValueError("Permutation test requires a finite observed statistic")
     if not config.permutations:
         return {"status": "not_run", "pvalue": None, "null_improvements": []}
     rng = np.random.default_rng(config.seed + 7919)
@@ -143,7 +145,10 @@ def permutation_control(
             local_audit,
             context=f"permutation:{index}",
         )
-        null.append(float(result.metrics["loss_improvement"]))
+        statistic = float(result.metrics["loss_improvement"])
+        if not np.isfinite(statistic):
+            raise ValueError(f"Permutation {index} produced a nonfinite statistic")
+        null.append(statistic)
         permutation_audits.append(
             {
                 "index": index,

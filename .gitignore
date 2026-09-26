@@ -14,3 +14,8 @@ dist/
 *.egg-info/
 build/
 .DS_Store
+
+# Generated distribution inventories are outside the source tree contract.
+SHA256SUMS.txt
+*.bundle
+coverage.xml

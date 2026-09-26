@@ -1,0 +1,806 @@
+FFFFFFFFFFFFFFFFFFFFFFFF.F                                               [100%]
+=================================== FAILURES ===================================
+_____ test_invalid_numeric_configuration_is_not_silently_coerced[change0] ______
+
+config = Config(outcome='phenotype', outcome_type='binary', sample_id='sample_id', group='donor', batch=None, covariates=(), po...l_min_counts=1, cell_min_genes=1, mitochondrial_prefix=None, max_mito_fraction=1.0, chunk_size=2048, max_dense_mb=2048)
+change = {'seed': True}
+
+    @pytest.mark.parametrize(
+        "change",
+        [
+            {"seed": True},
+            {"max_features": True},
+            {"min_count": True},
+            {"strengths": (0.05, 0.05)},
+            {"l1_ratios": (0.5, 0.5)},
+            {"strengths": (True,)},
+            {"l1_ratios": (True,)},
+        ],
+    )
+    def test_invalid_numeric_configuration_is_not_silently_coerced(config, change):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_review_regressions.py:36: Failed
+_____ test_invalid_numeric_configuration_is_not_silently_coerced[change1] ______
+
+config = Config(outcome='phenotype', outcome_type='binary', sample_id='sample_id', group='donor', batch=None, covariates=(), po...l_min_counts=1, cell_min_genes=1, mitochondrial_prefix=None, max_mito_fraction=1.0, chunk_size=2048, max_dense_mb=2048)
+change = {'max_features': True}
+
+    @pytest.mark.parametrize(
+        "change",
+        [
+            {"seed": True},
+            {"max_features": True},
+            {"min_count": True},
+            {"strengths": (0.05, 0.05)},
+            {"l1_ratios": (0.5, 0.5)},
+            {"strengths": (True,)},
+            {"l1_ratios": (True,)},
+        ],
+    )
+    def test_invalid_numeric_configuration_is_not_silently_coerced(config, change):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_review_regressions.py:36: Failed
+_____ test_invalid_numeric_configuration_is_not_silently_coerced[change2] ______
+
+config = Config(outcome='phenotype', outcome_type='binary', sample_id='sample_id', group='donor', batch=None, covariates=(), po...l_min_counts=1, cell_min_genes=1, mitochondrial_prefix=None, max_mito_fraction=1.0, chunk_size=2048, max_dense_mb=2048)
+change = {'min_count': True}
+
+    @pytest.mark.parametrize(
+        "change",
+        [
+            {"seed": True},
+            {"max_features": True},
+            {"min_count": True},
+            {"strengths": (0.05, 0.05)},
+            {"l1_ratios": (0.5, 0.5)},
+            {"strengths": (True,)},
+            {"l1_ratios": (True,)},
+        ],
+    )
+    def test_invalid_numeric_configuration_is_not_silently_coerced(config, change):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_review_regressions.py:36: Failed
+_____ test_invalid_numeric_configuration_is_not_silently_coerced[change3] ______
+
+config = Config(outcome='phenotype', outcome_type='binary', sample_id='sample_id', group='donor', batch=None, covariates=(), po...l_min_counts=1, cell_min_genes=1, mitochondrial_prefix=None, max_mito_fraction=1.0, chunk_size=2048, max_dense_mb=2048)
+change = {'strengths': (0.05, 0.05)}
+
+    @pytest.mark.parametrize(
+        "change",
+        [
+            {"seed": True},
+            {"max_features": True},
+            {"min_count": True},
+            {"strengths": (0.05, 0.05)},
+            {"l1_ratios": (0.5, 0.5)},
+            {"strengths": (True,)},
+            {"l1_ratios": (True,)},
+        ],
+    )
+    def test_invalid_numeric_configuration_is_not_silently_coerced(config, change):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_review_regressions.py:36: Failed
+_____ test_invalid_numeric_configuration_is_not_silently_coerced[change4] ______
+
+config = Config(outcome='phenotype', outcome_type='binary', sample_id='sample_id', group='donor', batch=None, covariates=(), po...l_min_counts=1, cell_min_genes=1, mitochondrial_prefix=None, max_mito_fraction=1.0, chunk_size=2048, max_dense_mb=2048)
+change = {'l1_ratios': (0.5, 0.5)}
+
+    @pytest.mark.parametrize(
+        "change",
+        [
+            {"seed": True},
+            {"max_features": True},
+            {"min_count": True},
+            {"strengths": (0.05, 0.05)},
+            {"l1_ratios": (0.5, 0.5)},
+            {"strengths": (True,)},
+            {"l1_ratios": (True,)},
+        ],
+    )
+    def test_invalid_numeric_configuration_is_not_silently_coerced(config, change):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_review_regressions.py:36: Failed
+_____ test_invalid_numeric_configuration_is_not_silently_coerced[change5] ______
+
+config = Config(outcome='phenotype', outcome_type='binary', sample_id='sample_id', group='donor', batch=None, covariates=(), po...l_min_counts=1, cell_min_genes=1, mitochondrial_prefix=None, max_mito_fraction=1.0, chunk_size=2048, max_dense_mb=2048)
+change = {'strengths': (True,)}
+
+    @pytest.mark.parametrize(
+        "change",
+        [
+            {"seed": True},
+            {"max_features": True},
+            {"min_count": True},
+            {"strengths": (0.05, 0.05)},
+            {"l1_ratios": (0.5, 0.5)},
+            {"strengths": (True,)},
+            {"l1_ratios": (True,)},
+        ],
+    )
+    def test_invalid_numeric_configuration_is_not_silently_coerced(config, change):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_review_regressions.py:36: Failed
+_____ test_invalid_numeric_configuration_is_not_silently_coerced[change6] ______
+
+config = Config(outcome='phenotype', outcome_type='binary', sample_id='sample_id', group='donor', batch=None, covariates=(), po...l_min_counts=1, cell_min_genes=1, mitochondrial_prefix=None, max_mito_fraction=1.0, chunk_size=2048, max_dense_mb=2048)
+change = {'l1_ratios': (True,)}
+
+    @pytest.mark.parametrize(
+        "change",
+        [
+            {"seed": True},
+            {"max_features": True},
+            {"min_count": True},
+            {"strengths": (0.05, 0.05)},
+            {"l1_ratios": (0.5, 0.5)},
+            {"strengths": (True,)},
+            {"l1_ratios": (True,)},
+        ],
+    )
+    def test_invalid_numeric_configuration_is_not_silently_coerced(config, change):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_review_regressions.py:36: Failed
+__________ test_inconsistent_h5ad_dimensions_fail_before_aggregation ___________
+
+config = Config(outcome='phenotype', outcome_type='binary', sample_id='sample_id', group='donor', batch=None, covariates=(), po...l_min_counts=1, cell_min_genes=1, mitochondrial_prefix=None, max_mito_fraction=1.0, chunk_size=2048, max_dense_mb=2048)
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-4/test_inconsistent_h5ad_dimensi0')
+
+    def test_inconsistent_h5ad_dimensions_fail_before_aggregation(config, tmp_path):
+        import h5py
+    
+        from sigtrellis.simulate import synthetic_single_cell
+        from sigtrellis.singlecell import pseudobulk
+    
+        path = tmp_path / "inconsistent.h5ad"
+        synthetic_single_cell(path, donors=6, genes=20, cells=5)
+        with h5py.File(path, "r+") as handle:
+            n, p = handle["X"].attrs["shape"]
+            handle["X"].attrs["shape"] = (n + 1, p)
+>       with pytest.raises(ValueError, match="shape does not match"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_review_regressions.py:51: Failed
+_______ test_identifiers_survive_csv_parsing_verbatim[samples_by_genes] ________
+
+data = Dataset(expression=      gene_0000  gene_0001  gene_0002  ...  gene_0057  gene_0058  gene_0059
+0000       21.0       4...       1  batch_1
+0047      0047  0047         1  batch_2, cell_type=None, input_hashes={}, upstream_qc={}, symbols={})
+config = Config(outcome='phenotype', outcome_type='binary', sample_id='sample_id', group='donor', batch=None, covariates=(), po...l_min_counts=1, cell_min_genes=1, mitochondrial_prefix=None, max_mito_fraction=1.0, chunk_size=2048, max_dense_mb=2048)
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-4/test_identifiers_survive_csv_p0')
+orientation = 'samples_by_genes'
+
+    @pytest.mark.parametrize("orientation", ["samples_by_genes", "genes_by_samples"])
+    def test_identifiers_survive_csv_parsing_verbatim(data, config, tmp_path, orientation):
+        ids = [f"{i:04d}" for i in range(len(data.expression))]
+        data.expression.index = ids
+        data.metadata.index = ids
+        data.metadata["sample_id"] = ids
+        data.metadata["donor"] = ["01", "1", "NA", *ids[3:]]
+        data.metadata["phenotype"] = np.where(data.metadata.phenotype == 1, "01", "1")
+        x = data.expression if orientation == "samples_by_genes" else data.expression.T
+        x.to_csv(tmp_path / "x.tsv", sep="\t")
+        data.metadata.to_csv(tmp_path / "m.tsv", sep="\t", index=False)
+        loaded = load_bulk(tmp_path / "x.tsv", tmp_path / "m.tsv", config, orientation)
+>       assert loaded.expression.index.tolist() == ids
+E       AssertionError: assert ['0', '1', '2...'4', '5', ...] == ['0000', '000..., '0005', ...]
+E         
+E         At index 0 diff: '0' != '0000'
+E         Use -v to get more diff
+
+tests/test_review_regressions.py:67: AssertionError
+_______ test_identifiers_survive_csv_parsing_verbatim[genes_by_samples] ________
+
+data = Dataset(expression=      gene_0000  gene_0001  gene_0002  ...  gene_0057  gene_0058  gene_0059
+0000       21.0       4...       1  batch_1
+0047      0047  0047         1  batch_2, cell_type=None, input_hashes={}, upstream_qc={}, symbols={})
+config = Config(outcome='phenotype', outcome_type='binary', sample_id='sample_id', group='donor', batch=None, covariates=(), po...l_min_counts=1, cell_min_genes=1, mitochondrial_prefix=None, max_mito_fraction=1.0, chunk_size=2048, max_dense_mb=2048)
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-4/test_identifiers_survive_csv_p1')
+orientation = 'genes_by_samples'
+
+    @pytest.mark.parametrize("orientation", ["samples_by_genes", "genes_by_samples"])
+    def test_identifiers_survive_csv_parsing_verbatim(data, config, tmp_path, orientation):
+        ids = [f"{i:04d}" for i in range(len(data.expression))]
+        data.expression.index = ids
+        data.metadata.index = ids
+        data.metadata["sample_id"] = ids
+        data.metadata["donor"] = ["01", "1", "NA", *ids[3:]]
+        data.metadata["phenotype"] = np.where(data.metadata.phenotype == 1, "01", "1")
+        x = data.expression if orientation == "samples_by_genes" else data.expression.T
+        x.to_csv(tmp_path / "x.tsv", sep="\t")
+        data.metadata.to_csv(tmp_path / "m.tsv", sep="\t", index=False)
+>       loaded = load_bulk(tmp_path / "x.tsv", tmp_path / "m.tsv", config, orientation)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_review_regressions.py:66: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+expression = PosixPath('/tmp/pytest-of-root/pytest-4/test_identifiers_survive_csv_p1/x.tsv')
+metadata = PosixPath('/tmp/pytest-of-root/pytest-4/test_identifiers_survive_csv_p1/m.tsv')
+config = Config(outcome='phenotype', outcome_type='binary', sample_id='sample_id', group='donor', batch=None, covariates=(), po...l_min_counts=1, cell_min_genes=1, mitochondrial_prefix=None, max_mito_fraction=1.0, chunk_size=2048, max_dense_mb=2048)
+orientation = 'genes_by_samples'
+
+    def load_bulk(
+        expression: Path, metadata: Path, config: Config, orientation: str = "auto"
+    ) -> Dataset:
+        x = read_table(expression)
+        m = read_table(metadata)
+        # First metadata column is the identifier, explicitly checked by name.
+        if m.index.name != config.sample_id:
+            raise ValueError(f"First metadata column must be {config.sample_id!r}")
+        x.index = x.index.astype(str)
+        x.columns = x.columns.astype(str)
+        m.index = m.index.astype(str)
+        if x.index.has_duplicates or x.columns.has_duplicates or m.index.has_duplicates:
+            raise ValueError("Duplicate sample or gene identifiers")
+        rows_match = set(x.index) == set(m.index)
+        cols_match = set(x.columns) == set(m.index)
+        if orientation == "auto":
+            if rows_match == cols_match:
+                raise ValueError("Ambiguous/mismatched sample axes; specify orientation and exact IDs")
+            orientation = "samples_by_genes" if rows_match else "genes_by_samples"
+        if orientation not in {"samples_by_genes", "genes_by_samples"}:
+            raise ValueError("Invalid orientation")
+        if orientation == "genes_by_samples":
+            x = x.T
+        if set(x.index) != set(m.index):
+>           raise ValueError("Expression and metadata sample IDs must match exactly")
+E           ValueError: Expression and metadata sample IDs must match exactly
+
+../../original_review_baseline/src/sigtrellis/io.py:52: ValueError
+__________________ test_blank_biological_identity_is_rejected __________________
+
+data = Dataset(expression=             gene_0000  gene_0001  gene_0002  ...  gene_0057  gene_0058  gene_0059
+sample_0000     ...sample_0047  sample_0047  sample_0047          0  batch_2, cell_type=None, input_hashes={}, upstream_qc={}, symbols={})
+config = Config(outcome='phenotype', outcome_type='binary', sample_id='sample_id', group='donor', batch=None, covariates=(), po...l_min_counts=1, cell_min_genes=1, mitochondrial_prefix=None, max_mito_fraction=1.0, chunk_size=2048, max_dense_mb=2048)
+
+    def test_blank_biological_identity_is_rejected(data, config):
+        data.metadata.loc[data.metadata.index[0], "donor"] = "  "
+>       with pytest.raises(ValueError, match="[Bb]lank"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_review_regressions.py:74: Failed
+________ test_paired_de_rejects_repeated_donor_condition_before_backend ________
+
+data = Dataset(expression=             gene_0000  gene_0001  gene_0002  ...  gene_0057  gene_0058  gene_0059
+sample_0000     ...atch_1
+sample_0047  sample_0047   d23          1  batch_2, cell_type=None, input_hashes={}, upstream_qc={}, symbols={})
+config = Config(outcome='phenotype', outcome_type='binary', sample_id='sample_id', group='donor', batch=None, covariates=(), po...l_min_counts=1, cell_min_genes=1, mitochondrial_prefix=None, max_mito_fraction=1.0, chunk_size=2048, max_dense_mb=2048)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fb5f2dfee10>
+
+    def test_paired_de_rejects_repeated_donor_condition_before_backend(data, config, monkeypatch):
+        dds = pytest.importorskip("pydeseq2.dds")
+        data.metadata["donor"] = [f"d{i // 2}" for i in range(len(data.expression))]
+        data.metadata["phenotype"] = np.tile([0, 1], len(data.expression) // 2)
+        data.metadata.loc[data.metadata.index[1], "phenotype"] = 0
+        local = replace(config, de_pair_group=True)
+    
+        def forbidden_backend(**kwargs):
+            raise AssertionError("Count backend reached an unsupported repeated-condition design")
+    
+        monkeypatch.setattr(dds, "DeseqDataSet", forbidden_backend)
+        with pytest.raises(ValueError, match="one observation per biological group and condition"):
+>           differential_expression(data, encode_outcome(data, local)[0], local)
+
+tests/test_review_regressions.py:90: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../original_review_baseline/src/sigtrellis/de.py:61: in differential_expression
+    dds = DeseqDataSet(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+kwargs = {'counts':              gene_0000  gene_0001  gene_0002  ...  gene_0057  gene_0058  gene_0059
+sample_0000         21  ...   0.0     0.0  ...    0.0    0.0    0.0        1.0
+
+[48 rows x 25 columns], 'size_factors_fit_type': 'poscounts', ...}
+
+    def forbidden_backend(**kwargs):
+>       raise AssertionError("Count backend reached an unsupported repeated-condition design")
+E       AssertionError: Count backend reached an unsupported repeated-condition design
+
+tests/test_review_regressions.py:86: AssertionError
+______ test_multiclass_correlated_group_evidence_keeps_contrasts_separate ______
+
+data = Dataset(expression=             gene_0000  gene_0001  gene_0002  ...  gene_0057  gene_0058  gene_0059
+sample_0000     ...sample_0047  sample_0047  sample_0047          0  batch_2, cell_type=None, input_hashes={}, upstream_qc={}, symbols={})
+config = Config(outcome='phenotype', outcome_type='binary', sample_id='sample_id', group='donor', batch=None, covariates=(), po...l_min_counts=1, cell_min_genes=1, mitochondrial_prefix=None, max_mito_fraction=1.0, chunk_size=2048, max_dense_mb=2048)
+
+    def test_multiclass_correlated_group_evidence_keeps_contrasts_separate(data, config):
+        coefs = np.zeros((6, 2, data.expression.shape[1]))
+        coefs[:, 0, 0] = 1
+        coefs[0, 1, 0] = 1
+        ranking = summarize_coefficients(
+            coefs, list(data.expression.columns), ["a_vs_c", "b_vs_c"], 1e-7
+        )
+>       result = correlation_diagnostics(
+            data,
+            coefs,
+            ranking,
+            replace(config, outcome_type="multiclass"),
+            contrasts=["a_vs_c", "b_vs_c"],
+        )
+E       TypeError: correlation_diagnostics() got an unexpected keyword argument 'contrasts'
+
+tests/test_review_regressions.py:100: TypeError
+___ test_invalid_statistics_never_pass_evidence_gates[loss_improvement-nan] ____
+
+config = Config(outcome='phenotype', outcome_type='binary', sample_id='sample_id', group='donor', batch=None, covariates=(), po...l_min_counts=1, cell_min_genes=1, mitochondrial_prefix=None, max_mito_fraction=1.0, chunk_size=2048, max_dense_mb=2048)
+bad_field = 'loss_improvement', bad_value = nan
+
+    @pytest.mark.parametrize(
+        "bad_field,bad_value",
+        [
+            ("loss_improvement", np.nan),
+            ("loss_improvement", np.inf),
+            ("pvalue", np.nan),
+            ("pvalue", -0.01),
+            ("pvalue", 0.0),
+        ],
+    )
+    def test_invalid_statistics_never_pass_evidence_gates(config, bad_field, bad_value):
+        table = pd.DataFrame(
+            {
+                "selection_frequency": [1.0],
+                "sign_consistency": [1.0],
+                "outer_selection_frequency": [1.0],
+                "outer_sign_consistency": [1.0],
+                "frequency_logcpm": [1.0],
+                "coefficient": [1.0],
+                "coefficient_median_selected": [1.0],
+                "outer_dominant_sign": [1.0],
+            }
+        )
+        metrics = {"loss_improvement": 1.0, "permutation": {"status": "tested", "pvalue": 0.01}}
+        if bad_field == "pvalue":
+            metrics["permutation"][bad_field] = bad_value
+        else:
+            metrics[bad_field] = bad_value
+        gated, blockers = evidence_gates(
+            table,
+            replace(config, permutations=99),
+            {"gate_blockers": []},
+            metrics,
+            {"status": "not_assessed"},
+        )
+>       assert blockers
+E       assert []
+
+tests/test_review_regressions.py:148: AssertionError
+___ test_invalid_statistics_never_pass_evidence_gates[loss_improvement-inf] ____
+
+config = Config(outcome='phenotype', outcome_type='binary', sample_id='sample_id', group='donor', batch=None, covariates=(), po...l_min_counts=1, cell_min_genes=1, mitochondrial_prefix=None, max_mito_fraction=1.0, chunk_size=2048, max_dense_mb=2048)
+bad_field = 'loss_improvement', bad_value = inf
+
+    @pytest.mark.parametrize(
+        "bad_field,bad_value",
+        [
+            ("loss_improvement", np.nan),
+            ("loss_improvement", np.inf),
+            ("pvalue", np.nan),
+            ("pvalue", -0.01),
+            ("pvalue", 0.0),
+        ],
+    )
+    def test_invalid_statistics_never_pass_evidence_gates(config, bad_field, bad_value):
+        table = pd.DataFrame(
+            {
+                "selection_frequency": [1.0],
+                "sign_consistency": [1.0],
+                "outer_selection_frequency": [1.0],
+                "outer_sign_consistency": [1.0],
+                "frequency_logcpm": [1.0],
+                "coefficient": [1.0],
+                "coefficient_median_selected": [1.0],
+                "outer_dominant_sign": [1.0],
+            }
+        )
+        metrics = {"loss_improvement": 1.0, "permutation": {"status": "tested", "pvalue": 0.01}}
+        if bad_field == "pvalue":
+            metrics["permutation"][bad_field] = bad_value
+        else:
+            metrics[bad_field] = bad_value
+        gated, blockers = evidence_gates(
+            table,
+            replace(config, permutations=99),
+            {"gate_blockers": []},
+            metrics,
+            {"status": "not_assessed"},
+        )
+>       assert blockers
+E       assert []
+
+tests/test_review_regressions.py:148: AssertionError
+________ test_invalid_statistics_never_pass_evidence_gates[pvalue-nan] _________
+
+config = Config(outcome='phenotype', outcome_type='binary', sample_id='sample_id', group='donor', batch=None, covariates=(), po...l_min_counts=1, cell_min_genes=1, mitochondrial_prefix=None, max_mito_fraction=1.0, chunk_size=2048, max_dense_mb=2048)
+bad_field = 'pvalue', bad_value = nan
+
+    @pytest.mark.parametrize(
+        "bad_field,bad_value",
+        [
+            ("loss_improvement", np.nan),
+            ("loss_improvement", np.inf),
+            ("pvalue", np.nan),
+            ("pvalue", -0.01),
+            ("pvalue", 0.0),
+        ],
+    )
+    def test_invalid_statistics_never_pass_evidence_gates(config, bad_field, bad_value):
+        table = pd.DataFrame(
+            {
+                "selection_frequency": [1.0],
+                "sign_consistency": [1.0],
+                "outer_selection_frequency": [1.0],
+                "outer_sign_consistency": [1.0],
+                "frequency_logcpm": [1.0],
+                "coefficient": [1.0],
+                "coefficient_median_selected": [1.0],
+                "outer_dominant_sign": [1.0],
+            }
+        )
+        metrics = {"loss_improvement": 1.0, "permutation": {"status": "tested", "pvalue": 0.01}}
+        if bad_field == "pvalue":
+            metrics["permutation"][bad_field] = bad_value
+        else:
+            metrics[bad_field] = bad_value
+        gated, blockers = evidence_gates(
+            table,
+            replace(config, permutations=99),
+            {"gate_blockers": []},
+            metrics,
+            {"status": "not_assessed"},
+        )
+>       assert blockers
+E       assert []
+
+tests/test_review_regressions.py:148: AssertionError
+_______ test_invalid_statistics_never_pass_evidence_gates[pvalue--0.01] ________
+
+config = Config(outcome='phenotype', outcome_type='binary', sample_id='sample_id', group='donor', batch=None, covariates=(), po...l_min_counts=1, cell_min_genes=1, mitochondrial_prefix=None, max_mito_fraction=1.0, chunk_size=2048, max_dense_mb=2048)
+bad_field = 'pvalue', bad_value = -0.01
+
+    @pytest.mark.parametrize(
+        "bad_field,bad_value",
+        [
+            ("loss_improvement", np.nan),
+            ("loss_improvement", np.inf),
+            ("pvalue", np.nan),
+            ("pvalue", -0.01),
+            ("pvalue", 0.0),
+        ],
+    )
+    def test_invalid_statistics_never_pass_evidence_gates(config, bad_field, bad_value):
+        table = pd.DataFrame(
+            {
+                "selection_frequency": [1.0],
+                "sign_consistency": [1.0],
+                "outer_selection_frequency": [1.0],
+                "outer_sign_consistency": [1.0],
+                "frequency_logcpm": [1.0],
+                "coefficient": [1.0],
+                "coefficient_median_selected": [1.0],
+                "outer_dominant_sign": [1.0],
+            }
+        )
+        metrics = {"loss_improvement": 1.0, "permutation": {"status": "tested", "pvalue": 0.01}}
+        if bad_field == "pvalue":
+            metrics["permutation"][bad_field] = bad_value
+        else:
+            metrics[bad_field] = bad_value
+        gated, blockers = evidence_gates(
+            table,
+            replace(config, permutations=99),
+            {"gate_blockers": []},
+            metrics,
+            {"status": "not_assessed"},
+        )
+>       assert blockers
+E       assert []
+
+tests/test_review_regressions.py:148: AssertionError
+________ test_invalid_statistics_never_pass_evidence_gates[pvalue-0.0] _________
+
+config = Config(outcome='phenotype', outcome_type='binary', sample_id='sample_id', group='donor', batch=None, covariates=(), po...l_min_counts=1, cell_min_genes=1, mitochondrial_prefix=None, max_mito_fraction=1.0, chunk_size=2048, max_dense_mb=2048)
+bad_field = 'pvalue', bad_value = 0.0
+
+    @pytest.mark.parametrize(
+        "bad_field,bad_value",
+        [
+            ("loss_improvement", np.nan),
+            ("loss_improvement", np.inf),
+            ("pvalue", np.nan),
+            ("pvalue", -0.01),
+            ("pvalue", 0.0),
+        ],
+    )
+    def test_invalid_statistics_never_pass_evidence_gates(config, bad_field, bad_value):
+        table = pd.DataFrame(
+            {
+                "selection_frequency": [1.0],
+                "sign_consistency": [1.0],
+                "outer_selection_frequency": [1.0],
+                "outer_sign_consistency": [1.0],
+                "frequency_logcpm": [1.0],
+                "coefficient": [1.0],
+                "coefficient_median_selected": [1.0],
+                "outer_dominant_sign": [1.0],
+            }
+        )
+        metrics = {"loss_improvement": 1.0, "permutation": {"status": "tested", "pvalue": 0.01}}
+        if bad_field == "pvalue":
+            metrics["permutation"][bad_field] = bad_value
+        else:
+            metrics[bad_field] = bad_value
+        gated, blockers = evidence_gates(
+            table,
+            replace(config, permutations=99),
+            {"gate_blockers": []},
+            metrics,
+            {"status": "not_assessed"},
+        )
+>       assert blockers
+E       assert []
+
+tests/test_review_regressions.py:148: AssertionError
+_____________ test_nonfinite_observed_permutation_statistic_fails ______________
+
+data = Dataset(expression=             gene_0000  gene_0001  gene_0002  ...  gene_0057  gene_0058  gene_0059
+sample_0000     ...sample_0047  sample_0047  sample_0047          0  batch_2, cell_type=None, input_hashes={}, upstream_qc={}, symbols={})
+config = Config(outcome='phenotype', outcome_type='binary', sample_id='sample_id', group='donor', batch=None, covariates=(), po...l_min_counts=1, cell_min_genes=1, mitochondrial_prefix=None, max_mito_fraction=1.0, chunk_size=2048, max_dense_mb=2048)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fb5f31d5790>
+
+    def test_nonfinite_observed_permutation_statistic_fails(data, config, monkeypatch):
+        import sigtrellis.validation as validation
+    
+        def forbidden_validation(*args, **kwargs):
+            raise AssertionError("Nonfinite statistic reached expensive permutation fitting")
+    
+        monkeypatch.setattr(validation, "nested_validate", forbidden_validation)
+        with pytest.raises(ValueError, match="finite"):
+>           permutation_control(
+                data, encode_outcome(data, config)[0], replace(config, permutations=19), np.nan, Audit()
+            )
+
+tests/test_review_regressions.py:160: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../original_review_baseline/src/sigtrellis/validation.py:139: in permutation_control
+    result = nested_validate(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (Dataset(expression=             gene_0000  gene_0001  gene_0002  ...  gene_0057  gene_0058  gene_0059
+sample_0000    ...ndrial_prefix=None, max_mito_fraction=1.0, chunk_size=2048, max_dense_mb=2048), Audit(fits=[], splits=[], warnings=[]))
+kwargs = {'context': 'permutation:0'}
+
+    def forbidden_validation(*args, **kwargs):
+>       raise AssertionError("Nonfinite statistic reached expensive permutation fitting")
+E       AssertionError: Nonfinite statistic reached expensive permutation fitting
+
+tests/test_review_regressions.py:156: AssertionError
+________ test_single_class_fold_does_not_claim_balanced_discrimination _________
+
+config = Config(outcome='phenotype', outcome_type='binary', sample_id='sample_id', group='donor', batch=None, covariates=(), po...l_min_counts=1, cell_min_genes=1, mitochondrial_prefix=None, max_mito_fraction=1.0, chunk_size=2048, max_dense_mb=2048)
+
+    def test_single_class_fold_does_not_claim_balanced_discrimination(config):
+        y = np.zeros(4)
+        metrics = evaluate(y, np.tile([0.8, 0.2], (4, 1)), config, np.ones(4))
+>       assert metrics["balanced_accuracy"] is None
+E       assert 1.0 is None
+
+tests/test_review_regressions.py:168: AssertionError
+____________ test_constant_regression_fold_has_undefined_r_squared _____________
+
+config = Config(outcome='phenotype', outcome_type='binary', sample_id='sample_id', group='donor', batch=None, covariates=(), po...l_min_counts=1, cell_min_genes=1, mitochondrial_prefix=None, max_mito_fraction=1.0, chunk_size=2048, max_dense_mb=2048)
+
+    def test_constant_regression_fold_has_undefined_r_squared(config):
+        metrics = evaluate(
+            np.ones(4),
+            np.arange(4, dtype=float),
+            replace(config, outcome_type="continuous"),
+            np.ones(4),
+        )
+>       assert metrics["r2"] is None
+E       assert 0.0 is None
+
+tests/test_review_regressions.py:180: AssertionError
+_ test_changed_training_artifacts_cannot_be_externally_validated[model_state.json] _
+
+data = Dataset(expression=             gene_0000  gene_0001  gene_0002  ...  gene_0057  gene_0058  gene_0059
+sample_0000     ...sample_0047  sample_0047  sample_0047          0  batch_2, cell_type=None, input_hashes={}, upstream_qc={}, symbols={})
+config = Config(outcome='phenotype', outcome_type='binary', sample_id='sample_id', group='donor', batch=None, covariates=(), po...l_min_counts=1, cell_min_genes=1, mitochondrial_prefix=None, max_mito_fraction=1.0, chunk_size=2048, max_dense_mb=2048)
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-4/test_changed_training_artifact0')
+artifact = 'model_state.json'
+
+    @pytest.mark.integration
+    @pytest.mark.parametrize(
+        "artifact", ["model_state.json", "configuration.json", "sample_metadata.csv"]
+    )
+    def test_changed_training_artifacts_cannot_be_externally_validated(
+        data, config, tmp_path, artifact
+    ):
+        run = tmp_path / "training"
+        run_analysis(data, replace(config, strengths=(0.05,), stability_resamples=2), run)
+        external, _ = synthetic_bulk(24, data.expression.shape[1], seed=73)
+        ids = [f"external_{i}" for i in range(len(external.expression))]
+        external.expression.index = ids
+        external.metadata.index = ids
+        external.metadata["sample_id"] = ids
+        external.metadata["donor"] = ids
+        xp, mp = tmp_path / "x.tsv", tmp_path / "m.tsv"
+        external.expression.to_csv(xp, sep="\t")
+        external.metadata.to_csv(mp, sep="\t", index=False)
+        target = run / artifact
+        if artifact == "model_state.json":
+            state = json.loads(target.read_text())
+            state["intercept"][0] += 100
+            target.write_text(json.dumps(state))
+        elif artifact == "configuration.json":
+            state = json.loads(target.read_text())
+            state["strengths"] = [1.0]
+            target.write_text(json.dumps(state))
+        else:
+            target.write_text(target.read_text() + "\n")
+>       with pytest.raises(ValueError, match="[Ii]ntegrity"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_review_regressions.py:213: Failed
+_ test_changed_training_artifacts_cannot_be_externally_validated[configuration.json] _
+
+data = Dataset(expression=             gene_0000  gene_0001  gene_0002  ...  gene_0057  gene_0058  gene_0059
+sample_0000     ...sample_0047  sample_0047  sample_0047          0  batch_2, cell_type=None, input_hashes={}, upstream_qc={}, symbols={})
+config = Config(outcome='phenotype', outcome_type='binary', sample_id='sample_id', group='donor', batch=None, covariates=(), po...l_min_counts=1, cell_min_genes=1, mitochondrial_prefix=None, max_mito_fraction=1.0, chunk_size=2048, max_dense_mb=2048)
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-4/test_changed_training_artifact1')
+artifact = 'configuration.json'
+
+    @pytest.mark.integration
+    @pytest.mark.parametrize(
+        "artifact", ["model_state.json", "configuration.json", "sample_metadata.csv"]
+    )
+    def test_changed_training_artifacts_cannot_be_externally_validated(
+        data, config, tmp_path, artifact
+    ):
+        run = tmp_path / "training"
+        run_analysis(data, replace(config, strengths=(0.05,), stability_resamples=2), run)
+        external, _ = synthetic_bulk(24, data.expression.shape[1], seed=73)
+        ids = [f"external_{i}" for i in range(len(external.expression))]
+        external.expression.index = ids
+        external.metadata.index = ids
+        external.metadata["sample_id"] = ids
+        external.metadata["donor"] = ids
+        xp, mp = tmp_path / "x.tsv", tmp_path / "m.tsv"
+        external.expression.to_csv(xp, sep="\t")
+        external.metadata.to_csv(mp, sep="\t", index=False)
+        target = run / artifact
+        if artifact == "model_state.json":
+            state = json.loads(target.read_text())
+            state["intercept"][0] += 100
+            target.write_text(json.dumps(state))
+        elif artifact == "configuration.json":
+            state = json.loads(target.read_text())
+            state["strengths"] = [1.0]
+            target.write_text(json.dumps(state))
+        else:
+            target.write_text(target.read_text() + "\n")
+>       with pytest.raises(ValueError, match="[Ii]ntegrity"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_review_regressions.py:213: Failed
+_ test_changed_training_artifacts_cannot_be_externally_validated[sample_metadata.csv] _
+
+data = Dataset(expression=             gene_0000  gene_0001  gene_0002  ...  gene_0057  gene_0058  gene_0059
+sample_0000     ...sample_0047  sample_0047  sample_0047          0  batch_2, cell_type=None, input_hashes={}, upstream_qc={}, symbols={})
+config = Config(outcome='phenotype', outcome_type='binary', sample_id='sample_id', group='donor', batch=None, covariates=(), po...l_min_counts=1, cell_min_genes=1, mitochondrial_prefix=None, max_mito_fraction=1.0, chunk_size=2048, max_dense_mb=2048)
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-4/test_changed_training_artifact2')
+artifact = 'sample_metadata.csv'
+
+    @pytest.mark.integration
+    @pytest.mark.parametrize(
+        "artifact", ["model_state.json", "configuration.json", "sample_metadata.csv"]
+    )
+    def test_changed_training_artifacts_cannot_be_externally_validated(
+        data, config, tmp_path, artifact
+    ):
+        run = tmp_path / "training"
+        run_analysis(data, replace(config, strengths=(0.05,), stability_resamples=2), run)
+        external, _ = synthetic_bulk(24, data.expression.shape[1], seed=73)
+        ids = [f"external_{i}" for i in range(len(external.expression))]
+        external.expression.index = ids
+        external.metadata.index = ids
+        external.metadata["sample_id"] = ids
+        external.metadata["donor"] = ids
+        xp, mp = tmp_path / "x.tsv", tmp_path / "m.tsv"
+        external.expression.to_csv(xp, sep="\t")
+        external.metadata.to_csv(mp, sep="\t", index=False)
+        target = run / artifact
+        if artifact == "model_state.json":
+            state = json.loads(target.read_text())
+            state["intercept"][0] += 100
+            target.write_text(json.dumps(state))
+        elif artifact == "configuration.json":
+            state = json.loads(target.read_text())
+            state["strengths"] = [1.0]
+            target.write_text(json.dumps(state))
+        else:
+            target.write_text(target.read_text() + "\n")
+>       with pytest.raises(ValueError, match="[Ii]ntegrity"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_review_regressions.py:213: Failed
+______ test_batch_holdout_hyperparameters_and_coefficients_are_preserved _______
+
+data = Dataset(expression=             gene_0000  gene_0001  gene_0002  ...  gene_0057  gene_0058  gene_0059
+sample_0000     ...sample_0047  sample_0047  sample_0047          0  batch_2, cell_type=None, input_hashes={}, upstream_qc={}, symbols={})
+config = Config(outcome='phenotype', outcome_type='binary', sample_id='sample_id', group='donor', batch=None, covariates=(), po...l_min_counts=1, cell_min_genes=1, mitochondrial_prefix=None, max_mito_fraction=1.0, chunk_size=2048, max_dense_mb=2048)
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-4/test_batch_holdout_hyperparame0')
+
+    @pytest.mark.integration
+    def test_batch_holdout_hyperparameters_and_coefficients_are_preserved(data, config, tmp_path):
+        output = tmp_path / "batch_run"
+        local = replace(config, batch="batch", strengths=(0.05,), stability_resamples=2)
+        run_analysis(data, local, output)
+        metrics = json.loads((output / "model_metrics.json").read_text())
+        batch = metrics["batch_validation"]
+        assert batch["status"] == "tested"
+        for fold in batch["folds"]:
+>           assert fold["parameters"]["strength"] in local.strengths
+                   ^^^^^^^^^^^^^^^^^^
+E           KeyError: 'parameters'
+
+tests/test_review_regressions.py:238: KeyError
+=============================== warnings summary ===============================
+tests/test_review_regressions.py::test_single_class_fold_does_not_claim_balanced_discrimination
+tests/test_review_regressions.py::test_single_class_fold_does_not_claim_balanced_discrimination
+  /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages/sklearn/metrics/_classification.py:620: UserWarning: A single label was found in 'y_true' and 'y_pred'. For the confusion matrix to have the correct shape, use the 'labels' parameter to pass all known labels.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_review_regressions.py::test_invalid_numeric_configuration_is_not_silently_coerced[change0]
+FAILED tests/test_review_regressions.py::test_invalid_numeric_configuration_is_not_silently_coerced[change1]
+FAILED tests/test_review_regressions.py::test_invalid_numeric_configuration_is_not_silently_coerced[change2]
+FAILED tests/test_review_regressions.py::test_invalid_numeric_configuration_is_not_silently_coerced[change3]
+FAILED tests/test_review_regressions.py::test_invalid_numeric_configuration_is_not_silently_coerced[change4]
+FAILED tests/test_review_regressions.py::test_invalid_numeric_configuration_is_not_silently_coerced[change5]
+FAILED tests/test_review_regressions.py::test_invalid_numeric_configuration_is_not_silently_coerced[change6]
+FAILED tests/test_review_regressions.py::test_inconsistent_h5ad_dimensions_fail_before_aggregation
+FAILED tests/test_review_regressions.py::test_identifiers_survive_csv_parsing_verbatim[samples_by_genes]
+FAILED tests/test_review_regressions.py::test_identifiers_survive_csv_parsing_verbatim[genes_by_samples]
+FAILED tests/test_review_regressions.py::test_blank_biological_identity_is_rejected
+FAILED tests/test_review_regressions.py::test_paired_de_rejects_repeated_donor_condition_before_backend
+FAILED tests/test_review_regressions.py::test_multiclass_correlated_group_evidence_keeps_contrasts_separate
+FAILED tests/test_review_regressions.py::test_invalid_statistics_never_pass_evidence_gates[loss_improvement-nan]
+FAILED tests/test_review_regressions.py::test_invalid_statistics_never_pass_evidence_gates[loss_improvement-inf]
+FAILED tests/test_review_regressions.py::test_invalid_statistics_never_pass_evidence_gates[pvalue-nan]
+FAILED tests/test_review_regressions.py::test_invalid_statistics_never_pass_evidence_gates[pvalue--0.01]
+FAILED tests/test_review_regressions.py::test_invalid_statistics_never_pass_evidence_gates[pvalue-0.0]
+FAILED tests/test_review_regressions.py::test_nonfinite_observed_permutation_statistic_fails
+FAILED tests/test_review_regressions.py::test_single_class_fold_does_not_claim_balanced_discrimination
+FAILED tests/test_review_regressions.py::test_constant_regression_fold_has_undefined_r_squared
+FAILED tests/test_review_regressions.py::test_changed_training_artifacts_cannot_be_externally_validated[model_state.json]
+FAILED tests/test_review_regressions.py::test_changed_training_artifacts_cannot_be_externally_validated[configuration.json]
+FAILED tests/test_review_regressions.py::test_changed_training_artifacts_cannot_be_externally_validated[sample_metadata.csv]
+FAILED tests/test_review_regressions.py::test_batch_holdout_hyperparameters_and_coefficients_are_preserved
+25 failed, 1 passed, 2 warnings in 11.29s

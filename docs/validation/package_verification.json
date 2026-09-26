@@ -1,8 +1,10 @@
 {
-  "wheel_sha256": "e4eb83f2cb617a3e567ead392482cdab4b639b11210403e197c58b014a2fdd9d",
+  "version": "0.1.1",
+  "wheel_sha256": "1e6e785fdfc98df87e46f067a9476f6533c233d75d2baa7eeb2bc5f7b66894cf",
   "identical_to_clean_tested_wheel": true,
-  "source_distribution_members": 71,
-  "source_distribution_sha256": "c5ed987ce3ae509985834e888bf7f216b307d7229fc05c0db263c18633572ce4",
+  "source_distribution_sha256": "2c0e0812c4e6b03fdd2a63db998fd9ad8e3d421ea1e80dd982cb31b272bae368",
+  "source_distribution_members": 99,
   "recorded_run_output_hashes_verified": true,
-  "final_run_source_hashes_match_delivered_source": true
+  "final_run_source_hashes_match_delivered_source": true,
+  "reviewed_figures_byte_identical_to_previous_inspection": true
 }

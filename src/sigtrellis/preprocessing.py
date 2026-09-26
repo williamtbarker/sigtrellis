@@ -121,6 +121,7 @@ class Prepared:
             eligible = np.ones(values.shape[1], dtype=bool)
         variance = normalized.var(axis=0)
         eligible &= variance > 1e-12
+        expression_eligible_count = int(eligible.sum())
         indices = np.flatnonzero(eligible)
         score = variance.copy()
         method = self.config.candidate_method
@@ -162,7 +163,9 @@ class Prepared:
                 "reference_hash": array_hash(reference) if reference is not None else None,
                 "candidate_method": method,
                 "n_input_features": x.shape[1],
-                "n_prevalence_variance_eligible": int(eligible.sum()),
+                "n_prevalence_variance_eligible": expression_eligible_count,
+                "n_after_supervised_screen": int(eligible.sum()),
+                "n_retained_features": len(self.genes),
                 "retained_genes": self.genes,
                 "removed_genes": [g for g in self.all_genes if g not in retained_set],
                 "gene_scale_hash": array_hash(np.asarray(self.scaler.scale_, dtype=float))

@@ -46,12 +46,13 @@ def batch_diagnostics(
             if config.outcome_type != "continuous" and set(y[train]) != set(y):
                 raise ValueError("Training data lack an outcome class")
             tr, te = data.subset(train), data.subset(test)
-            params, _ = tune(tr, y[train], config, audit, f"batch:{batch}")
+            params, tuning = tune(tr, y[train], config, audit, f"batch:{batch}")
             model = fit_model(tr, y[train], config, params, audit, f"batch:{batch}/refit")
             coefficients.append(model.coefficients())
             baseline_params = Hyperparameters(config.strengths[0], config.l1_ratios[0])
+            baseline_tuning = pd.DataFrame()
             if config.covariates:
-                baseline_params, _ = tune(
+                baseline_params, baseline_tuning = tune(
                     tr, y[train], config, audit, f"batch:{batch}/baseline", covariates_only=True
                 )
             baseline = fit_prepared(
@@ -61,6 +62,8 @@ def batch_diagnostics(
             improvement = loss(y[test], baseline.predict(te), config, w) - loss(
                 y[test], model.predict(te), config, w
             )
+            if not np.isfinite(improvement):
+                raise ValueError("Batch holdout produced nonfinite loss improvement")
             rows.append(
                 {
                     "batch": batch,
@@ -68,6 +71,13 @@ def batch_diagnostics(
                     "loss_improvement": improvement,
                     "n_train_groups": len(set(groups[train])),
                     "n_test_groups": len(set(groups[test])),
+                    "parameters": {"strength": params.strength, "l1_ratio": params.l1_ratio},
+                    "tuning_results": tuning.to_dict("records"),
+                    "baseline_parameters": {
+                        "strength": baseline_params.strength,
+                        "l1_ratio": baseline_params.l1_ratio,
+                    },
+                    "baseline_tuning_results": baseline_tuning.to_dict("records"),
                 }
             )
         except ValueError as exc:
@@ -89,15 +99,22 @@ def evidence_gates(
     permutation = metrics["permutation"]
     if permutation["status"] != "tested":
         blockers.append("no_eligible_permutation_test")
-    if config.permutations < 19:
+    if config.permutations < 19 or 1 / (1 + config.permutations) > config.permutation_alpha + 1e-12:
         blockers.append("insufficient_permutation_resolution")
-    if permutation.get("pvalue") is None or permutation["pvalue"] > config.permutation_alpha:
+    pvalue = permutation.get("pvalue")
+    if pvalue is None or not np.isfinite(pvalue) or not 0 < pvalue <= 1:
+        blockers.append("invalid_or_unavailable_permutation_pvalue")
+    elif pvalue > config.permutation_alpha:
         blockers.append("permutation_control_not_passed")
-    if metrics["loss_improvement"] <= 0:
+    if not np.isfinite(metrics["loss_improvement"]):
+        blockers.append("nonfinite_held_out_improvement")
+    elif metrics["loss_improvement"] <= 0:
         blockers.append("no_held_out_improvement_over_baseline")
     if config.batch and batch["status"] != "tested":
         blockers.append("cross_batch_robustness_not_established")
-    if batch["status"] == "tested" and any(f["loss_improvement"] <= 0 for f in batch["folds"]):
+    if batch["status"] == "tested" and any(
+        not np.isfinite(f["loss_improvement"]) or f["loss_improvement"] <= 0 for f in batch["folds"]
+    ):
         blockers.append("cross_batch_performance_failure")
     eligible = (
         (table.selection_frequency >= config.selection_threshold)
@@ -278,12 +295,17 @@ def _run(
             write_json(output / "de_design.json", de.attrs)
         except ValueError as exc:
             audit.warnings.append(f"EXPLORATORY_DE_UNAVAILABLE: {exc}")
-    correlation = correlation_diagnostics(data, stability.coefficients, table, config)
+    correlation = correlation_diagnostics(
+        data, stability.coefficients, table, config, contrasts=contrasts
+    )
     table["correlated_feature_group"] = table.gene_id.map(correlation.membership).fillna(
         "not_assessed"
     )
-    frequencies = correlation.groups.set_index("group_id")["selection_frequency"]
-    table["correlated_group_frequency"] = table.correlated_feature_group.map(frequencies)
+    frequencies = correlation.groups.set_index(["group_id", "contrast"])["selection_frequency"]
+    table["correlated_group_frequency"] = [
+        frequencies.get((group, contrast), np.nan)
+        for group, contrast in zip(table.correlated_feature_group, table.contrast, strict=True)
+    ]
     table, blockers = evidence_gates(table, config, qc, metrics, batch)
     table = table.sort_values(
         [
@@ -317,6 +339,13 @@ def _run(
         output / "resample_coefficients.npz",
         stability=stability.coefficients,
         outer=validation.coefficients,
+        batch=batch_coefficients
+        if batch_coefficients is not None
+        else np.empty((0, len(contrasts), data.expression.shape[1])),
+        batch_labels=np.asarray(
+            [row["batch"] for row in batch["folds"]] if batch_coefficients is not None else [],
+            dtype=str,
+        ),
         genes=np.asarray(data.expression.columns, dtype=str),
         contrasts=np.asarray(contrasts, dtype=str),
     )
@@ -365,9 +394,9 @@ def _run(
         n_biological_groups=qc["n_biological_groups"],
         classes=classes,
         final_hyperparameters={"strength": params.strength, "l1_ratio": params.l1_ratio},
-        selected_features=table.loc[table.coefficient != 0, ["gene_id", "contrast"]].to_dict(
-            "records"
-        ),
+        selected_features=table.loc[
+            table.coefficient.abs() > config.coefficient_tolerance, ["gene_id", "contrast"]
+        ].to_dict("records"),
         candidate_features=table.loc[
             table.passes_robustness_gates, ["gene_id", "contrast"]
         ].to_dict("records"),

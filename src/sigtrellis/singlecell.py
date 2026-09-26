@@ -40,6 +40,8 @@ def pseudobulk(path: Path, config: Config) -> list[Dataset]:
             raise ValueError(f"Missing cell metadata: {sorted(set(required) - set(obs.columns))}")
         if obs[required].isna().any().any():
             raise ValueError("Missing sample, phenotype, grouping, or cell-type metadata")
+        if any(obs[name].astype(str).str.strip().eq("").any() for name in required):
+            raise ValueError("Blank required single-cell metadata")
         obs[config.sample_id] = obs[config.sample_id].astype(str)
         # A sample ID denotes ONE biological specimen/condition, not a pooled donor label.
         invariant = list(
@@ -73,6 +75,8 @@ def pseudobulk(path: Path, config: Config) -> list[Dataset]:
             raise ValueError(f"Count source {key!r} is absent")
         element = handle[key]
         matrix: Any = sparse_dataset(element) if isinstance(element, h5py.Group) else element
+        if tuple(matrix.shape) != (len(obs), len(var)):
+            raise ValueError("Count matrix shape does not match cell/gene metadata")
         mito = np.array(
             [
                 str(g).startswith(config.mitochondrial_prefix)

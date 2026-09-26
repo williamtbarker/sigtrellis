@@ -1,4 +1,4 @@
-# Executed validation — SigTrellis 0.1.0
+# Executed validation — SigTrellis 0.1.1
 
 Executed locally on Linux / Python 3.12.14, 2026-09-26. Results below are observed execution results, not anticipated CI outcomes. Source hashes in all final demonstration manifests match the delivered Python modules. Every recorded output hash was checked after each completed run.
 
@@ -6,15 +6,15 @@ Executed locally on Linux / Python 3.12.14, 2026-09-26. Results below are observ
 
 | Check | Result | Evidence |
 |---|---|---|
-| Full development-environment pytest suite | **89 passed**, 43.54 s | `docs/validation/pytest.log` |
-| Full suite against installed wheel in a fresh venv | **89 passed**, 48.08 s | `docs/validation/clean_pytest.log` |
-| Branch-aware coverage | **88%**; 1,776 statements, 608 branches | `docs/validation/coverage.json` and test logs |
+| Full development-environment pytest suite | **116 passed**, 59.61 s | `docs/validation/pytest.log` |
+| Full suite against installed wheel in a fresh venv | **116 passed**, 62.53 s | `docs/validation/clean_pytest.log` |
+| Branch-aware coverage | **89%**; 1,838 statements, 650 branches | `docs/validation/coverage.json` and test logs |
 | Ruff lint and format | Pass | `docs/validation/ruff.log` |
-| Strict mypy | Pass, 20 source files | `docs/validation/mypy.log` |
+| Strict mypy | Pass, 21 source files | `docs/validation/mypy.log` |
 | Build and clean wheel installation | Pass | build/install logs under `docs/validation/` |
 | Installed dependency consistency | Pass | `docs/validation/pip_check.log` |
 | Documented synthetic quickstart, outside source tree | Complete; four planted candidates, no extras | `release_evidence/toy/` |
-| Public bulk and single-cell preparation under fresh runtime | Complete; checksums and H5AD count round-trip verified | preparation logs and JSON under `release_evidence/preparation/` |
+| Public bulk and single-cell preparation | Complete; checksums and H5AD count round-trip verified | preparation log and JSON under `release_evidence/preparation/` |
 | Public end-to-end runs from installed wheel | Both complete | `release_evidence/public_bulk/`, `release_evidence/public_single_cell/` |
 | Report visual inspection | Volcano, coefficient IQR and correlation figures inspected; readable axes/labels | PNGs and self-contained HTML in evidence directories |
 | Remote GitHub Actions / Docker execution | **Not executed here**; configuration supplied | `.github/workflows/ci.yml`, `Dockerfile` |
@@ -94,10 +94,14 @@ sigtrellis single-cell --input data/public/single_cell/kang.h5ad \
 python examples/validate_science.py --output results/scientific_benchmarks.json
 ```
 
-Use fresh output directories. Public demonstration reports in the archive were generated with the same delivered source from the built wheel outside the source tree. The synthetic benchmark table was generated in the separately recorded development environment; small numerical differences under other dependency versions are not hidden. Model-manifest input hashes and source hashes enable a precise comparison.
+Use fresh output directories. Public demonstration reports in the archive were generated with the same delivered source from the built wheel outside the source tree. The synthetic benchmark table was generated in the recorded fresh installed-wheel environment; small numerical differences under other dependency versions are not hidden. Model-manifest input hashes and source hashes enable a precise comparison.
 
 ## Acceptance and remaining work
 
 Both modalities, all three outcome families, elastic-net tuning, empirical stability, nested/grouped validation, negative controls, required reports, reproducibility records, public downloads/preparation, clean install and documented quickstart have executed successfully. The requested scientific limitations are enforced or explicitly documented rather than represented as supported inference.
 
 The release is scientifically credible as **research software with tested safeguards**. It is not a completed clinical qualification, independent reproduction of every DE backend, a validated compact assay panel, a formal feature-level error-control method, or an atlas-scale performance benchmark. Remaining research priorities are conditional inference with covariates, panel-specific nested discovery, larger independent cohorts, hierarchical/random-effect designs, and gene-program-level validation. See `docs/ADVERSARIAL_REVIEW.md` for the final risk review.
+
+## Follow-up adversarial source review
+
+The 0.1.1 source review adds 27 tests. Twenty-six adversarial cases reproduce failures in 0.1.0; a real nested PyDESeq2 integration check also passes on the original as a positive control. All 116 tests pass after correction. `docs/REVIEW_0.1.1.md` records severity, fixes and limits. Original records are preserved under `docs/validation/v0.1.0/`. Both public input expression hashes, primary metrics (within 1e-10) and candidate decisions match the original valid-case demonstrations. Source and output hashes now describe the corrected release.

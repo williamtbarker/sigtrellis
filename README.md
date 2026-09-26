@@ -4,7 +4,7 @@
 
 SigTrellis is a local Python CLI and library for bulk RNA-seq and donor-aware single-cell pseudobulk analysis. It combines fold-local preprocessing and optional differential-expression screening, nested grouped elastic-net modeling, retuned group subsampling, correlated-feature diagnostics, negative controls, and an auditable scientific report.
 
-**Research software, version 0.1.0.** A selected gene is a candidate association—not a validated biomarker, mechanism, causal effect, diagnostic test, or qualified clinical measurement. The final consensus panel has not inherited the nested CV performance of the training procedure. Read [LIMITATIONS.md](LIMITATIONS.md) before interpreting results.
+**Research software, version 0.1.1.** A selected gene is a candidate association—not a validated biomarker, mechanism, causal effect, diagnostic test, or qualified clinical measurement. The final consensus panel has not inherited the nested CV performance of the training procedure. Read [LIMITATIONS.md](LIMITATIONS.md) before interpreting results.
 
 This is an original, general-purpose implementation of public methods. It does not reproduce any previous employer's code, data, or confidential methodology. The [research review](RESEARCH.md) explains the design and the limited conceptual relationship to Stabilomics.
 
@@ -161,6 +161,8 @@ sigtrellis external --run results/bulk \
 
 The external cohort must have the exact training gene universe and declared metadata. Training normalization and scaling are reused without fitting. Sample/group overlap and exact copied expression profiles are rejected, including copies under renamed IDs. This evaluates the frozen final model, not a new compact panel refitted from the stability table. Near-duplicates and biological relatives still require study-specific review. Covariate categories absent from training are rejected in both CV and external evaluation.
 
+Before prediction, the model, configuration and training metadata must match their saved hashes. Modified artifacts fail verification. External probability columns identify their classes explicitly. Hash verification assumes a trusted manifest; it is not a digital signature.
+
 ## Develop and verify
 
 ```bash
@@ -173,5 +175,7 @@ python -m build
 ```
 
 Tests include planted counts, correlated replacements, pure noise, imbalance, outliers, batch-only and batch-specific effects, paired cells, too few donors, a deliberately unsafe global screen, exact duplicates, target copies, and train-boundary spies. See [VALIDATION.md](VALIDATION.md) for measured results and [ARCHITECTURE.md](ARCHITECTURE.md) for extension boundaries.
+
+Version 0.1.1 includes a second adversarial review covering identifier preservation, repeated-condition DE, artifact integrity, multiclass evidence, nonfinite statistics and malformed H5AD inputs. Findings and reproductions are in [REVIEW_0.1.1.md](docs/REVIEW_0.1.1.md).
 
 MIT software license. Third-party public datasets retain their own licenses. Cite the software with `CITATION.cff` and the methods and datasets used in your analysis.

@@ -1,0 +1,22 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____________ test_signed_zero_cannot_disguise_an_exact_duplicate ______________
+
+data = Dataset(expression=             gene_0000  gene_0001  gene_0002  ...  gene_0057  gene_0058  gene_0059
+sample_0000     ...sample_0047  sample_0047  sample_0047          0  batch_2, cell_type=None, input_hashes={}, upstream_qc={}, symbols={})
+config = Config(outcome='phenotype', outcome_type='binary', sample_id='sample_id', group='donor', batch=None, covariates=(), po...l_min_counts=1, cell_min_genes=1, mitochondrial_prefix=None, max_mito_fraction=1.0, chunk_size=2048, max_dense_mb=2048)
+
+    def test_signed_zero_cannot_disguise_an_exact_duplicate(data, config):
+        data.expression = data.expression.astype(float)
+        data.expression.iloc[0, 0] = 0.0
+        data.expression.iloc[1] = data.expression.iloc[0]
+        data.expression.iloc[1, 0] = -0.0
+        np.testing.assert_array_equal(data.expression.iloc[0], data.expression.iloc[1])
+>       with pytest.raises(ValueError, match="Identical expression"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_review_regressions.py:84: Failed
+=========================== short test summary info ============================
+FAILED tests/test_review_regressions.py::test_signed_zero_cannot_disguise_an_exact_duplicate
+1 failed, 26 deselected in 0.79s

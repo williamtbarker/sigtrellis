@@ -58,6 +58,10 @@ def validate_dataset(data: Dataset, config: Config) -> dict[str, Any]:
         raise ValueError(f"Missing metadata columns: {sorted(missing)}")
     if m[list(required)].isna().any().any():
         raise ValueError("Missing required metadata; no automatic imputation")
+    if any(m[name].astype(str).str.strip().eq("").any() for name in required):
+        raise ValueError(
+            "Blank required metadata; biological identities and outcomes must be explicit"
+        )
     if m[config.sample_id].astype(str).tolist() != x.index.astype(str).tolist():
         raise ValueError("Sample column must equal expression row identifiers")
     reserved = required | {"sample_id", "donor", "batch", "phenotype", "outcome"}

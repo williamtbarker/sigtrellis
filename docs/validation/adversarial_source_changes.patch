@@ -1,0 +1,862 @@
+diff --git a/pyproject.toml b/pyproject.toml
+index 6e1de86..eaac972 100644
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
+ 
+ [project]
+ name = "sigtrellis"
+-version = "0.1.0"
++version = "0.1.1"
+ description = "Donor-aware, leakage-audited elastic-net transcriptomic signature discovery"
+ readme = "README.md"
+ requires-python = ">=3.12"
+@@ -29,7 +29,7 @@ packages = ["src/sigtrellis"]
+ 
+ [tool.ruff]
+ line-length = 100
+-target-version = "py311"
++target-version = "py312"
+ 
+ [tool.ruff.lint]
+ select = ["E4", "E7", "E9", "F", "I", "B", "UP"]
+diff --git a/src/sigtrellis/__init__.py b/src/sigtrellis/__init__.py
+index 1f1518b..092cdff 100644
+--- a/src/sigtrellis/__init__.py
++++ b/src/sigtrellis/__init__.py
+@@ -1,3 +1,3 @@
+ """SigTrellis: empirical evidence for candidate transcriptomic signatures."""
+ 
+-__version__ = "0.1.0"
++__version__ = "0.1.1"
+diff --git a/src/sigtrellis/config.py b/src/sigtrellis/config.py
+index a69aacb..dbc2b5f 100644
+--- a/src/sigtrellis/config.py
++++ b/src/sigtrellis/config.py
+@@ -70,6 +70,13 @@ class Config:
+     max_dense_mb: int = 2048
+ 
+     def validate(self) -> None:
++        for item in fields(self):
++            if (
++                isinstance(item.default, (int, float))
++                and not isinstance(item.default, bool)
++                and isinstance(getattr(self, item.name), bool)
++            ):
++                raise ValueError(f"{item.name} must be numeric, not a boolean")
+         if not isinstance(self.outcome, str) or not isinstance(self.sample_id, str):
+             raise ValueError("outcome and sample_id must be nonempty strings")
+         for key in (
+@@ -172,15 +179,22 @@ class Config:
+             ):
+                 raise ValueError(f"{key} must be finite and positive")
+         if not self.strengths or any(
+-            not isinstance(x, (int, float)) or not math.isfinite(x) or x <= 0
++            isinstance(x, bool) or not isinstance(x, (int, float)) or not math.isfinite(x) or x <= 0
+             for x in self.strengths
+         ):
+             raise ValueError("strengths must be finite and positive")
+         if not self.l1_ratios or any(
+-            not isinstance(x, (int, float)) or not math.isfinite(x) or not 0 < x <= 1
++            isinstance(x, bool)
++            or not isinstance(x, (int, float))
++            or not math.isfinite(x)
++            or not 0 < x <= 1
+             for x in self.l1_ratios
+         ):
+             raise ValueError("l1_ratios must be in (0,1]; pure ridge is not sparse selection")
++        if len(set(self.strengths)) != len(self.strengths) or len(set(self.l1_ratios)) != len(
++            self.l1_ratios
++        ):
++            raise ValueError("Duplicate hyperparameters would duplicate inner-fold evidence")
+         for norm in self.stability_normalizations:
+             if norm not in choices["normalization"]:
+                 raise ValueError("Invalid stability normalization")
+diff --git a/src/sigtrellis/correlation.py b/src/sigtrellis/correlation.py
+index 1cd0fbd..922aeae 100644
+--- a/src/sigtrellis/correlation.py
++++ b/src/sigtrellis/correlation.py
+@@ -25,8 +25,19 @@ class CorrelationResult:
+ 
+ 
+ def correlation_diagnostics(
+-    data: Dataset, coefficients: FloatArray, ranking: pd.DataFrame, config: Config
++    data: Dataset,
++    coefficients: FloatArray,
++    ranking: pd.DataFrame,
++    config: Config,
++    *,
++    contrasts: list[str] | None = None,
+ ) -> CorrelationResult:
++    if contrasts is None:
++        if coefficients.shape[1] != 1:
++            raise ValueError("Explicit contrast order is required for multiclass coefficients")
++        contrasts = ranking.contrast.drop_duplicates().tolist()
++    if len(contrasts) != coefficients.shape[1] or len(set(contrasts)) != len(contrasts):
++        raise ValueError("Contrast labels do not match coefficient axes")
+     ranked = ranking.sort_values(
+         ["selection_frequency", "sign_consistency", "rank_median_selected", "gene_id"],
+         ascending=[False, False, True, True],
+@@ -41,8 +52,8 @@ def correlation_diagnostics(
+     genes = [all_genes[i] for i in variable]
+     if not genes:
+         return CorrelationResult(
+-            pd.DataFrame(columns=["group_id", "members", "selection_frequency"]),
+-            pd.DataFrame(columns=["gene_a", "gene_b", "exclusive_given_any"]),
++            pd.DataFrame(columns=["group_id", "contrast", "members", "selection_frequency"]),
++            pd.DataFrame(columns=["contrast", "gene_a", "gene_b", "exclusive_given_any"]),
+             pd.DataFrame(),
+             {},
+         )
+@@ -63,7 +74,8 @@ def correlation_diagnostics(
+         if len(genes) > 1
+         else np.array([1])
+     )
+-    selected = np.asarray((abs(coefficients) > config.coefficient_tolerance).any(axis=1))
++    # Preserve the contrast axis: evidence for class A must not inflate class B.
++    selected = abs(coefficients) > config.coefficient_tolerance
+     group_rows: list[dict[str, Any]] = []
+     pair_rows: list[dict[str, Any]] = []
+     membership: dict[str, str] = {}
+@@ -73,42 +85,51 @@ def correlation_diagnostics(
+         source_indices = [all_genes.index(g) for g in members]
+         group_id = f"correlation_{int(label):03d}"
+         membership.update({g: group_id for g in members})
+-        group_rows.append(
+-            {
+-                "group_id": group_id,
+-                "members": ";".join(members),
+-                "n_members": len(members),
+-                "selection_frequency": float(selected[:, source_indices].any(axis=1).mean()),
+-                "minimum_member_frequency": float(selected[:, source_indices].mean(axis=0).min()),
+-                "interpretation": "Marginal coexpression group, not a validated gene program",
+-            }
+-        )
+-        for a, b in combinations(positions, 2):
+-            sa = selected[:, all_genes.index(genes[a])]
+-            sb = selected[:, all_genes.index(genes[b])]
+-            union = sa | sb
+-            pair_rows.append(
++        for ci, contrast in enumerate(contrasts):
++            contrast_selected = selected[:, ci, :]
++            group_rows.append(
+                 {
+                     "group_id": group_id,
+-                    "gene_a": genes[a],
+-                    "gene_b": genes[b],
+-                    "expression_correlation": float(corr[a, b]),
+-                    "frequency_any": float(union.mean()),
+-                    "frequency_both": float((sa & sb).mean()),
+-                    "exclusive_given_any": float((sa ^ sb).sum() / union.sum())
+-                    if union.any()
+-                    else None,
+-                    "selection_phi": float(np.corrcoef(sa, sb)[0, 1])
+-                    if sa.std() and sb.std()
+-                    else None,
++                    "contrast": contrast,
++                    "members": ";".join(members),
++                    "n_members": len(members),
++                    "selection_frequency": float(
++                        contrast_selected[:, source_indices].any(axis=1).mean()
++                    ),
++                    "minimum_member_frequency": float(
++                        contrast_selected[:, source_indices].mean(axis=0).min()
++                    ),
++                    "interpretation": "Contrast-specific selection in a descriptive marginal coexpression group",
+                 }
+             )
++            for a, b in combinations(positions, 2):
++                sa = contrast_selected[:, all_genes.index(genes[a])]
++                sb = contrast_selected[:, all_genes.index(genes[b])]
++                union = sa | sb
++                pair_rows.append(
++                    {
++                        "group_id": group_id,
++                        "contrast": contrast,
++                        "gene_a": genes[a],
++                        "gene_b": genes[b],
++                        "expression_correlation": float(corr[a, b]),
++                        "frequency_any": float(union.mean()),
++                        "frequency_both": float((sa & sb).mean()),
++                        "exclusive_given_any": float((sa ^ sb).sum() / union.sum())
++                        if union.any()
++                        else None,
++                        "selection_phi": float(np.corrcoef(sa, sb)[0, 1])
++                        if sa.std() and sb.std()
++                        else None,
++                    }
++                )
+     return CorrelationResult(
+         pd.DataFrame(group_rows),
+         pd.DataFrame(
+             pair_rows,
+             columns=[
+                 "group_id",
++                "contrast",
+                 "gene_a",
+                 "gene_b",
+                 "expression_correlation",
+diff --git a/src/sigtrellis/de.py b/src/sigtrellis/de.py
+index 8f20e30..d217e71 100644
+--- a/src/sigtrellis/de.py
++++ b/src/sigtrellis/de.py
+@@ -28,6 +28,13 @@ def differential_expression(data: Dataset, y: FloatArray, config: Config) -> pd.
+         raise ValueError(
+             "DE with repeated biological groups requires de_pair_group; collapse technical replicates first"
+         )
++    if config.de_pair_group and config.group:
++        replication = pd.crosstab(data.metadata[config.group].astype(str).to_numpy(), y)
++        if (replication > 1).any().any():
++            raise ValueError(
++                "Paired DE supports one observation per biological group and condition; "
++                "combine technical replicates or use a model for the actual repeated-measures design"
++            )
+     nuisance = list(config.covariates)
+     if config.batch:
+         nuisance.append(config.batch)
+diff --git a/src/sigtrellis/domain.py b/src/sigtrellis/domain.py
+index 0a4b80a..67c6181 100644
+--- a/src/sigtrellis/domain.py
++++ b/src/sigtrellis/domain.py
+@@ -60,7 +60,11 @@ def file_hash(path: Path) -> str:
+ 
+ 
+ def array_hash(values: FloatArray) -> str:
+-    return hashlib.sha256(np.ascontiguousarray(values, dtype="<f8").tobytes()).hexdigest()
++    # Numerically equal profiles must fingerprint equally: signed zero must not
++    # let a duplicate specimen cross the biological validation boundary.
++    canonical = np.array(values, dtype="<f8", order="C", copy=True)
++    canonical[canonical == 0] = 0.0
++    return hashlib.sha256(canonical.tobytes()).hexdigest()
+ 
+ 
+ def write_json(path: Path, value: Any) -> None:
+diff --git a/src/sigtrellis/integrity.py b/src/sigtrellis/integrity.py
+new file mode 100644
+index 0000000..0270c42
+--- /dev/null
++++ b/src/sigtrellis/integrity.py
+@@ -0,0 +1,21 @@
++"""Verify persisted scientific inputs against a trusted run manifest."""
++
++from pathlib import Path
++from typing import Any
++
++from sigtrellis.domain import file_hash
++
++
++def verify_run_artifacts(
++    run: Path, manifest: dict[str, Any], names: tuple[str, ...]
++) -> dict[str, str]:
++    """Detect missing/changed files; this is integrity checking, not authentication."""
++    recorded = manifest.get("output_hashes", {})
++    verified: dict[str, str] = {}
++    for name in names:
++        expected = recorded.get(name)
++        path = run / name
++        if not isinstance(expected, str) or not path.is_file() or file_hash(path) != expected:
++            raise ValueError(f"Integrity verification failed for training artifact: {name}")
++        verified[name] = expected
++    return verified
+diff --git a/src/sigtrellis/io.py b/src/sigtrellis/io.py
+index a3cb29c..430cfd1 100644
+--- a/src/sigtrellis/io.py
++++ b/src/sigtrellis/io.py
+@@ -12,24 +12,42 @@ from sigtrellis.config import Config
+ from sigtrellis.domain import Dataset, file_hash
+ 
+ 
+-def read_table(path: Path) -> pd.DataFrame:
++def read_table(path: Path, text_columns: tuple[str, ...] = ()) -> pd.DataFrame:
+     sep = "\t" if ".tsv" in path.name else ","
+     # pandas otherwise silently mangles duplicate headers into distinct feature names.
+     import gzip
+ 
+     opener = gzip.open if path.suffix == ".gz" else open
+     with opener(path, "rt") as handle:
+-        header = next(csv.reader(handle, delimiter=sep))
++        header = next(csv.reader(handle, delimiter=sep), [])
++    if len(header) < 2:
++        raise ValueError(f"Empty or invalid table: {path.name}")
+     if len(header) != len(set(header)):
+         raise ValueError(f"Duplicate headers in {path.name}")
+-    return pd.read_csv(path, sep=sep, index_col=0)
++    # Identifiers are strings, including '001' and literal 'NA'. Blank values
++    # are rejected by the scientific input contract, not guessed as categories.
++    frame = pd.read_csv(
++        path,
++        sep=sep,
++        keep_default_na=False,
++        converters={0: str},
++        dtype={name: str for name in text_columns if name != header[0]},
++    )
++    # Construct the index afterward: the CSV index parser can infer numeric
++    # identifiers even when the column converter returns strings.
++    return frame.set_index(frame.columns[0])
+ 
+ 
+ def load_bulk(
+     expression: Path, metadata: Path, config: Config, orientation: str = "auto"
+ ) -> Dataset:
+     x = read_table(expression)
+-    m = read_table(metadata)
++    identities = tuple(
++        name for name in (config.group, config.batch, config.permutation_strata) if name is not None
++    )
++    if config.outcome_type != "continuous":
++        identities += (config.outcome,)
++    m = read_table(metadata, identities)
+     # First metadata column is the identifier, explicitly checked by name.
+     if m.index.name != config.sample_id:
+         raise ValueError(f"First metadata column must be {config.sample_id!r}")
+diff --git a/src/sigtrellis/metrics.py b/src/sigtrellis/metrics.py
+index 3df6e18..0e36a2f 100644
+--- a/src/sigtrellis/metrics.py
++++ b/src/sigtrellis/metrics.py
+@@ -64,7 +64,9 @@ def evaluate(
+         return {
+             "rmse": float(np.sqrt(mean_squared_error(y, prediction, sample_weight=weights))),
+             "mae": float(mean_absolute_error(y, prediction, sample_weight=weights)),
+-            "r2": float(r2_score(y, prediction, sample_weight=weights)) if len(y) > 1 else None,
++            "r2": float(r2_score(y, prediction, sample_weight=weights))
++            if len(np.unique(y)) > 1
++            else None,
+         }
+     binary = config.outcome_type == "binary"
+     hard = (
+@@ -72,10 +74,16 @@ def evaluate(
+         if binary
+         else prediction.argmax(axis=1)
+     )
++    all_classes = len(np.unique(y)) == prediction.shape[1]
+     metrics: dict[str, Any] = {
+         "log_loss": loss(y, prediction, config, weights),
+-        "balanced_accuracy": float(balanced_accuracy_score(y, hard, sample_weight=weights)),
+-        "mcc": float(matthews_corrcoef(y, hard, sample_weight=weights)),
++        "balanced_accuracy": float(balanced_accuracy_score(y, hard, sample_weight=weights))
++        if all_classes
++        else None,
++        "mcc": float(matthews_corrcoef(y, hard, sample_weight=weights)) if all_classes else None,
++        "discrimination_status": "all_classes_observed"
++        if all_classes
++        else "undefined_missing_classes",
+     }
+     if binary:
+         prob = prediction[:, 1]
+diff --git a/src/sigtrellis/prediction.py b/src/sigtrellis/prediction.py
+index a75bafd..854980f 100644
+--- a/src/sigtrellis/prediction.py
++++ b/src/sigtrellis/prediction.py
+@@ -12,6 +12,7 @@ from scipy.special import expit, softmax
+ 
+ from sigtrellis.config import load_config
+ from sigtrellis.domain import Dataset, FloatArray, array_hash, write_json
++from sigtrellis.integrity import verify_run_artifacts
+ from sigtrellis.io import load_bulk
+ from sigtrellis.metrics import evaluate, group_weights
+ from sigtrellis.preprocessing import Normalizer
+@@ -71,15 +72,19 @@ def external_validate(
+ ) -> dict[str, Any]:
+     if output.exists() and any(output.iterdir()):
+         raise ValueError("External output directory must be empty")
+-    config = load_config(run / "configuration.json")
+     manifest = json.loads((run / "run_manifest.json").read_text())
+     if manifest["status"] != "complete":
+         raise ValueError("Training run did not complete")
++    verified = verify_run_artifacts(
++        run, manifest, ("configuration.json", "model_state.json", "sample_metadata.csv")
++    )
++    config = load_config(run / "configuration.json")
+     data = load_bulk(expression, metadata, config, orientation)
+     validate_dataset(data, config)
+     train_metadata = pd.read_csv(
+         run / "sample_metadata.csv",
+         dtype={config.sample_id: str, config.group or config.sample_id: str},
++        keep_default_na=False,
+     )
+     if set(data.expression.index) & set(train_metadata[config.sample_id].astype(str)):
+         raise ValueError("External sample identifiers overlap training")
+@@ -107,12 +112,20 @@ def external_validate(
+         y = labels.map(mapping).to_numpy(dtype=float)
+     metrics = evaluate(y, prediction, config, group_weights(group_values(data, config)))
+     output.mkdir(parents=True, exist_ok=True)
+-    frame = pd.DataFrame(prediction, index=data.expression.index)
++    columns = (
++        ["prediction"]
++        if config.outcome_type == "continuous"
++        else [f"probability:{label}" for label in manifest["classes"]]
++    )
++    frame = pd.DataFrame(prediction, index=data.expression.index, columns=columns)
+     frame.to_csv(output / "external_predictions.csv", index_label="sample_id")
+     record = {
+         "metrics": metrics,
+         "input_hashes": data.input_hashes,
+         "training_expression_hash": manifest["expression_hash"],
++        "training_model_sha256": verified["model_state.json"],
++        "verified_training_artifacts": verified,
++        "classes": manifest["classes"],
+         "scope": "Frozen final full-data model; does not validate a separately refitted consensus panel",
+         "training_transform_refit": False,
+     }
+diff --git a/src/sigtrellis/preprocessing.py b/src/sigtrellis/preprocessing.py
+index 8e5ba1a..9a14070 100644
+--- a/src/sigtrellis/preprocessing.py
++++ b/src/sigtrellis/preprocessing.py
+@@ -121,6 +121,7 @@ class Prepared:
+             eligible = np.ones(values.shape[1], dtype=bool)
+         variance = normalized.var(axis=0)
+         eligible &= variance > 1e-12
++        expression_eligible_count = int(eligible.sum())
+         indices = np.flatnonzero(eligible)
+         score = variance.copy()
+         method = self.config.candidate_method
+@@ -162,7 +163,9 @@ class Prepared:
+                 "reference_hash": array_hash(reference) if reference is not None else None,
+                 "candidate_method": method,
+                 "n_input_features": x.shape[1],
+-                "n_prevalence_variance_eligible": int(eligible.sum()),
++                "n_prevalence_variance_eligible": expression_eligible_count,
++                "n_after_supervised_screen": int(eligible.sum()),
++                "n_retained_features": len(self.genes),
+                 "retained_genes": self.genes,
+                 "removed_genes": [g for g in self.all_genes if g not in retained_set],
+                 "gene_scale_hash": array_hash(np.asarray(self.scaler.scale_, dtype=float))
+diff --git a/src/sigtrellis/qc.py b/src/sigtrellis/qc.py
+index edad7fb..6d6828b 100644
+--- a/src/sigtrellis/qc.py
++++ b/src/sigtrellis/qc.py
+@@ -58,6 +58,10 @@ def validate_dataset(data: Dataset, config: Config) -> dict[str, Any]:
+         raise ValueError(f"Missing metadata columns: {sorted(missing)}")
+     if m[list(required)].isna().any().any():
+         raise ValueError("Missing required metadata; no automatic imputation")
++    if any(m[name].astype(str).str.strip().eq("").any() for name in required):
++        raise ValueError(
++            "Blank required metadata; biological identities and outcomes must be explicit"
++        )
+     if m[config.sample_id].astype(str).tolist() != x.index.astype(str).tolist():
+         raise ValueError("Sample column must equal expression row identifiers")
+     reserved = required | {"sample_id", "donor", "batch", "phenotype", "outcome"}
+diff --git a/src/sigtrellis/singlecell.py b/src/sigtrellis/singlecell.py
+index 84883e1..f4f16e8 100644
+--- a/src/sigtrellis/singlecell.py
++++ b/src/sigtrellis/singlecell.py
+@@ -40,6 +40,8 @@ def pseudobulk(path: Path, config: Config) -> list[Dataset]:
+             raise ValueError(f"Missing cell metadata: {sorted(set(required) - set(obs.columns))}")
+         if obs[required].isna().any().any():
+             raise ValueError("Missing sample, phenotype, grouping, or cell-type metadata")
++        if any(obs[name].astype(str).str.strip().eq("").any() for name in required):
++            raise ValueError("Blank required single-cell metadata")
+         obs[config.sample_id] = obs[config.sample_id].astype(str)
+         # A sample ID denotes ONE biological specimen/condition, not a pooled donor label.
+         invariant = list(
+@@ -73,6 +75,8 @@ def pseudobulk(path: Path, config: Config) -> list[Dataset]:
+             raise ValueError(f"Count source {key!r} is absent")
+         element = handle[key]
+         matrix: Any = sparse_dataset(element) if isinstance(element, h5py.Group) else element
++        if tuple(matrix.shape) != (len(obs), len(var)):
++            raise ValueError("Count matrix shape does not match cell/gene metadata")
+         mito = np.array(
+             [
+                 str(g).startswith(config.mitochondrial_prefix)
+diff --git a/src/sigtrellis/validation.py b/src/sigtrellis/validation.py
+index 965e70d..fb09d8b 100644
+--- a/src/sigtrellis/validation.py
++++ b/src/sigtrellis/validation.py
+@@ -126,6 +126,8 @@ def nested_validate(
+ def permutation_control(
+     data: Dataset, y: FloatArray, config: Config, observed: float, audit: Audit
+ ) -> dict[str, Any]:
++    if not np.isfinite(observed):
++        raise ValueError("Permutation test requires a finite observed statistic")
+     if not config.permutations:
+         return {"status": "not_run", "pvalue": None, "null_improvements": []}
+     rng = np.random.default_rng(config.seed + 7919)
+@@ -143,7 +145,10 @@ def permutation_control(
+             local_audit,
+             context=f"permutation:{index}",
+         )
+-        null.append(float(result.metrics["loss_improvement"]))
++        statistic = float(result.metrics["loss_improvement"])
++        if not np.isfinite(statistic):
++            raise ValueError(f"Permutation {index} produced a nonfinite statistic")
++        null.append(statistic)
+         permutation_audits.append(
+             {
+                 "index": index,
+diff --git a/src/sigtrellis/workflow.py b/src/sigtrellis/workflow.py
+index 0931235..80ab632 100644
+--- a/src/sigtrellis/workflow.py
++++ b/src/sigtrellis/workflow.py
+@@ -46,12 +46,13 @@ def batch_diagnostics(
+             if config.outcome_type != "continuous" and set(y[train]) != set(y):
+                 raise ValueError("Training data lack an outcome class")
+             tr, te = data.subset(train), data.subset(test)
+-            params, _ = tune(tr, y[train], config, audit, f"batch:{batch}")
++            params, tuning = tune(tr, y[train], config, audit, f"batch:{batch}")
+             model = fit_model(tr, y[train], config, params, audit, f"batch:{batch}/refit")
+             coefficients.append(model.coefficients())
+             baseline_params = Hyperparameters(config.strengths[0], config.l1_ratios[0])
++            baseline_tuning = pd.DataFrame()
+             if config.covariates:
+-                baseline_params, _ = tune(
++                baseline_params, baseline_tuning = tune(
+                     tr, y[train], config, audit, f"batch:{batch}/baseline", covariates_only=True
+                 )
+             baseline = fit_prepared(
+@@ -61,6 +62,8 @@ def batch_diagnostics(
+             improvement = loss(y[test], baseline.predict(te), config, w) - loss(
+                 y[test], model.predict(te), config, w
+             )
++            if not np.isfinite(improvement):
++                raise ValueError("Batch holdout produced nonfinite loss improvement")
+             rows.append(
+                 {
+                     "batch": batch,
+@@ -68,6 +71,13 @@ def batch_diagnostics(
+                     "loss_improvement": improvement,
+                     "n_train_groups": len(set(groups[train])),
+                     "n_test_groups": len(set(groups[test])),
++                    "parameters": {"strength": params.strength, "l1_ratio": params.l1_ratio},
++                    "tuning_results": tuning.to_dict("records"),
++                    "baseline_parameters": {
++                        "strength": baseline_params.strength,
++                        "l1_ratio": baseline_params.l1_ratio,
++                    },
++                    "baseline_tuning_results": baseline_tuning.to_dict("records"),
+                 }
+             )
+         except ValueError as exc:
+@@ -89,15 +99,22 @@ def evidence_gates(
+     permutation = metrics["permutation"]
+     if permutation["status"] != "tested":
+         blockers.append("no_eligible_permutation_test")
+-    if config.permutations < 19:
++    if config.permutations < 19 or 1 / (1 + config.permutations) > config.permutation_alpha + 1e-12:
+         blockers.append("insufficient_permutation_resolution")
+-    if permutation.get("pvalue") is None or permutation["pvalue"] > config.permutation_alpha:
++    pvalue = permutation.get("pvalue")
++    if pvalue is None or not np.isfinite(pvalue) or not 0 < pvalue <= 1:
++        blockers.append("invalid_or_unavailable_permutation_pvalue")
++    elif pvalue > config.permutation_alpha:
+         blockers.append("permutation_control_not_passed")
+-    if metrics["loss_improvement"] <= 0:
++    if not np.isfinite(metrics["loss_improvement"]):
++        blockers.append("nonfinite_held_out_improvement")
++    elif metrics["loss_improvement"] <= 0:
+         blockers.append("no_held_out_improvement_over_baseline")
+     if config.batch and batch["status"] != "tested":
+         blockers.append("cross_batch_robustness_not_established")
+-    if batch["status"] == "tested" and any(f["loss_improvement"] <= 0 for f in batch["folds"]):
++    if batch["status"] == "tested" and any(
++        not np.isfinite(f["loss_improvement"]) or f["loss_improvement"] <= 0 for f in batch["folds"]
++    ):
+         blockers.append("cross_batch_performance_failure")
+     eligible = (
+         (table.selection_frequency >= config.selection_threshold)
+@@ -278,12 +295,17 @@ def _run(
+             write_json(output / "de_design.json", de.attrs)
+         except ValueError as exc:
+             audit.warnings.append(f"EXPLORATORY_DE_UNAVAILABLE: {exc}")
+-    correlation = correlation_diagnostics(data, stability.coefficients, table, config)
++    correlation = correlation_diagnostics(
++        data, stability.coefficients, table, config, contrasts=contrasts
++    )
+     table["correlated_feature_group"] = table.gene_id.map(correlation.membership).fillna(
+         "not_assessed"
+     )
+-    frequencies = correlation.groups.set_index("group_id")["selection_frequency"]
+-    table["correlated_group_frequency"] = table.correlated_feature_group.map(frequencies)
++    frequencies = correlation.groups.set_index(["group_id", "contrast"])["selection_frequency"]
++    table["correlated_group_frequency"] = [
++        frequencies.get((group, contrast), np.nan)
++        for group, contrast in zip(table.correlated_feature_group, table.contrast, strict=True)
++    ]
+     table, blockers = evidence_gates(table, config, qc, metrics, batch)
+     table = table.sort_values(
+         [
+@@ -317,6 +339,13 @@ def _run(
+         output / "resample_coefficients.npz",
+         stability=stability.coefficients,
+         outer=validation.coefficients,
++        batch=batch_coefficients
++        if batch_coefficients is not None
++        else np.empty((0, len(contrasts), data.expression.shape[1])),
++        batch_labels=np.asarray(
++            [row["batch"] for row in batch["folds"]] if batch_coefficients is not None else [],
++            dtype=str,
++        ),
+         genes=np.asarray(data.expression.columns, dtype=str),
+         contrasts=np.asarray(contrasts, dtype=str),
+     )
+@@ -365,9 +394,9 @@ def _run(
+         n_biological_groups=qc["n_biological_groups"],
+         classes=classes,
+         final_hyperparameters={"strength": params.strength, "l1_ratio": params.l1_ratio},
+-        selected_features=table.loc[table.coefficient != 0, ["gene_id", "contrast"]].to_dict(
+-            "records"
+-        ),
++        selected_features=table.loc[
++            table.coefficient.abs() > config.coefficient_tolerance, ["gene_id", "contrast"]
++        ].to_dict("records"),
+         candidate_features=table.loc[
+             table.passes_robustness_gates, ["gene_id", "contrast"]
+         ].to_dict("records"),
+diff --git a/tests/test_review_regressions.py b/tests/test_review_regressions.py
+new file mode 100644
+index 0000000..5fa6f40
+--- /dev/null
++++ b/tests/test_review_regressions.py
+@@ -0,0 +1,253 @@
++"""Reproductions of defects found in the second adversarial source review."""
++
++import json
++from dataclasses import replace
++
++import numpy as np
++import pandas as pd
++import pytest
++
++from sigtrellis.correlation import correlation_diagnostics
++from sigtrellis.de import differential_expression
++from sigtrellis.domain import Audit
++from sigtrellis.io import load_bulk
++from sigtrellis.metrics import evaluate
++from sigtrellis.prediction import external_validate
++from sigtrellis.qc import encode_outcome, validate_dataset
++from sigtrellis.simulate import synthetic_bulk
++from sigtrellis.stability import summarize_coefficients
++from sigtrellis.validation import nested_validate, permutation_control
++from sigtrellis.workflow import evidence_gates, run_analysis
++
++
++@pytest.mark.parametrize(
++    "change",
++    [
++        {"seed": True},
++        {"max_features": True},
++        {"min_count": True},
++        {"strengths": (0.05, 0.05)},
++        {"l1_ratios": (0.5, 0.5)},
++        {"strengths": (True,)},
++        {"l1_ratios": (True,)},
++    ],
++)
++def test_invalid_numeric_configuration_is_not_silently_coerced(config, change):
++    with pytest.raises(ValueError):
++        replace(config, **change).validate()
++
++
++def test_inconsistent_h5ad_dimensions_fail_before_aggregation(config, tmp_path):
++    import h5py
++
++    from sigtrellis.simulate import synthetic_single_cell
++    from sigtrellis.singlecell import pseudobulk
++
++    path = tmp_path / "inconsistent.h5ad"
++    synthetic_single_cell(path, donors=6, genes=20, cells=5)
++    with h5py.File(path, "r+") as handle:
++        n, p = handle["X"].attrs["shape"]
++        handle["X"].attrs["shape"] = (n + 1, p)
++    with pytest.raises(ValueError, match="shape does not match"):
++        pseudobulk(path, replace(config, min_cells=3))
++
++
++@pytest.mark.parametrize("orientation", ["samples_by_genes", "genes_by_samples"])
++def test_identifiers_survive_csv_parsing_verbatim(data, config, tmp_path, orientation):
++    ids = [f"{i:04d}" for i in range(len(data.expression))]
++    data.expression.index = ids
++    data.metadata.index = ids
++    data.metadata["sample_id"] = ids
++    data.metadata["donor"] = ["01", "1", "NA", *ids[3:]]
++    data.metadata["phenotype"] = np.where(data.metadata.phenotype == 1, "01", "1")
++    x = data.expression if orientation == "samples_by_genes" else data.expression.T
++    x.to_csv(tmp_path / "x.tsv", sep="\t")
++    data.metadata.to_csv(tmp_path / "m.tsv", sep="\t", index=False)
++    loaded = load_bulk(tmp_path / "x.tsv", tmp_path / "m.tsv", config, orientation)
++    assert loaded.expression.index.tolist() == ids
++    assert loaded.metadata.donor.tolist() == data.metadata.donor.tolist()
++    assert loaded.metadata.phenotype.tolist() == data.metadata.phenotype.tolist()
++
++
++def test_blank_biological_identity_is_rejected(data, config):
++    data.metadata.loc[data.metadata.index[0], "donor"] = "  "
++    with pytest.raises(ValueError, match="[Bb]lank"):
++        validate_dataset(data, config)
++
++
++def test_signed_zero_cannot_disguise_an_exact_duplicate(data, config):
++    data.expression = data.expression.astype(float)
++    data.expression.iloc[0, 0] = 0.0
++    data.expression.iloc[1] = data.expression.iloc[0]
++    data.expression.iloc[1, 0] = -0.0
++    np.testing.assert_array_equal(data.expression.iloc[0], data.expression.iloc[1])
++    with pytest.raises(ValueError, match="Identical expression"):
++        validate_dataset(data, config)
++
++
++def test_paired_de_rejects_repeated_donor_condition_before_backend(data, config, monkeypatch):
++    dds = pytest.importorskip("pydeseq2.dds")
++    data.metadata["donor"] = [f"d{i // 2}" for i in range(len(data.expression))]
++    data.metadata["phenotype"] = np.tile([0, 1], len(data.expression) // 2)
++    data.metadata.loc[data.metadata.index[1], "phenotype"] = 0
++    local = replace(config, de_pair_group=True)
++
++    def forbidden_backend(**kwargs):
++        raise AssertionError("Count backend reached an unsupported repeated-condition design")
++
++    monkeypatch.setattr(dds, "DeseqDataSet", forbidden_backend)
++    with pytest.raises(ValueError, match="one observation per biological group and condition"):
++        differential_expression(data, encode_outcome(data, local)[0], local)
++
++
++def test_multiclass_correlated_group_evidence_keeps_contrasts_separate(data, config):
++    coefs = np.zeros((6, 2, data.expression.shape[1]))
++    coefs[:, 0, 0] = 1
++    coefs[0, 1, 0] = 1
++    ranking = summarize_coefficients(
++        coefs, list(data.expression.columns), ["a_vs_c", "b_vs_c"], 1e-7
++    )
++    result = correlation_diagnostics(
++        data,
++        coefs,
++        ranking,
++        replace(config, outcome_type="multiclass"),
++        contrasts=["a_vs_c", "b_vs_c"],
++    )
++    assert "contrast" in result.groups.columns
++    freq = result.groups.set_index("contrast").selection_frequency
++    assert freq["a_vs_c"] == 1
++    assert freq["b_vs_c"] == pytest.approx(1 / 6)
++
++
++@pytest.mark.parametrize(
++    "bad_field,bad_value",
++    [
++        ("loss_improvement", np.nan),
++        ("loss_improvement", np.inf),
++        ("pvalue", np.nan),
++        ("pvalue", -0.01),
++        ("pvalue", 0.0),
++    ],
++)
++def test_invalid_statistics_never_pass_evidence_gates(config, bad_field, bad_value):
++    table = pd.DataFrame(
++        {
++            "selection_frequency": [1.0],
++            "sign_consistency": [1.0],
++            "outer_selection_frequency": [1.0],
++            "outer_sign_consistency": [1.0],
++            "frequency_logcpm": [1.0],
++            "coefficient": [1.0],
++            "coefficient_median_selected": [1.0],
++            "outer_dominant_sign": [1.0],
++        }
++    )
++    metrics = {"loss_improvement": 1.0, "permutation": {"status": "tested", "pvalue": 0.01}}
++    if bad_field == "pvalue":
++        metrics["permutation"][bad_field] = bad_value
++    else:
++        metrics[bad_field] = bad_value
++    gated, blockers = evidence_gates(
++        table,
++        replace(config, permutations=99),
++        {"gate_blockers": []},
++        metrics,
++        {"status": "not_assessed"},
++    )
++    assert blockers
++    assert not gated.passes_robustness_gates.any()
++
++
++def test_nonfinite_observed_permutation_statistic_fails(data, config, monkeypatch):
++    import sigtrellis.validation as validation
++
++    def forbidden_validation(*args, **kwargs):
++        raise AssertionError("Nonfinite statistic reached expensive permutation fitting")
++
++    monkeypatch.setattr(validation, "nested_validate", forbidden_validation)
++    with pytest.raises(ValueError, match="finite"):
++        permutation_control(
++            data, encode_outcome(data, config)[0], replace(config, permutations=19), np.nan, Audit()
++        )
++
++
++def test_single_class_fold_does_not_claim_balanced_discrimination(config):
++    y = np.zeros(4)
++    metrics = evaluate(y, np.tile([0.8, 0.2], (4, 1)), config, np.ones(4))
++    assert metrics["balanced_accuracy"] is None
++    assert metrics["mcc"] is None
++    assert metrics["brier_score"] == pytest.approx(0.04)
++
++
++def test_constant_regression_fold_has_undefined_r_squared(config):
++    metrics = evaluate(
++        np.ones(4),
++        np.arange(4, dtype=float),
++        replace(config, outcome_type="continuous"),
++        np.ones(4),
++    )
++    assert metrics["r2"] is None
++    assert metrics["rmse"] > 0
++
++
++@pytest.mark.integration
++@pytest.mark.parametrize(
++    "artifact", ["model_state.json", "configuration.json", "sample_metadata.csv"]
++)
++def test_changed_training_artifacts_cannot_be_externally_validated(
++    data, config, tmp_path, artifact
++):
++    run = tmp_path / "training"
++    run_analysis(data, replace(config, strengths=(0.05,), stability_resamples=2), run)
++    external, _ = synthetic_bulk(24, data.expression.shape[1], seed=73)
++    ids = [f"external_{i}" for i in range(len(external.expression))]
++    external.expression.index = ids
++    external.metadata.index = ids
++    external.metadata["sample_id"] = ids
++    external.metadata["donor"] = ids
++    xp, mp = tmp_path / "x.tsv", tmp_path / "m.tsv"
++    external.expression.to_csv(xp, sep="\t")
++    external.metadata.to_csv(mp, sep="\t", index=False)
++    target = run / artifact
++    if artifact == "model_state.json":
++        state = json.loads(target.read_text())
++        state["intercept"][0] += 100
++        target.write_text(json.dumps(state))
++    elif artifact == "configuration.json":
++        state = json.loads(target.read_text())
++        state["strengths"] = [1.0]
++        target.write_text(json.dumps(state))
++    else:
++        target.write_text(target.read_text() + "\n")
++    with pytest.raises(ValueError, match="[Ii]ntegrity"):
++        external_validate(run, xp, mp, tmp_path / "external")
++
++
++@pytest.mark.integration
++def test_actual_count_de_screen_runs_inside_nested_cv(data, config):
++    pytest.importorskip("pydeseq2")
++    local = replace(config, candidate_method="deseq2", strengths=(0.05,))
++    audit = Audit()
++    result = nested_validate(data, encode_outcome(data, local)[0], local, audit)
++    assert result.metrics["out_of_fold"]["roc_auc"] > 0.8
++    assert len(audit.fits) == local.outer_folds * (local.inner_folds + 1)
++    assert all(len(fit["sample_ids"]) < len(data.expression) for fit in audit.fits)
++    assert all(fit["candidate_method"] == "deseq2" for fit in audit.fits)
++
++
++@pytest.mark.integration
++def test_batch_holdout_hyperparameters_and_coefficients_are_preserved(data, config, tmp_path):
++    output = tmp_path / "batch_run"
++    local = replace(config, batch="batch", strengths=(0.05,), stability_resamples=2)
++    run_analysis(data, local, output)
++    metrics = json.loads((output / "model_metrics.json").read_text())
++    batch = metrics["batch_validation"]
++    assert batch["status"] == "tested"
++    for fold in batch["folds"]:
++        assert fold["parameters"]["strength"] in local.strengths
++        assert fold["tuning_results"]
++        assert "baseline_parameters" in fold
++    with np.load(output / "resample_coefficients.npz", allow_pickle=False) as stored:
++        assert stored["batch"].shape == (len(batch["folds"]), 1, data.expression.shape[1])
++        assert stored["batch_labels"].tolist() == [row["batch"] for row in batch["folds"]]

@@ -28,6 +28,13 @@ def differential_expression(data: Dataset, y: FloatArray, config: Config) -> pd.
         raise ValueError(
             "DE with repeated biological groups requires de_pair_group; collapse technical replicates first"
         )
+    if config.de_pair_group and config.group:
+        replication = pd.crosstab(data.metadata[config.group].astype(str).to_numpy(), y)
+        if (replication > 1).any().any():
+            raise ValueError(
+                "Paired DE supports one observation per biological group and condition; "
+                "combine technical replicates or use a model for the actual repeated-measures design"
+            )
     nuisance = list(config.covariates)
     if config.batch:
         nuisance.append(config.batch)

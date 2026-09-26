@@ -70,6 +70,13 @@ class Config:
     max_dense_mb: int = 2048
 
     def validate(self) -> None:
+        for item in fields(self):
+            if (
+                isinstance(item.default, (int, float))
+                and not isinstance(item.default, bool)
+                and isinstance(getattr(self, item.name), bool)
+            ):
+                raise ValueError(f"{item.name} must be numeric, not a boolean")
         if not isinstance(self.outcome, str) or not isinstance(self.sample_id, str):
             raise ValueError("outcome and sample_id must be nonempty strings")
         for key in (
@@ -172,15 +179,22 @@ class Config:
             ):
                 raise ValueError(f"{key} must be finite and positive")
         if not self.strengths or any(
-            not isinstance(x, (int, float)) or not math.isfinite(x) or x <= 0
+            isinstance(x, bool) or not isinstance(x, (int, float)) or not math.isfinite(x) or x <= 0
             for x in self.strengths
         ):
             raise ValueError("strengths must be finite and positive")
         if not self.l1_ratios or any(
-            not isinstance(x, (int, float)) or not math.isfinite(x) or not 0 < x <= 1
+            isinstance(x, bool)
+            or not isinstance(x, (int, float))
+            or not math.isfinite(x)
+            or not 0 < x <= 1
             for x in self.l1_ratios
         ):
             raise ValueError("l1_ratios must be in (0,1]; pure ridge is not sparse selection")
+        if len(set(self.strengths)) != len(self.strengths) or len(set(self.l1_ratios)) != len(
+            self.l1_ratios
+        ):
+            raise ValueError("Duplicate hyperparameters would duplicate inner-fold evidence")
         for norm in self.stability_normalizations:
             if norm not in choices["normalization"]:
                 raise ValueError("Invalid stability normalization")

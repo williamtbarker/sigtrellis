@@ -22,6 +22,7 @@
 | `metrics` | Proper-loss selection, group weights, complementary metrics/calibration |
 | `workflow` | Orchestration, positive-gate eligibility, manifests, errors and artifacts |
 | `prediction` | Frozen external-cohort evaluation without transform refitting |
+| `integrity` | Verify required frozen-run artifacts against their recorded hashes |
 | `reporting` | Purpose-labeled plots and self-contained HTML/Markdown |
 | `simulate` | Deterministic fixtures with separately recorded planted truth |
 | `cli` | Explicit user-facing contracts and modality routing |
@@ -39,10 +40,14 @@ Outer folds are never used to choose their own hyperparameters. Final full-data 
 - Independent samples: sample ID is the default group, with an explicit assumption warning.
 - Multiple specimens from a donor: an explicit shared group controls splitting, weights and subsampling.
 - Paired DE: donor fixed effects are included only when requested and identifiable; repeated groups without a pairing contract are rejected.
+- Paired DE additionally requires one observation per group/condition. Technical replicates must be combined appropriately; general repeated-measures designs require another model.
 - Covariates: typed numeric or categorical, jointly penalized in prediction and unpenalized design terms in count DE. These are different statistical roles and are labeled accordingly.
 - Batch: diagnostics, optional purged holdouts, and count-DE nuisance terms. No global batch correction or batch predictor.
 - Multiclass: multinomial logistic elastic net; coefficient contrasts against class 0.
 - Correlated genes: descriptive groups, not fitted latent features or biological pathway assignments.
+- Multinomial correlation-group and substitution frequencies retain the explicit coefficient-contrast axis. Group membership can be shared while selection evidence remains contrast specific.
+
+CSV identifiers are parsed as strings before constructing the index; a numeric-looking identifier is never silently normalized. Input metadata blanks and H5AD matrix/metadata shape disagreement fail before modeling. Numeric fingerprints canonicalize signed zero. External evaluation verifies model state, configuration and training metadata against the saved manifest before reading the new cohort. This detects changed artifacts against a trusted manifest; it is not cryptographic authentication of a manifest an attacker can also replace.
 
 ## Performance and scale
 
@@ -55,4 +60,3 @@ BLAS/OpenMP threads are limited to one within `run_analysis` for reproducibility
 New supervised screens must implement the training-only `Prepared.fit` boundary and pass the boundary-spy and global-screen attack tests. New normalization must separate fitted reference state from sample-local transform. New validators must preserve biological groups and declare their estimand. New DE backends must expose design rank, replicate assumptions, effect contrasts and missing/filtered tests rather than mapping all methods onto a misleading universal p-value schema.
 
 Deferred extensions include conditional/random-effect inference, validated continuous/multiclass count contrasts, temporal splits, exchangeability diagnostics, feature-level error control, train-frozen batch harmonization, pathway-score feature adapters, and panel-specific nested stability selection. They require statistical design and validation, not merely more configuration switches.
-

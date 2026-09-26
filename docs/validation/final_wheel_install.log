@@ -1,0 +1,10 @@
+Processing ./dist/sigtrellis-0.1.1-py3-none-any.whl
+Installing collected packages: sigtrellis
+  Attempting uninstall: sigtrellis
+    Found existing installation: sigtrellis 0.1.1
+    Uninstalling sigtrellis-0.1.1:
+      Successfully uninstalled sigtrellis-0.1.1
+Successfully installed sigtrellis-0.1.1
+
+[notice] A new release of pip is available: 25.0.1 -> 26.2.1
+[notice] To update, run: python -m pip install --upgrade pip

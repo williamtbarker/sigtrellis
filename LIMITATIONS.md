@@ -2,6 +2,8 @@
 
 This is a tested first research release, not a clinically validated system. Production-oriented packaging and automated checks do not make the methodology universally correct.
 
+The 0.1.1 review adds artifact integrity checks, exact identifier handling, stricter paired-DE replication contracts and contrast-specific correlation evidence. Artifact hashes detect changes relative to a trusted manifest; they do not authenticate a manifest that has also been altered. Paired DE supports one observation per donor/condition, not arbitrary repeated visits.
+
 1. **Association only.** Neither selection, stability, count-DE support nor strong cross-validation establishes biological validation, a mechanism, causality, clinical utility or qualification. An external assay, independent cohort, and an appropriate intended-use study are separate requirements.
 2. **Performance scope.** Nested CV evaluates a training procedure on smaller training sets. It does not automatically evaluate the final full-data fit or the consensus feature panel assembled afterward. A compact assay panel must be frozen and separately assessed. Confidence intervals are not inferred from overlapping folds.
 3. **Small studies.** No universal minimum donor count guarantees trustworthy modeling. The default 20-group gate is conservative operational policy, not a power calculation. The public examples deliberately fail the small-cohort gate. Within-group permutations can have very few unique labelings even when many Monte Carlo draws are requested.
@@ -17,4 +19,3 @@ This is a tested first research release, not a clinically validated system. Prod
 13. **Scale and runtime.** Chunked H5AD aggregation avoids a dense cells-by-genes matrix. The sample-level accumulator and models remain dense. Running all cell types can increase memory substantially. Large nested DE/permutation experiments are expensive; no performance promise is made for atlas-scale studies.
 14. **Portability.** Seeds, source hashes, versions and thread limits are recorded. Bitwise identity across CPU/BLAS/library versions is not guaranteed. Prepared HDF5/gzip byte streams may vary even when biological counts are identical. A clean Python 3.12 installation is verified; CI definitions for additional Python versions are supplied but are not a report of executed remote CI.
 15. **Known deferred methods.** No automatic pathway enrichment, validated gene-program score models, survival analysis, interactions, zero-inflated cell-level models, donor random effects, nonlinear classifiers, nested probability recalibration, train-frozen batch harmonization, or conditional feature-level significance. The current package makes the implemented scope explicit instead of silently approximating these analyses.
-

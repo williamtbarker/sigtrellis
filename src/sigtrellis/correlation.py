@@ -25,8 +25,19 @@ class CorrelationResult:
 
 
 def correlation_diagnostics(
-    data: Dataset, coefficients: FloatArray, ranking: pd.DataFrame, config: Config
+    data: Dataset,
+    coefficients: FloatArray,
+    ranking: pd.DataFrame,
+    config: Config,
+    *,
+    contrasts: list[str] | None = None,
 ) -> CorrelationResult:
+    if contrasts is None:
+        if coefficients.shape[1] != 1:
+            raise ValueError("Explicit contrast order is required for multiclass coefficients")
+        contrasts = ranking.contrast.drop_duplicates().tolist()
+    if len(contrasts) != coefficients.shape[1] or len(set(contrasts)) != len(contrasts):
+        raise ValueError("Contrast labels do not match coefficient axes")
     ranked = ranking.sort_values(
         ["selection_frequency", "sign_consistency", "rank_median_selected", "gene_id"],
         ascending=[False, False, True, True],
@@ -41,8 +52,8 @@ def correlation_diagnostics(
     genes = [all_genes[i] for i in variable]
     if not genes:
         return CorrelationResult(
-            pd.DataFrame(columns=["group_id", "members", "selection_frequency"]),
-            pd.DataFrame(columns=["gene_a", "gene_b", "exclusive_given_any"]),
+            pd.DataFrame(columns=["group_id", "contrast", "members", "selection_frequency"]),
+            pd.DataFrame(columns=["contrast", "gene_a", "gene_b", "exclusive_given_any"]),
             pd.DataFrame(),
             {},
         )
@@ -63,7 +74,8 @@ def correlation_diagnostics(
         if len(genes) > 1
         else np.array([1])
     )
-    selected = np.asarray((abs(coefficients) > config.coefficient_tolerance).any(axis=1))
+    # Preserve the contrast axis: evidence for class A must not inflate class B.
+    selected = abs(coefficients) > config.coefficient_tolerance
     group_rows: list[dict[str, Any]] = []
     pair_rows: list[dict[str, Any]] = []
     membership: dict[str, str] = {}
@@ -73,42 +85,51 @@ def correlation_diagnostics(
         source_indices = [all_genes.index(g) for g in members]
         group_id = f"correlation_{int(label):03d}"
         membership.update({g: group_id for g in members})
-        group_rows.append(
-            {
-                "group_id": group_id,
-                "members": ";".join(members),
-                "n_members": len(members),
-                "selection_frequency": float(selected[:, source_indices].any(axis=1).mean()),
-                "minimum_member_frequency": float(selected[:, source_indices].mean(axis=0).min()),
-                "interpretation": "Marginal coexpression group, not a validated gene program",
-            }
-        )
-        for a, b in combinations(positions, 2):
-            sa = selected[:, all_genes.index(genes[a])]
-            sb = selected[:, all_genes.index(genes[b])]
-            union = sa | sb
-            pair_rows.append(
+        for ci, contrast in enumerate(contrasts):
+            contrast_selected = selected[:, ci, :]
+            group_rows.append(
                 {
                     "group_id": group_id,
-                    "gene_a": genes[a],
-                    "gene_b": genes[b],
-                    "expression_correlation": float(corr[a, b]),
-                    "frequency_any": float(union.mean()),
-                    "frequency_both": float((sa & sb).mean()),
-                    "exclusive_given_any": float((sa ^ sb).sum() / union.sum())
-                    if union.any()
-                    else None,
-                    "selection_phi": float(np.corrcoef(sa, sb)[0, 1])
-                    if sa.std() and sb.std()
-                    else None,
+                    "contrast": contrast,
+                    "members": ";".join(members),
+                    "n_members": len(members),
+                    "selection_frequency": float(
+                        contrast_selected[:, source_indices].any(axis=1).mean()
+                    ),
+                    "minimum_member_frequency": float(
+                        contrast_selected[:, source_indices].mean(axis=0).min()
+                    ),
+                    "interpretation": "Contrast-specific selection in a descriptive marginal coexpression group",
                 }
             )
+            for a, b in combinations(positions, 2):
+                sa = contrast_selected[:, all_genes.index(genes[a])]
+                sb = contrast_selected[:, all_genes.index(genes[b])]
+                union = sa | sb
+                pair_rows.append(
+                    {
+                        "group_id": group_id,
+                        "contrast": contrast,
+                        "gene_a": genes[a],
+                        "gene_b": genes[b],
+                        "expression_correlation": float(corr[a, b]),
+                        "frequency_any": float(union.mean()),
+                        "frequency_both": float((sa & sb).mean()),
+                        "exclusive_given_any": float((sa ^ sb).sum() / union.sum())
+                        if union.any()
+                        else None,
+                        "selection_phi": float(np.corrcoef(sa, sb)[0, 1])
+                        if sa.std() and sb.std()
+                        else None,
+                    }
+                )
     return CorrelationResult(
         pd.DataFrame(group_rows),
         pd.DataFrame(
             pair_rows,
             columns=[
                 "group_id",
+                "contrast",
                 "gene_a",
                 "gene_b",
                 "expression_correlation",

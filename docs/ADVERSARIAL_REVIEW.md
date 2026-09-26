@@ -1,4 +1,4 @@
-# Adversarial scientific review — version 0.1.0
+# Adversarial scientific review — version 0.1.1
 
 This review checks implemented failure modes and states what remains outside the evidence. Executed numerical results and software checks are in `../VALIDATION.md`.
 
@@ -33,3 +33,7 @@ This review checks implemented failure modes and states what remains outside the
 ## Publication judgment
 
 The implementation is suitable for a public **research software** release with the evidence and limitations attached. It is not yet a clinically validated biomarker platform, a universal confounder-adjusted inference engine, or an externally validated compact-panel assay. Independent statistical review, larger cross-cohort benchmarks, DE agreement checks against established R implementations, and prospective panel evaluation would strengthen future releases. No claim of proprietary-project provenance is made.
+
+## Second source review
+
+The follow-up review and its reproduced defects, fixes and 27 new tests are documented in [REVIEW_0.1.1.md](REVIEW_0.1.1.md). The original safeguards were retained; review findings were corrected and the demonstration evidence regenerated.

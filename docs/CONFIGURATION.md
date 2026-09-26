@@ -28,6 +28,10 @@ The complete typed contract and defaults are in `src/sigtrellis/config.py`. Use 
 
 Two specimens from the same donor need distinct `sample_id` values and one shared `group`. A condition contrast varying within donor can use `de_pair_group: true` and `permutation_scheme: within_group` if treatment labels are exchangeable. Do not use within-donor label permutation for a time series or a systematically ordered intervention without justifying exchangeability. Technical replicates should be combined according to the assay design before modeling; two rows do not create two donors.
 
+The paired DE backend requires at most one specimen per group/condition. Repeated visits in the same condition cannot be treated as additional independent observations by setting `de_pair_group`. Use a design-specific repeated-measures model for that inference. Grouped predictive validation can still keep such rows together, subject to its stated estimand and exchangeability assumptions.
+
+Identifiers are exact strings: `001`, `01` and `1` denote different units, and a literal identifier `NA` is preserved. Blank required values fail. Numeric settings cannot be booleans; hyperparameter grids cannot contain duplicate values, which would otherwise duplicate fold evidence in the tuning summary.
+
 ## Compact panels and independent performance
 
 The candidate table is a discovery product assembled after procedure validation. To evaluate a chosen assay panel, freeze the panel and protocol and evaluate on new donors/cohorts; do not report the earlier procedure CV score as that panel's measured accuracy. `sigtrellis external` evaluates the already fitted final model, which can include more genes than the gated candidate list. It does not silently refit a compact panel.

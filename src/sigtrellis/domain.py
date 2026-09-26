@@ -60,7 +60,11 @@ def file_hash(path: Path) -> str:
 
 
 def array_hash(values: FloatArray) -> str:
-    return hashlib.sha256(np.ascontiguousarray(values, dtype="<f8").tobytes()).hexdigest()
+    # Numerically equal profiles must fingerprint equally: signed zero must not
+    # let a duplicate specimen cross the biological validation boundary.
+    canonical = np.array(values, dtype="<f8", order="C", copy=True)
+    canonical[canonical == 0] = 0.0
+    return hashlib.sha256(canonical.tobytes()).hexdigest()
 
 
 def write_json(path: Path, value: Any) -> None:

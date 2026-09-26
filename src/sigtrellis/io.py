@@ -12,24 +12,42 @@ from sigtrellis.config import Config
 from sigtrellis.domain import Dataset, file_hash
 
 
-def read_table(path: Path) -> pd.DataFrame:
+def read_table(path: Path, text_columns: tuple[str, ...] = ()) -> pd.DataFrame:
     sep = "\t" if ".tsv" in path.name else ","
     # pandas otherwise silently mangles duplicate headers into distinct feature names.
     import gzip
 
     opener = gzip.open if path.suffix == ".gz" else open
     with opener(path, "rt") as handle:
-        header = next(csv.reader(handle, delimiter=sep))
+        header = next(csv.reader(handle, delimiter=sep), [])
+    if len(header) < 2:
+        raise ValueError(f"Empty or invalid table: {path.name}")
     if len(header) != len(set(header)):
         raise ValueError(f"Duplicate headers in {path.name}")
-    return pd.read_csv(path, sep=sep, index_col=0)
+    # Identifiers are strings, including '001' and literal 'NA'. Blank values
+    # are rejected by the scientific input contract, not guessed as categories.
+    frame = pd.read_csv(
+        path,
+        sep=sep,
+        keep_default_na=False,
+        converters={0: str},
+        dtype={name: str for name in text_columns if name != header[0]},
+    )
+    # Construct the index afterward: the CSV index parser can infer numeric
+    # identifiers even when the column converter returns strings.
+    return frame.set_index(frame.columns[0])
 
 
 def load_bulk(
     expression: Path, metadata: Path, config: Config, orientation: str = "auto"
 ) -> Dataset:
     x = read_table(expression)
-    m = read_table(metadata)
+    identities = tuple(
+        name for name in (config.group, config.batch, config.permutation_strata) if name is not None
+    )
+    if config.outcome_type != "continuous":
+        identities += (config.outcome,)
+    m = read_table(metadata, identities)
     # First metadata column is the identifier, explicitly checked by name.
     if m.index.name != config.sample_id:
         raise ValueError(f"First metadata column must be {config.sample_id!r}")

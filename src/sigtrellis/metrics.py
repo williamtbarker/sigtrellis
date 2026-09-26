@@ -64,7 +64,9 @@ def evaluate(
         return {
             "rmse": float(np.sqrt(mean_squared_error(y, prediction, sample_weight=weights))),
             "mae": float(mean_absolute_error(y, prediction, sample_weight=weights)),
-            "r2": float(r2_score(y, prediction, sample_weight=weights)) if len(y) > 1 else None,
+            "r2": float(r2_score(y, prediction, sample_weight=weights))
+            if len(np.unique(y)) > 1
+            else None,
         }
     binary = config.outcome_type == "binary"
     hard = (
@@ -72,10 +74,16 @@ def evaluate(
         if binary
         else prediction.argmax(axis=1)
     )
+    all_classes = len(np.unique(y)) == prediction.shape[1]
     metrics: dict[str, Any] = {
         "log_loss": loss(y, prediction, config, weights),
-        "balanced_accuracy": float(balanced_accuracy_score(y, hard, sample_weight=weights)),
-        "mcc": float(matthews_corrcoef(y, hard, sample_weight=weights)),
+        "balanced_accuracy": float(balanced_accuracy_score(y, hard, sample_weight=weights))
+        if all_classes
+        else None,
+        "mcc": float(matthews_corrcoef(y, hard, sample_weight=weights)) if all_classes else None,
+        "discrimination_status": "all_classes_observed"
+        if all_classes
+        else "undefined_missing_classes",
     }
     if binary:
         prob = prediction[:, 1]

@@ -1,4 +1,4 @@
-# SigTrellis 0.1.0 — release assessment
+# SigTrellis 0.1.1 — release assessment
 
 An original, local Python research package for stable candidate transcriptomic signatures. All required core workflows are implemented and executed. No previous employer's code, data, or confidential method is represented as part of this project.
 
@@ -13,7 +13,7 @@ An original, local Python research package for stable candidate transcriptomic s
 | `LIMITATIONS.md` | Supported scope and assumptions that can invalidate conclusions |
 | `CHANGELOG.md`, `LICENSE`, `CITATION.cff` | Version history, MIT software terms and citation metadata |
 | `pyproject.toml`, `Dockerfile` | Installation, typed/linted/tested package settings and local container recipe |
-| `src/sigtrellis/` | Twenty Python modules, CLI, modality adapters, modeling, audits and reporting |
+| `src/sigtrellis/` | Twenty-one Python modules, CLI, modality adapters, modeling, audits and reporting |
 | `tests/` | 89 unit, scientific, integration and adversarial cases |
 | `examples/` | Public download/preparation script, scientific benchmark, reproducible study YAMLs |
 | `docs/` | Configuration, dataset terms, adversarial review and machine-readable validation evidence |
@@ -31,7 +31,7 @@ Feature evidence combines coefficients, signs, selection/rank variation, normali
 
 ## Executed results
 
-- 89 tests pass in both development and fresh installed-wheel environments; 88% branch-aware coverage. Ruff and strict mypy pass.
+- 116 tests pass in both development and fresh installed-wheel environments; 89% branch-aware coverage. Ruff and strict mypy pass.
 - The documented 80-sample synthetic quickstart recovers exactly four planted genes as gated candidates.
 - Public airway bulk completes with eight samples/four paired donors, count DE and reports; no candidate passes all gates.
 - Public Kang single-cell analysis completes from 24,673 input cells, with 5,697 monocytes aggregated into 16 samples/eight donors; no candidate passes all gates.
@@ -61,3 +61,7 @@ Nested procedure performance does not validate the final compact panel. Selectio
 Future research should address conditional stability with nuisance factors, panel-specific nested validation, larger independently collected cohorts, agreement with R DE reference workflows, hierarchical designs, biological gene-program stability, and prospective assay transfer. Atlas-scale computational claims require separate benchmarking.
 
 **Recommendation:** publish publicly as a tested, clearly scoped research software release with these limitations and the adversarial review attached. It is not ready to be represented as a clinically validated biomarker discovery/qualification platform. The repository and package name have not been published or reserved by this work.
+
+## Changes after adversarial code review
+
+Version 0.1.1 corrects identifier parsing, exact-duplicate fingerprints, paired DE replication contracts, frozen-artifact verification, multinomial correlation evidence, nonfinite confidence checks, undefined metrics and H5AD shape validation. It also strengthens configuration checks and batch provenance. See `docs/REVIEW_0.1.1.md` for the reproduced failures and `docs/GITHUB_RELEASE.md` for publication commands. The remote repository has not been created by this work.
