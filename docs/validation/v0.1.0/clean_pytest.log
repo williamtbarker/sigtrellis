@@ -1,6 +1,6 @@
 ============================= test session starts ==============================
 platform linux -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0
-rootdir: /workspace/scratch/e5221b18d874/sigtrellis
+rootdir: /path/to/validation-workspace/sigtrellis
 configfile: pyproject.toml
 testpaths: tests
 plugins: zarr-3.4.0, cov-7.1.0
@@ -18,26 +18,26 @@ _______________ coverage: platform linux, python 3.12.14-final-0 _______________
 
 Name                                                                                                          Stmts   Miss Branch BrPart  Cover   Missing
 ---------------------------------------------------------------------------------------------------------------------------------------------------------
-/workspace/scratch/e5221b18d874/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/__init__.py            1      0      0      0   100%
-/workspace/scratch/e5221b18d874/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/__main__.py            2      2      0      0     0%   1-3
-/workspace/scratch/e5221b18d874/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/cli.py                97     17     26      5    79%   101-105, 119-132, 136, 140-144, 147-148
-/workspace/scratch/e5221b18d874/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/config.py            156     12     92     14    90%   89, 92, 109, 113, 117, 119->121, 140, 159, 186, 192, 200->209, 208, 214, 221
-/workspace/scratch/e5221b18d874/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/correlation.py        50      1      6      1    96%   43
-/workspace/scratch/e5221b18d874/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/de.py                 55      7     20      4    83%   23-24, 26, 44-45, 53, 58
-/workspace/scratch/e5221b18d874/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/domain.py             52      0     10      0   100%
-/workspace/scratch/e5221b18d874/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/io.py                 41      5     16      5    82%   35, 40, 45, 48, 52
-/workspace/scratch/e5221b18d874/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/metrics.py            38      0     10      0   100%
-/workspace/scratch/e5221b18d874/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/modeling.py          105      4     24      2    95%   179-181, 202, 205->208
-/workspace/scratch/e5221b18d874/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/prediction.py         83     13     38     11    79%   24, 39, 53, 55-57, 73, 77, 85, 89, 92, 101, 106
-/workspace/scratch/e5221b18d874/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/preprocessing.py     130      5     42      6    94%   47, 50, 56, 131, 149->151, 181
-/workspace/scratch/e5221b18d874/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/qc.py                152     33    108     23    74%   22, 26, 31, 34, 38, 47, 51, 53, 58, 62, 70, 71->78, 95, 99, 105, 131-136, 138, 139->128, 143-144, 152->155, 166-175, 184
-/workspace/scratch/e5221b18d874/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/reporting.py         186     22     30      5    87%   52->88, 74-82, 156->170, 172-182, 271-277
-/workspace/scratch/e5221b18d874/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/simulate.py           93      5     36      3    94%   20, 130-134
-/workspace/scratch/e5221b18d874/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/singlecell.py         91      6     30      7    89%   25, 32, 40, 55, 57->61, 66, 73
-/workspace/scratch/e5221b18d874/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/splits.py            103     11     52     10    86%   21, 35, 43, 54, 76, 113->108, 115-117, 128, 130, 144
-/workspace/scratch/e5221b18d874/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/stability.py          65      0     10      0   100%
-/workspace/scratch/e5221b18d874/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/validation.py         72      0     12      0   100%
-/workspace/scratch/e5221b18d874/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/workflow.py          204     22     46      7    88%   37, 54, 99, 101, 177-178, 223-225, 250-253, 272-280
+/path/to/validation-workspace/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/__init__.py            1      0      0      0   100%
+/path/to/validation-workspace/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/__main__.py            2      2      0      0     0%   1-3
+/path/to/validation-workspace/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/cli.py                97     17     26      5    79%   101-105, 119-132, 136, 140-144, 147-148
+/path/to/validation-workspace/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/config.py            156     12     92     14    90%   89, 92, 109, 113, 117, 119->121, 140, 159, 186, 192, 200->209, 208, 214, 221
+/path/to/validation-workspace/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/correlation.py        50      1      6      1    96%   43
+/path/to/validation-workspace/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/de.py                 55      7     20      4    83%   23-24, 26, 44-45, 53, 58
+/path/to/validation-workspace/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/domain.py             52      0     10      0   100%
+/path/to/validation-workspace/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/io.py                 41      5     16      5    82%   35, 40, 45, 48, 52
+/path/to/validation-workspace/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/metrics.py            38      0     10      0   100%
+/path/to/validation-workspace/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/modeling.py          105      4     24      2    95%   179-181, 202, 205->208
+/path/to/validation-workspace/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/prediction.py         83     13     38     11    79%   24, 39, 53, 55-57, 73, 77, 85, 89, 92, 101, 106
+/path/to/validation-workspace/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/preprocessing.py     130      5     42      6    94%   47, 50, 56, 131, 149->151, 181
+/path/to/validation-workspace/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/qc.py                152     33    108     23    74%   22, 26, 31, 34, 38, 47, 51, 53, 58, 62, 70, 71->78, 95, 99, 105, 131-136, 138, 139->128, 143-144, 152->155, 166-175, 184
+/path/to/validation-workspace/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/reporting.py         186     22     30      5    87%   52->88, 74-82, 156->170, 172-182, 271-277
+/path/to/validation-workspace/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/simulate.py           93      5     36      3    94%   20, 130-134
+/path/to/validation-workspace/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/singlecell.py         91      6     30      7    89%   25, 32, 40, 55, 57->61, 66, 73
+/path/to/validation-workspace/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/splits.py            103     11     52     10    86%   21, 35, 43, 54, 76, 113->108, 115-117, 128, 130, 144
+/path/to/validation-workspace/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/stability.py          65      0     10      0   100%
+/path/to/validation-workspace/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/validation.py         72      0     12      0   100%
+/path/to/validation-workspace/clean_verify/.venv/lib/python3.12/site-packages/sigtrellis/workflow.py          204     22     46      7    88%   37, 54, 99, 101, 177-178, 223-225, 250-253, 272-280
 ---------------------------------------------------------------------------------------------------------------------------------------------------------
 TOTAL                                                                                                          1776    165    608    103    88%
 ============================= 89 passed in 48.08s ==============================

@@ -8,6 +8,7 @@ authors:
   - family-names: Barker
     given-names: Will
 license: MIT
+repository-code: "https://github.com/williamtbarker/sigtrellis"
 keywords:
   - RNA-seq
   - single-cell distributions

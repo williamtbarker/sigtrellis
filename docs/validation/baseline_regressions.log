@@ -773,7 +773,7 @@ tests/test_review_regressions.py:238: KeyError
 =============================== warnings summary ===============================
 tests/test_review_regressions.py::test_single_class_fold_does_not_claim_balanced_discrimination
 tests/test_review_regressions.py::test_single_class_fold_does_not_claim_balanced_discrimination
-  /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages/sklearn/metrics/_classification.py:620: UserWarning: A single label was found in 'y_true' and 'y_pred'. For the confusion matrix to have the correct shape, use the 'labels' parameter to pass all known labels.
+  /path/to/python-runtime/lib/python3.12/site-packages/sklearn/metrics/_classification.py:620: UserWarning: A single label was found in 'y_true' and 'y_pred'. For the confusion matrix to have the correct shape, use the 'labels' parameter to pass all known labels.
     warnings.warn(
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html

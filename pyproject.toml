@@ -21,6 +21,10 @@ de = ["pydeseq2>=0.5.4,<0.6"]
 demo = ["rdata>=1.0,<2"]
 dev = ["pytest>=8", "pytest-cov>=6", "ruff>=0.11", "mypy>=1.15", "pandas-stubs", "types-PyYAML", "build"]
 
+[project.urls]
+Repository = "https://github.com/williamtbarker/sigtrellis"
+Issues = "https://github.com/williamtbarker/sigtrellis/issues"
+
 [project.scripts]
 sigtrellis = "sigtrellis.cli:main"
 

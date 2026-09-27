@@ -23,6 +23,10 @@ individual feature frequencies.
 
 ## Repository and archive structure
 
+The table distinguishes tracked source from artifacts prepared in the original
+release archive. A Git clone does not include ignored distributions, full evidence,
+or the historical Git bundle; inspect any separately obtained archive inventory.
+
 | Path | Purpose |
 |---|---|
 | `src/sigtrellis/` | 28 typed production modules: adapters, cell moments/identity, preprocessing, models, splits, stability, panels, DE, external prediction and reporting |
@@ -37,7 +41,7 @@ individual feature frequencies.
 | `LICENSE`, `CITATION.cff`, `CHANGELOG.md` | MIT source license, attribution and release history |
 | `release_evidence/` | Full generated reports and numerical/audit artifacts, included in the archive but ignored by Git |
 | `dist/` | Built 0.3.0 wheel and source distribution |
-| `sigtrellis-history.bundle` | Local commit/tag history for reconstruction; no remote push performed |
+| `sigtrellis-history.bundle` | Historical archive copy of local commit/tag history |
 | `RELEASE_INVENTORY.json`, `SHA256SUMS.txt` | Archive inventory and per-file hashes |
 
 Large raw data, environments and caches are excluded. Earlier reports retain their

@@ -1,4 +1,9 @@
-# SigTrellis 0.1.1 — release assessment
+# SigTrellis 0.1.1 — historical release assessment
+
+This report records the 0.1.1 assessment before public repository publication. Its
+implementation, test counts, and publication status are historical. Use
+[RELEASE_GUIDE.md](RELEASE_GUIDE.md), [VALIDATION.md](VALIDATION.md), and
+[CHANGELOG.md](CHANGELOG.md) for the current release.
 
 An original, local Python research package for stable candidate transcriptomic signatures. All required core workflows are implemented and executed. No previous employer's code, data, or confidential method is represented as part of this project.
 

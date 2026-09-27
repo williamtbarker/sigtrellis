@@ -1,6 +1,6 @@
 ============================= test session starts ==============================
 platform linux -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0
-rootdir: /workspace/scratch/e5221b18d874/final_clean
+rootdir: /path/to/validation-workspace/final_clean
 configfile: pyproject.toml
 testpaths: tests
 plugins: cov-7.1.0, zarr-3.4.0
@@ -18,7 +18,7 @@ tests/test_singlecell.py ......                                          [100%]
 
 =============================== warnings summary ===============================
 tests/test_release_expansion.py::test_abundance_does_not_change_when_the_same_cell_distribution_is_repeated
-  /workspace/scratch/e5221b18d874/final_clean/.venv/lib/python3.12/site-packages/anndata/_core/anndata.py:1882: UserWarning: Observation names are not unique. To make them unique, call `.obs_names_make_unique`.
+  /path/to/validation-workspace/final_clean/.venv/lib/python3.12/site-packages/anndata/_core/anndata.py:1882: UserWarning: Observation names are not unique. To make them unique, call `.obs_names_make_unique`.
     utils.warn_names_duplicates("obs")
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
@@ -54,5 +54,5 @@ Name                                                             Stmts   Miss Br
 .venv/lib/python3.12/site-packages/sigtrellis/workflow.py          254     20     74     10    90%   42, 60, 71, 74-77, 133->135, 136, 140, 151, 244-245, 297-299, 347-352
 ------------------------------------------------------------------------------------------------------------
 TOTAL                                                             2457    242    916    155    87%
-Coverage JSON written to file /workspace/scratch/e5221b18d874/review_work/sigtrellis/release_evidence/v0.2.0/coverage.json
+Coverage JSON written to file /path/to/validation-workspace/review_work/sigtrellis/release_evidence/v0.2.0/coverage.json
 ================== 152 passed, 1 warning in 197.40s (0:03:17) ==================

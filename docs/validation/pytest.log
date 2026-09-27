@@ -1,6 +1,6 @@
 ============================= test session starts ==============================
 platform linux -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0
-rootdir: /workspace/scratch/e5221b18d874/review_work/sigtrellis
+rootdir: /path/to/validation-workspace/review_work/sigtrellis
 configfile: pyproject.toml
 testpaths: tests
 plugins: zarr-3.4.0, cov-7.1.0
@@ -42,5 +42,5 @@ src/sigtrellis/validation.py         77      1     16      1    98%   150
 src/sigtrellis/workflow.py          212     19     52      7    89%   37, 55, 66, 114, 118, 194-195, 240-242, 289-297
 -----------------------------------------------------------------------------
 TOTAL                              1838    156    650    106    89%
-Coverage JSON written to file /workspace/scratch/e5221b18d874/review_coverage.json
+Coverage JSON written to file /path/to/validation-workspace/review_coverage.json
 ============================= 116 passed in 59.61s =============================

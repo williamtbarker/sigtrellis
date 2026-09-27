@@ -1,6 +1,6 @@
-Using Python 3.12.14 environment at: /workspace/scratch/e5221b18d874/final_clean/.venv
+Using Python 3.12.14 environment at: /path/to/validation-workspace/final_clean/.venv
 Resolved 60 packages in 7.78s
 Prepared 1 package in 55ms
 Uninstalled 1 package in 3ms
 Installed 1 package in 10ms
- ~ sigtrellis==0.2.0 (from file:///workspace/scratch/e5221b18d874/review_work/sigtrellis/dist/sigtrellis-0.2.0-py3-none-any.whl)
+ ~ sigtrellis==0.2.0 (from file:///path/to/validation-workspace/review_work/sigtrellis/dist/sigtrellis-0.2.0-py3-none-any.whl)

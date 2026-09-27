@@ -10,10 +10,11 @@ virtual environments and caches are excluded. The Git repository ignores raw
 data and full generated evidence; public preparation scripts and compact
 validation records are tracked. Preserve all dataset attribution/reuse notices.
 
-The package has not been uploaded to PyPI or pushed to a remote repository by
-this preparation task. Before making a public release, choose the desired GitHub
-repository and visibility, inspect the tagged source and `VALIDATION.md`, and use
-the supplied bundle if preserving history is desired. Do not advertise clinical
+The public source is maintained at
+[williamtbarker/sigtrellis](https://github.com/williamtbarker/sigtrellis).
+Before preparing a release, inspect the exact source commit, package contents,
+GitHub Actions results, and `VALIDATION.md`. See [GITHUB_RELEASE.md](GITHUB_RELEASE.md)
+for the maintenance workflow. Source availability does not establish PyPI publication. Do not advertise clinical
 qualification, causal discovery, formal gene-level stability error control, or
 an ability to extract a valid marker from every possible experimental design.
 

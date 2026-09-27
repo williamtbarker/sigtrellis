@@ -48,7 +48,7 @@ scipy==1.18.1
 scverse-misc==0.1.6
 session-info2==0.4.2
 session_info==1.0.1
-sigtrellis @ file:///workspace/scratch/e5221b18d874/review_work/sigtrellis/dist/sigtrellis-0.1.1-py3-none-any.whl#sha256=1e6e785fdfc98df87e46f067a9476f6533c233d75d2baa7eeb2bc5f7b66894cf
+sigtrellis @ file:///path/to/validation-workspace/review_work/sigtrellis/dist/sigtrellis-0.1.1-py3-none-any.whl#sha256=1e6e785fdfc98df87e46f067a9476f6533c233d75d2baa7eeb2bc5f7b66894cf
 six==1.17.0
 stdlib-list==0.12.0
 threadpoolctl==3.7.0

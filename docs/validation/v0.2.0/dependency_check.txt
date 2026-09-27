@@ -1,3 +1,3 @@
-Using Python 3.12.14 environment at: /workspace/scratch/e5221b18d874/final_clean/.venv
+Using Python 3.12.14 environment at: /path/to/validation-workspace/final_clean/.venv
 Checked 60 packages in 13ms
 All installed packages are compatible

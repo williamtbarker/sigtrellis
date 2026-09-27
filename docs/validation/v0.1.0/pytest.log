@@ -1,6 +1,6 @@
 ============================= test session starts ==============================
 platform linux -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0
-rootdir: /workspace/scratch/e5221b18d874/sigtrellis
+rootdir: /path/to/validation-workspace/sigtrellis
 configfile: pyproject.toml
 testpaths: tests
 plugins: zarr-3.4.0, cov-7.1.0

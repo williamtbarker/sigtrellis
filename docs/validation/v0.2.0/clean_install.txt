@@ -1,4 +1,4 @@
-Using Python 3.12.14 environment at: /workspace/scratch/e5221b18d874/final_clean/.venv
+Using Python 3.12.14 environment at: /path/to/validation-workspace/final_clean/.venv
 Resolved 60 packages in 13.38s
 Downloading mypy (14.6MiB)
 Downloading pandas (11.8MiB)
@@ -82,7 +82,7 @@ Installed 60 packages in 144ms
  + scverse-misc==0.1.6
  + session-info==1.0.1
  + session-info2==0.4.2
- + sigtrellis==0.2.0 (from file:///workspace/scratch/e5221b18d874/review_work/sigtrellis/dist/sigtrellis-0.2.0-py3-none-any.whl)
+ + sigtrellis==0.2.0 (from file:///path/to/validation-workspace/review_work/sigtrellis/dist/sigtrellis-0.2.0-py3-none-any.whl)
  + six==1.17.0
  + stdlib-list==0.12.0
  + threadpoolctl==3.7.0
