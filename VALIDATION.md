@@ -123,20 +123,11 @@ held-out batches. Correlated predictors, imbalance, outliers, multinomial and
 continuous outcomes are also exercised. Finite simulations do not establish a
 zero false-positive rate.
 
-## Leakage and adversarial evidence
+## Leakage and regression evidence
 
-Five counterexamples fail against the installed 0.2.0 release and pass now:
-cell ordering, unrelated-donor perturbation effects, renamed/reordered duplicates,
-changed normalization gene universe and misaligned perturbation rows. The final
-suite additionally checks supervised DE inside training folds, unsafe global
-screening as a positive control, training-only transforms, donor splits, duplicated
-bulk profiles, target/identifier encodings, cell-state confounding, paired DE,
-external artifact integrity and canonical feature serialization.
+Regression tests cover cell ordering, unrelated-donor perturbation effects, renamed/reordered duplicates, changed normalization gene universes, and misaligned perturbation rows. The suite additionally checks supervised DE inside training folds, unsafe global screening as a positive control, training-only transforms, donor splits, duplicated bulk profiles, target/identifier encodings, cell-state confounding, paired DE, external artifact integrity, and canonical feature serialization.
 
-The new single-cell tests are in `tests/test_cell_adversarial.py`. Read
-`docs/REVIEW_0.3.0.md` for scope and residual attacks. Exact full-cell source hashes,
-resolved configurations and model outputs are preserved. Hashes assume a trusted
-manifest; they are not digital signatures.
+The single-cell regression tests are in `tests/test_cell_adversarial.py`. Exact full-cell source hashes, resolved configurations, and model outputs are preserved. Hashes assume a trusted manifest; they are not digital signatures.
 
 ## Interpretation and remaining research
 
