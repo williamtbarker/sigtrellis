@@ -35,8 +35,8 @@
 - Block nonfinite statistics and invalid permutation p-values; report missing-class discrimination and constant-outcome R² as undefined.
 - Validate H5AD matrix dimensions against cell/gene metadata before aggregation; reject boolean numeric settings and duplicated hyperparameter-grid entries.
 - Preserve batch tuning choices, complete tuning tables, coefficients and batch-axis labels; correct filtering-stage counts and apply coefficient tolerance consistently in manifests.
-- Add 27 targeted review tests, including a real nested PyDESeq2 screen. The original release fails 26 of the new adversarial cases; the original fold-local DE integration passes.
-- Refresh public/synthetic reports and package verification for the revised release. See `docs/REVIEW_0.1.1.md`.
+- Add 27 targeted regression tests, including a real nested PyDESeq2 screen, covering identifier handling, artifact verification, multinomial evidence, nonfinite statistics, and H5AD validation.
+- Refresh public/synthetic reports and package verification for the revised release.
 
 ## 0.1.0 — 2026-09-26
 
