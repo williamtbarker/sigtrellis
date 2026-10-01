@@ -10,7 +10,7 @@ SigTrellis is a local Python CLI and library for discovering candidate phenotype
 
 For a new cell line, start with [the practical cell-line guide](docs/CELL_LINE_GUIDE.md). You need independent cultures or experiments and a measurable phenotype with variation. A single culture, an unspecified phenotype, or perfect treatment/batch confounding cannot support a reproducible phenotype signature, regardless of the number of sequenced cells.
 
-This is an original, general-purpose implementation of public methods. It does not reproduce any previous employer's code, data, or confidential methodology. The [research review](RESEARCH.md) explains the design and the limited conceptual relationship to Stabilomics.
+The methodological rationale, assumptions, and literature basis are documented in [RESEARCH.md](RESEARCH.md).
 
 ## Install
 
